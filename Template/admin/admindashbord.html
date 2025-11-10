@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css"> <!-- Custom CSS -->
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="d-flex" id="wrapper">
+    <div class="bg-primary text-white" id="sidebar-wrapper">
+      <div class="sidebar-heading text-center">
+        <h2>Admin Dashboard</h2>
+      </div>
+      <div class="list-group list-group-flush">
+        <a href="#blogSection" class="list-group-item list-group-item-action text-white">Manage Blogs</a>
+        <a href="#profileSection" class="list-group-item list-group-item-action text-white">Manage Profile</a>
+        <a href="#personnelSection" class="list-group-item list-group-item-action text-white">Manage Personnel</a>
+      </div>
+    </div>
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <button class="btn btn-primary" id="menu-toggle">Toggle Sidebar</button>
+        </div>
+      </nav>
+
+      <!-- Blog Section -->
+      <div class="container mt-4" id="blogSection">
+        <h3>Manage Blogs</h3>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBlogModal">Add Blog Post</button>
+        <table class="table table-bordered mt-3">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Content</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="blogTable">
+            <!-- Blog posts will be dynamically added here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Profile Section -->
+      <div class="container mt-4" id="profileSection">
+        <h3>Manage Profile</h3>
+        <form id="profileForm">
+          <div class="mb-3">
+            <label for="profileName" class="form-label">Name</label>
+            <input type="text" class="form-control" id="profileName" required>
+          </div>
+          <div class="mb-3">
+            <label for="profileBio" class="form-label">Bio</label>
+            <textarea class="form-control" id="profileBio" rows="3" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Profile</button>
+        </form>
+      </div>
+
+      <!-- Personnel Section -->
+      <div class="container mt-4" id="personnelSection">
+        <h3>Manage Personnel</h3>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPersonnelModal">Add Personnel</button>
+        <table class="table table-bordered mt-3">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="personnelTable">
+            <!-- Personnel data will be dynamically added here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Adding Blog -->
+  <div class="modal fade" id="addBlogModal" tabindex="-1" aria-labelledby="addBlogModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addBlogModalLabel">Add New Blog Post</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addBlogForm">
+            <div class="mb-3">
+              <label for="blogTitle" class="form-label">Title</label>
+              <input type="text" class="form-control" id="blogTitle" required>
+            </div>
+            <div class="mb-3">
+              <label for="blogContent" class="form-label">Content</label>
+              <textarea class="form-control" id="blogContent" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Blog</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Adding Personnel -->
+  <div class="modal fade" id="addPersonnelModal" tabindex="-1" aria-labelledby="addPersonnelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addPersonnelModalLabel">Add New Personnel</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addPersonnelForm">
+            <div class="mb-3">
+              <label for="personnelName" class="form-label">Name</label>
+              <input type="text" class="form-control" id="personnelName" required>
+            </div>
+            <div class="mb-3">
+              <label for="personnelRole" class="form-label">Role</label>
+              <input type="text" class="form-control" id="personnelRole" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Personnel</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="admin.js"></script> <!-- Custom JavaScript -->
+</body>
+</html>
