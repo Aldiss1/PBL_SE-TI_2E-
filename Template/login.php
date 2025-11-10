@@ -1,0 +1,66 @@
+<?php
+session_start();
+require_once __DIR__ . '/config/koneksi.php';
+require_once __DIR__ . '/config/anti_injection.php';
+require_once __DIR__ . '/fungsi/pesan_kilat.php';
+
+// Jika sudah login, redirect ke dashboard
+if (isset($_SESSION['login'])) {
+    header('Location: module/admin/dashboard.php');
+    exit;
+}
+
+// Proses login
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = clean_input($_POST['username']);
+    $password = clean_input($_POST['password']);
+    
+    $query = "SELECT * FROM users WHERE username = '$username' AND password = MD5('$password')";
+    $result = pg_query($koneksi, $query);
+    
+    if (!$result) {
+        error_log("Error query login: " . pg_last_error($koneksi));
+        pesan_kilat('Terjadi kesalahan sistem. Silakan coba lagi.', 'error');
+    } elseif (pg_num_rows($result) > 0) {
+        $user = pg_fetch_assoc($result);
+        $_SESSION['login'] = true;
+        $_SESSION['username'] = $username;
+        header('Location: module/admin/dashboard.php');
+        exit;
+    } else {
+        pesan_kilat('Username atau password salah', 'error');
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin</title>
+    <link rel="stylesheet" href="assets/css/bootstrap-5.0.0-alpha-2.min.css" />
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <h2 class="text-center mb-4">Login Admin</h2>
+                <?php tampilkan_pesan(); ?>
+                
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
