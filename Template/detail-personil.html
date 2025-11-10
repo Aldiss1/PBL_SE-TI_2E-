@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html class="no-js" lang="id">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <title>Detail Personil - Web Profile Laboratorium SE</title>
+        <meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        
+        <link rel="stylesheet" href="assets/css/bootstrap-5.0.0-alpha-2.min.css" />
+        <link rel="stylesheet" href="assets/css/LineIcons.2.0.css"/>
+        <link rel="stylesheet" href="assets/css/animate.css"/>
+        <link rel="stylesheet" href="assets/css/lindy-uikit.css"/>
+        <style>
+            /* Style tambahan untuk halaman detail personil */
+            .profile-details h3 {
+                color: #323450;
+                font-weight: 600;
+                margin-bottom: 10px;
+            }
+            .profile-details .role {
+                font-size: 1.25rem;
+                font-weight: 500;
+                color: #2F80ED;
+                margin-bottom: 25px;
+            }
+            .profile-details .contact-info {
+                list-style: none;
+                padding: 0;
+                margin: 25px 0;
+            }
+            .profile-details .contact-info li {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+                font-size: 1rem;
+            }
+            .profile-details .contact-info li i {
+                font-size: 1.2rem;
+                color: #2F80ED;
+                margin-right: 15px;
+                width: 20px;
+                text-align: center;
+            }
+            .profile-details .section-heading {
+                margin-top: 40px;
+                margin-bottom: 20px;
+                font-weight: 600;
+                color: #323450;
+            }
+            .profile-details .publications-list li {
+                margin-bottom: 10px;
+            }
+
+            html {
+                overflow-y: scroll;
+            }
+        </style>
+    </head>
+  <body>
+    <section class="hero-section-wrapper-2">
+        <header class="header header-2">
+            <div class="navbar-area">
+              <div class="container">
+                <div class="row align-items-center">
+                  <div class="col-lg-12">
+                    <nav class="navbar navbar-expand-lg">
+                        <a class="navbar-brand" href="index.html">
+                          <img src="assets/img/logo/logo.png" alt="Logo" />
+                        </a>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent2" aria-controls="navbarSupportedContent2" aria-expanded="false" aria-label="Toggle navigation">
+                          <span class="toggler-icon"></span>
+                          <span class="toggler-icon"></span>
+                          <span class="toggler-icon"></span>
+                        </button>
+          
+                        <div class="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent2">
+                            <ul id="nav2" class="navbar-nav ml-auto">
+                                <li class="nav-item">
+                                  <a class="page-scroll" href="index.html#home">Home</a>
+                                </li>
+                                
+                                <li class="nav-item dropdown">
+                                  <a class="page-scroll dropdown-toggle" href="#" id="navbarDropdownProfile" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                      <i class="fas fa-user-circle mr-1"></i> Profil Kami
+                                      <span class="ml-1"><i class="fas fa-chevron-down"></i></span>
+                                  </a>
+                                  <div class="dropdown-menu animated fadeIn" aria-labelledby="navbarDropdownProfile">
+                                      <a class="dropdown-item" href="tentang-kami.html">
+                                          <i class="fas fa-info-circle mr-2 text-primary"></i> Tentang Kami
+                                      </a>
+                                      <a class="dropdown-item" href="visi-misi.html">
+                                          <i class="fas fa-bullseye mr-2 text-success"></i> Visi &amp; Misi
+                                      </a>
+                                      <a class="dropdown-item" href="#struktur">
+                                          <i class="fas fa-sitemap mr-2 text-warning"></i> Struktur Organisasi
+                                      </a>
+                                  </div>
+                                </li>
+                                
+                                <li class="nav-item">
+                                  <a class="page-scroll" href="personil.html">Personil</a> 
+                                </li>
+                                <li class="nav-item">
+                                  <a class="page-scroll" href="daftar.html">Daftar</a>
+                                </li>
+                                <li class="nav-item">
+                                  <a class="page-scroll" href="blog-detail.html">Blog</a>
+                                </li>
+                              </ul>
+                          <a href="#0" class="button button-sm radius-10 d-none d-lg-flex">Admin</a>
+                        </div>
+                      </nav>
+                  </div>
+                </div>
+              </div>
+            </div> 
+        </header>
+    </section>
+
+    <section id="detail-personil" class="pt-150 pb-100">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-4 col-md-5 wow fadeInUp" data-wow-delay=".2s">
+              <img src="https://via.placeholder.com/300" alt="Foto Profil" class="img-fluid rounded-circle shadow">
+            </div>
+
+            <div class="col-lg-8 col-md-7 wow fadeInUp" data-wow-delay=".4s">
+              <div class="profile-details mt-4 mt-md-0">
+                <h3>Moch Zawaruddin A</h3>
+                <p class="role">Kepala Laboratorium</p>
+                
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet.</p>
+                
+                <ul class="contact-info">
+                    <li><i class="lni lni-envelope"></i> zawaruddin@contoh.com</li>
+                    <li><i class="lni lni-linkedin-original"></i> linkedin.com/in/zawaruddin</li>
+                    <li><i class="lni lni-graduation"></i> Google Scholar Profile</li>
+                </ul>
+
+                <h5 class="section-heading">Biografi</h5>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla.</p>
+
+                <h5 class="section-heading">Publikasi & Penelitian</h5>
+                <ul class="publications-list">
+                    <li>Judul Penelitian 1 (2025)</li>
+                    <li>Judul Publikasi di Jurnal XYZ (2024)</li>
+                    <li>Judul Penelitian 2 (2023)</li>
+                </ul>
+
+                <a href="personil.html" class="button radius-10 border-button mt-30">
+                    <i class="lni lni-arrow-left"></i> Kembali ke Daftar Anggota
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    <footer class="footer footer-style-1">
+        <div class="container">
+          <div class="copyright-wrapper wow fadeInUp" data-wow-delay=".2s">
+            <p>Design and Developed by <a href="https://uideck.com" rel="nofollow" target="_blank">UIdeck</a> Built-with <a href="#">Lindy UI Kit</a>. Distibuted by <a href="https://themewagon.com" target="_blank">ThemeWagon</a></p>
+          </div>
+        </div>
+    </footer>
+    <a href="#" class="scroll-top"> <i class="lni lni-chevron-up"></i> </a>
+    <script src="assets/js/bootstrap.5.0.0.alpha-2.min.js"></script>
+    <script src="assets/js/count-up.min.js"></script>
+    <script src="assets/js/wow.min.js"></script>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>
