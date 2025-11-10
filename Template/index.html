@@ -23,6 +23,248 @@
       /* Subtle page background */
       body {
         background: linear-gradient(180deg, #f8fbff 0%, #ffffff 50%, #f8fbff 100%);
+        overflow-x: hidden;
+        overflow-y: auto;
+        height: auto;
+        min-height: 100vh;
+      }
+      
+      html {
+        overflow-x: hidden;
+        overflow-y: auto;
+        height: auto;
+      }
+      
+      /* Fix hero section untuk tidak membatasi scroll */
+      .hero-section-wrapper-2 {
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+        position: relative !important;
+      }
+      
+      .hero-section-wrapper-2 .hero-style-2 {
+        min-height: auto !important;
+        height: auto !important;
+        overflow: visible !important;
+        position: relative !important;
+      }
+      
+      /* Pastikan semua section bisa di-scroll dan tidak menyembunyikan navbar */
+      section {
+        overflow: visible !important;
+        position: relative;
+        z-index: 1;
+      }
+      
+      /* Pastikan navbar selalu di atas semua section */
+      section,
+      .stats-section,
+      #services,
+      #focus,
+      #visi,
+      #roadmap,
+      #galeri-dosen,
+      #contact {
+        z-index: 1 !important;
+        position: relative !important;
+      }
+      
+      /* Stats section khusus - pastikan tidak menutupi navbar */
+      .stats-section {
+        z-index: 1 !important;
+        position: relative !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+      }
+      
+      /* Navbar HARUS selalu di atas - SANGAT TINGGI */
+      .header,
+      .header.sticky,
+      .header.header-2.sticky,
+      .hero-section-wrapper-2 .header,
+      .hero-section-wrapper-2 .header.sticky {
+        z-index: 9999 !important;
+        position: fixed !important;
+      }
+      
+      /* Force navbar tetap visible di stats section */
+      .stats-section ~ * .header,
+      .stats-section + * .header {
+        z-index: 9999 !important;
+      }
+      
+      /* Pastikan galeri dosen tidak konflik dengan navbar */
+      #galeri-dosen {
+        position: relative;
+        z-index: 1;
+        isolation: isolate;
+      }
+      
+      #galeri-dosen .dosen-gallery-card,
+      #galeri-dosen .dosen-avatar-border,
+      #galeri-dosen .dosen-avatar-img {
+        position: relative !important;
+        z-index: 1 !important;
+      }
+      
+      /* Override untuk memastikan tidak ada position fixed/sticky pada avatar */
+      .dosen-avatar-border,
+      .dosen-avatar-img,
+      .dosen-avatar-img img {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        transform: none !important;
+      }
+      
+      /* CARA BARU: Navbar FIXED setelah scroll - LEBIH SEDERHANA */
+      .hero-section-wrapper-2 {
+        position: relative;
+        overflow: visible !important;
+      }
+      
+      /* Navbar default: absolute di hero section */
+      .hero-section-wrapper-2 .header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 2;
+        background: transparent;
+        transition: all 0.3s ease;
+      }
+      
+      /* Navbar FIXED saat scroll - SELALU DI ATAS - SANGAT KUAT */
+      .hero-section-wrapper-2 .header.sticky,
+      .header.sticky,
+      .header.header-2.sticky,
+      header.header.sticky,
+      header.header-2.sticky {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        z-index: 1000 !important;
+        background: #ffffff !important;
+        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+      
+      /* Force override inline style jika ada */
+      .hero-section-wrapper-2 .header.sticky[style],
+      .header.sticky[style] {
+        position: fixed !important;
+        top: 0 !important;
+        z-index: 1000 !important;
+      }
+      
+      /* Pastikan navbar area juga ikut */
+      .header.sticky .navbar-area,
+      .header.header-2.sticky .navbar-area {
+        position: relative !important;
+        width: 100% !important;
+      }
+      
+      /* Pastikan navbar tetap visible */
+      .header.sticky .navbar,
+      .header.header-2.sticky .navbar {
+        position: relative !important;
+        width: 100% !important;
+      }
+      
+      /* Pastikan navbar tetap visible di semua section */
+      .header.header-2 {
+        position: relative;
+      }
+      
+      /* PASTIKAN NAVBAR TIDAK PERNAH HILANG */
+      .header,
+      .header.header-2,
+      .hero-section-wrapper-2 .header {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+      
+      /* Override semua kemungkinan yang menyembunyikan navbar */
+      .header[style*="display: none"],
+      .header[style*="visibility: hidden"],
+      .header[style*="opacity: 0"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
+      
+      /* Pastikan navbar area juga ikut sticky */
+      .header.sticky .navbar-area,
+      .header.header-2.sticky .navbar-area {
+        position: relative !important;
+      }
+      
+      /* Pastikan navbar area tidak mempengaruhi konten */
+      .navbar-area {
+        position: relative;
+      }
+      
+      /* Pastikan section galeri dosen berada di bawah navbar dan tidak terpengaruh */
+      #galeri-dosen {
+        z-index: 1 !important;
+        position: relative !important;
+        isolation: isolate;
+      }
+      
+      /* Force semua elemen di galeri dosen untuk tidak mengikuti navbar */
+      #galeri-dosen * {
+        position: relative !important;
+      }
+      
+      #galeri-dosen .dosen-gallery-card,
+      #galeri-dosen .dosen-avatar-border,
+      #galeri-dosen .dosen-avatar-img,
+      #galeri-dosen .dosen-avatar-img img {
+        position: relative !important;
+        z-index: 1 !important;
+        transform: none !important;
+        will-change: auto !important;
+      }
+      
+      /* Pastikan container tidak membatasi scroll */
+      .container {
+        overflow: visible !important;
+      }
+      
+      /* Pastikan row tidak membatasi scroll */
+      .row {
+        overflow: visible !important;
+      }
+      
+      /* Pastikan body dan html bisa di-scroll normal */
+      body, html {
+        position: relative;
+        width: 100%;
+      }
+      
+      /* Pastikan tidak ada wrapper yang membatasi scroll */
+      * {
+        box-sizing: border-box;
+      }
+      
+      /* Override untuk memastikan scroll bekerja */
+      .hero-section-wrapper-2 .container,
+      .hero-section-wrapper-2 .row,
+      .hero-section-wrapper-2 [class*="col-"] {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
       }
 
       /* Enhanced hero */
@@ -51,6 +293,171 @@
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
+      }
+      
+      /* Mascot/Illustration Styles */
+      .hero-mascot {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 40px;
+        animation: float 3s ease-in-out infinite;
+      }
+      .mascot-container {
+        position: relative;
+        width: 380px;
+        height: 380px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .mascot-illustration {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 10px 30px rgba(47, 128, 237, 0.15));
+      }
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+      }
+      .mascot-bg-circle {
+        position: absolute;
+        width: 420px;
+        height: 420px;
+        background: radial-gradient(circle, rgba(47, 128, 237, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: pulse 2s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 0.6; }
+        50% { transform: scale(1.1); opacity: 0.3; }
+      }
+      
+      /* Stats Section - Konsisten dengan desain halaman */
+      .stats-section {
+        background: #f7fafd;
+        padding: 80px 0;
+        margin: 60px 0;
+        position: relative;
+        z-index: 1 !important;
+      }
+      
+      .stats-section .container {
+        overflow: visible !important;
+        position: relative;
+        z-index: 1 !important;
+      }
+      
+      /* Pastikan stat-card tidak menutupi navbar */
+      .stat-card {
+        z-index: 1 !important;
+        position: relative !important;
+      }
+      
+      /* Stat Card - Style konsisten dengan card lain */
+      .stat-card {
+        text-align: center;
+        position: relative;
+        z-index: 1;
+        padding: 40px 30px;
+        background: #ffffff;
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        box-shadow: 0px 5px 15px rgba(0,0,0,0.08);
+        height: 100%;
+      }
+      
+      .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0px 10px 30px rgba(47, 128, 237, 0.15);
+        border-color: #2F80ED;
+      }
+      
+      .stat-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        background: #2F80ED;
+        color: #ffffff;
+        font-size: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 25px;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+      
+      .stat-icon i {
+        font-size: 40px;
+        line-height: 1;
+        display: block;
+        color: #ffffff;
+      }
+      
+      .stat-card:hover .stat-icon {
+        transform: scale(1.1);
+        background: #1e6fd8;
+      }
+      
+      .stat-number {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+        color: #2F80ED;
+        line-height: 1;
+      }
+      
+      .stat-label {
+        font-size: 1rem;
+        color: #323450;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+      
+      /* Responsive untuk stats */
+      @media (max-width: 767px) {
+        .stat-card {
+          padding: 30px 20px;
+          margin-bottom: 15px;
+        }
+        .stat-number {
+          font-size: 2.8rem;
+        }
+        .stat-icon {
+          width: 70px;
+          height: 70px;
+          font-size: 35px;
+        }
+      }
+      
+      /* Responsive untuk mascot */
+      @media (max-width: 991px) {
+        .mascot-container {
+          width: 320px;
+          height: 320px;
+        }
+        .mascot-bg-circle {
+          width: 360px;
+          height: 360px;
+        }
+      }
+      @media (max-width: 767px) {
+        .mascot-container {
+          width: 280px;
+          height: 280px;
+        }
+        .mascot-bg-circle {
+          width: 320px;
+          height: 320px;
+        }
+        .hero-mascot {
+          margin-top: 30px;
+        }
       }
     </style>
   </head>
@@ -144,19 +551,31 @@
       <!-- ========================= hero-2 start ========================= -->
         <!-- Start of Selection -->
         <div class="row align-items-center justify-content-center">
-          <div class="col-12 col-lg-8">
-            <div class="text-center" style="padding: 60px 24px; margin-top: 130px; margin-bottom: 32px;">
-              <h4 style="color: #2F80ED; font-weight: 700; margin-bottom: 22px; font-size: 2rem;">Selamat Datang</h4>
-              <h2 style="font-size: 2.8rem; font-weight: 800; color: #22243e; margin-bottom: 22px; line-height: 1.2;">
-                Web Profile Laboratorium<br>Software Engineering
-              </h2>
-              <p style="font-size: 1.15rem; color: #717791; margin-bottom: 40px;">
-                Untuk mahasiswa yang ingin mengakses Laboratorium Software Engineering<br>silahkan klik tombol di bawah
-              </p>
-              <a href="#contact" rel="nofollow" target="blank"
-                 style="display: inline-block; font-weight: 600; color: #fff; background: #2F80ED; border-radius: 8px; padding: 12px 38px; font-size: 1.09rem; box-shadow: 0 2px 8px rgba(47,128,237,.07); text-decoration: none;">
-                  Daftar
-              </a>
+          <div class="col-12 col-lg-10">
+            <div class="row align-items-center">
+              <div class="col-lg-6">
+                <div class="text-center text-lg-left" style="padding: 60px 24px; margin-top: 130px; margin-bottom: 32px;">
+                  <h4 style="color: #2F80ED; font-weight: 700; margin-bottom: 22px; font-size: 2rem;">Selamat Datang</h4>
+                  <h2 style="font-size: 2.8rem; font-weight: 800; color: #22243e; margin-bottom: 22px; line-height: 1.2;">
+                    Web Profile Laboratorium<br>Software Engineering
+                  </h2>
+                  <p style="font-size: 1.15rem; color: #717791; margin-bottom: 40px;">
+                    Untuk mahasiswa yang ingin mengakses Laboratorium Software Engineering<br>silahkan klik tombol di bawah
+                  </p>
+                  <a href="#contact" rel="nofollow" target="blank"
+                     style="display: inline-block; font-weight: 600; color: #fff; background: #2F80ED; border-radius: 8px; padding: 12px 38px; font-size: 1.09rem; box-shadow: 0 2px 8px rgba(47,128,237,.07); text-decoration: none; transition: all 0.3s;">
+                    Daftar
+                  </a>
+                </div>
+              </div>
+              <div class="col-lg-6">
+                <div class="hero-mascot wow fadeInRight" data-wow-delay=".4s">
+                  <div class="mascot-container">
+                    <div class="mascot-bg-circle"></div>
+                    <img src="assets/img/LAB SE_Outline.png" class="mascot-illustration" alt="Lab SE Mascot" style="position: relative; z-index: 2;">
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -165,6 +584,50 @@
 
     </section>
     <!-- ========================= hero-section-wrapper-2 end ========================= -->
+
+<!-- ========================= Stats Section ========================= -->
+<section class="stats-section" style="margin: 80px 0;">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+        <div class="stat-card wow fadeInUp" data-wow-delay=".2s">
+          <div class="stat-icon">
+            <i class="lni lni-user"></i>
+          </div>
+          <div class="stat-number" data-count="50">0</div>
+          <div class="stat-label">Anggota Aktif</div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+        <div class="stat-card wow fadeInUp" data-wow-delay=".3s">
+          <div class="stat-icon">
+            <i class="lni lni-files"></i>
+          </div>
+          <div class="stat-number" data-count="15">0</div>
+          <div class="stat-label">Proyek Penelitian</div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 mb-4 mb-md-0">
+        <div class="stat-card wow fadeInUp" data-wow-delay=".4s">
+          <div class="stat-icon">
+            <i class="lni lni-book"></i>
+          </div>
+          <div class="stat-number" data-count="6">0</div>
+          <div class="stat-label">Dosen Pengampu</div>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6">
+        <div class="stat-card wow fadeInUp" data-wow-delay=".5s">
+          <div class="stat-icon">
+            <i class="lni lni-layers"></i>
+          </div>
+          <div class="stat-number" data-count="3">0</div>
+          <div class="stat-label">Fokus Penelitian</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ========================= feature style-2 start ========================= -->
 <section id="services" class="feature-section feature-style-2">
@@ -375,7 +838,9 @@
     border-radius: 14px;
     transition: transform 0.22s, box-shadow 0.22s;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    padding-top: 60px;
+    z-index: 1;
   }
   .dosen-gallery-card:hover {
     transform: translateY(-6px) scale(1.02);
@@ -389,22 +854,52 @@
     height: 110px;
     border-radius: 50%;
     margin: 0 auto;
-    margin-top: -48px;
+    margin-top: 0;
+    margin-bottom: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
     border: 3px solid #e3e9f0;
     position: relative;
-    z-index: 2;
+    z-index: 1;
+    flex-shrink: 0;
   }
   .dosen-avatar-img {
     width: 98px;
     height: 98px;
-    object-fit: cover;
     border-radius: 50%;
     border: 2px solid #e3e9f0;
-    background: #fff;
+    background: linear-gradient(135deg, #2F80ED 0%, #6C63FF 100%);
     transition: border 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .dosen-avatar-img::before {
+    content: attr(data-initial);
+    position: absolute;
+    z-index: 1;
+    line-height: 1;
+  }
+  .dosen-avatar-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+    display: block;
+  }
+  .dosen-avatar-img:has(img[style*="display: none"])::before,
+  .dosen-avatar-img:not(:has(img))::before {
+    display: block;
   }
   .dosen-gallery-card:hover .dosen-avatar-img {
     border: 2px solid #2F80ED33;
@@ -433,7 +928,7 @@
     margin-top: 12px;
   }
   .dosen-social a {
-    color: #bfc4c8;
+    color: #bfc4c8 !important;
     background: #f7fafd;
     width: 32px;
     height: 32px;
@@ -443,16 +938,23 @@
     border-radius: 7px;
     font-size: 15px;
     border: 1.2px solid #e9ecef;
-    transition: color .19s, border .19s;
+    transition: color .19s, border .19s, background .19s;
+    text-decoration: none;
   }
   .dosen-social a:hover {
-    color: #2F80ED;
+    color: #2F80ED !important;
     border: 1.2px solid #9dbfe1;
     background: #fff;
   }
   @media (max-width: 767px) {
-    .dosen-gallery-card { margin-bottom: 32px;}
-    .dosen-avatar-border { margin-top: -55px;}
+    .dosen-gallery-card { 
+      margin-bottom: 32px;
+      padding-top: 50px;
+    }
+    .dosen-avatar-border { 
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
   }
 </style>
 <section id="galeri-dosen" class="py-100" style="background: #f7fafd;">
@@ -466,9 +968,11 @@
     <div class="row justify-content-center">
       <!-- Dosen 1 -->
       <div class="col-md-6 col-lg-4 col-xl-2 mb-5 d-flex align-items-stretch">
-        <div class="dosen-gallery-card w-100 text-center pt-5 pb-4 px-2 d-flex flex-column align-items-center">
-          <div class="dosen-avatar-border mb-3">
-            <img src="assets/images/dosen1.jpg" class="dosen-avatar-img" alt="Dr. Andi Pratama">
+        <div class="dosen-gallery-card w-100 text-center pb-4 px-2 d-flex flex-column align-items-center">
+          <div class="dosen-avatar-border">
+            <div class="dosen-avatar-img" data-initial="AP">
+              <img src="assets/img/team/team-1/team-1.png" alt="Dr. Andi Pratama" onerror="this.remove();">
+            </div>
           </div>
           <div class="flex-grow-1">
             <div class="dosen-name">Dr. Andi Pratama</div>
@@ -482,9 +986,11 @@
       </div>
       <!-- Dosen 2 -->
       <div class="col-md-6 col-lg-4 col-xl-2 mb-5 d-flex align-items-stretch">
-        <div class="dosen-gallery-card w-100 text-center pt-5 pb-4 px-2 d-flex flex-column align-items-center">
-          <div class="dosen-avatar-border mb-3">
-            <img src="assets/images/dosen2.jpg" class="dosen-avatar-img" alt="Dr. Siti Nurhaliza">
+        <div class="dosen-gallery-card w-100 text-center pb-4 px-2 d-flex flex-column align-items-center">
+          <div class="dosen-avatar-border">
+            <div class="dosen-avatar-img" data-initial="SN">
+              <img src="assets/img/team/team-1/team-2.png" alt="Dr. Siti Nurhaliza" onerror="this.remove();">
+            </div>
           </div>
           <div class="flex-grow-1">
             <div class="dosen-name">Dr. Siti Nurhaliza</div>
@@ -498,64 +1004,72 @@
       </div>
       <!-- Dosen 3 -->
       <div class="col-md-6 col-lg-4 col-xl-2 mb-5 d-flex align-items-stretch">
-        <div class="dosen-gallery-card w-100 text-center pt-5 pb-4 px-2 d-flex flex-column align-items-center">
-          <div class="dosen-avatar-border mb-3">
-            <img src="assets/images/dosen3.jpg" class="dosen-avatar-img" alt="Budi Santoso, M.Kom">
+        <div class="dosen-gallery-card w-100 text-center pb-4 px-2 d-flex flex-column align-items-center">
+          <div class="dosen-avatar-border">
+            <div class="dosen-avatar-img" data-initial="BS">
+              <img src="assets/img/team/team-1/team-3.png" alt="Budi Santoso, M.Kom" onerror="this.remove();">
+            </div>
           </div>
           <div class="flex-grow-1">
             <div class="dosen-name">Budi Santoso, M.Kom</div>
             <span class="dosen-role-badge">Dosen Pengampu</span>
             <div class="dosen-social">
               <a href="mailto:budi.santoso@universitas.ac.id" title="Email"><i class="lni lni-envelope"></i></a>
-              <a href="#"><i class="lni lni-linkedin-original" title="LinkedIn"></i></a>
+              <a href="#" title="LinkedIn"><i class="lni lni-linkedin-original"></i></a>
             </div>
           </div>
         </div>
       </div>
       <!-- Dosen 4 -->
       <div class="col-md-6 col-lg-4 col-xl-2 mb-5 d-flex align-items-stretch">
-        <div class="dosen-gallery-card w-100 text-center pt-5 pb-4 px-2 d-flex flex-column align-items-center">
-          <div class="dosen-avatar-border mb-3">
-            <img src="assets/images/dosen4.jpg" class="dosen-avatar-img" alt="Lia Zahra, M.T.">
+        <div class="dosen-gallery-card w-100 text-center pb-4 px-2 d-flex flex-column align-items-center">
+          <div class="dosen-avatar-border">
+            <div class="dosen-avatar-img" data-initial="LZ">
+              <img src="assets/img/team/team-1/team-4.png" alt="Lia Zahra, M.T." onerror="this.remove();">
+            </div>
           </div>
           <div class="flex-grow-1">
             <div class="dosen-name">Lia Zahra, M.T.</div>
             <span class="dosen-role-badge">Dosen Pengampu</span>
             <div class="dosen-social">
-              <a href="mailto:lia.zahra@universitas.ac.id"><i class="lni lni-envelope"></i></a>
-              <a href="#"><i class="lni lni-linkedin-original" title="LinkedIn"></i></a>
+              <a href="mailto:lia.zahra@universitas.ac.id" title="Email"><i class="lni lni-envelope"></i></a>
+              <a href="#" title="LinkedIn"><i class="lni lni-linkedin-original"></i></a>
             </div>
           </div>
         </div>
       </div>
       <!-- Dosen 5 -->
       <div class="col-md-6 col-lg-4 col-xl-2 mb-5 d-flex align-items-stretch">
-        <div class="dosen-gallery-card w-100 text-center pt-5 pb-4 px-2 d-flex flex-column align-items-center">
-          <div class="dosen-avatar-border mb-3">
-            <img src="assets/images/dosen5.jpg" class="dosen-avatar-img" alt="Ir. Dani Rahman, M.Eng">
+        <div class="dosen-gallery-card w-100 text-center pb-4 px-2 d-flex flex-column align-items-center">
+          <div class="dosen-avatar-border">
+            <div class="dosen-avatar-img" data-initial="DR">
+              <img src="assets/img/team/team-1/team-1.png" alt="Ir. Dani Rahman, M.Eng" onerror="this.remove();">
+            </div>
           </div>
           <div class="flex-grow-1">
             <div class="dosen-name">Ir. Dani Rahman, M.Eng</div>
             <span class="dosen-role-badge">Dosen Pengampu</span>
             <div class="dosen-social">
-              <a href="mailto:dani.rahman@universitas.ac.id"><i class="lni lni-envelope"></i></a>
-              <a href="#"><i class="lni lni-linkedin-original" title="LinkedIn"></i></a>
+              <a href="mailto:dani.rahman@universitas.ac.id" title="Email"><i class="lni lni-envelope"></i></a>
+              <a href="#" title="LinkedIn"><i class="lni lni-linkedin-original"></i></a>
             </div>
           </div>
         </div>
       </div>
       <!-- Dosen 6 -->
       <div class="col-md-6 col-lg-4 col-xl-2 mb-5 d-flex align-items-stretch">
-        <div class="dosen-gallery-card w-100 text-center pt-5 pb-4 px-2 d-flex flex-column align-items-center">
-          <div class="dosen-avatar-border mb-3">
-            <img src="assets/images/dosen6.jpg" class="dosen-avatar-img" alt="Rina Mayang, M.Cs">
+        <div class="dosen-gallery-card w-100 text-center pb-4 px-2 d-flex flex-column align-items-center">
+          <div class="dosen-avatar-border">
+            <div class="dosen-avatar-img" data-initial="RM">
+              <img src="assets/img/team/team-1/team-2.png" alt="Rina Mayang, M.Cs" onerror="this.remove();">
+            </div>
           </div>
           <div class="flex-grow-1">
             <div class="dosen-name">Rina Mayang, M.Cs</div>
             <span class="dosen-role-badge">Dosen Pengampu</span>
             <div class="dosen-social">
-              <a href="mailto:rina.mayang@universitas.ac.id"><i class="lni lni-envelope"></i></a>
-              <a href="#"><i class="lni lni-linkedin-original" title="LinkedIn"></i></a>
+              <a href="mailto:rina.mayang@universitas.ac.id" title="Email"><i class="lni lni-envelope"></i></a>
+              <a href="#" title="LinkedIn"><i class="lni lni-linkedin-original"></i></a>
             </div>
           </div>
         </div>
@@ -742,5 +1256,182 @@
     <script src="assets/js/count-up.min.js"></script>
     <script src="assets/js/wow.min.js"></script>
     <script src="assets/js/main.js"></script>
+    
+    <!-- Navbar Sticky Fix - PASTI BEKERJA DI STATS SECTION -->
+    <script>
+      (function() {
+        let headerNavbar = null;
+        let isSticky = false;
+        
+        function initNavbar() {
+          headerNavbar = document.querySelector(".hero-section-wrapper-2 .header");
+          
+          if (!headerNavbar) {
+            setTimeout(initNavbar, 100);
+            return;
+          }
+          
+          // Simpan original onscroll
+          const originalOnScroll = window.onscroll;
+          
+          // Function untuk handle scroll - PASTI TAMBAHKAN STICKY
+          function handleScroll() {
+            if (!headerNavbar) return;
+            
+            const scrollY = window.pageYOffset || window.scrollY || document.documentElement.scrollTop;
+            
+            if (scrollY > 50) {
+              // PASTI tambahkan sticky
+              if (!headerNavbar.classList.contains("sticky")) {
+                headerNavbar.classList.add("sticky");
+                isSticky = true;
+              }
+              // Force style untuk memastikan
+              headerNavbar.style.setProperty('position', 'fixed', 'important');
+              headerNavbar.style.setProperty('z-index', '9999', 'important');
+              headerNavbar.style.setProperty('top', '0', 'important');
+            } else {
+              headerNavbar.classList.remove("sticky");
+              isSticky = false;
+            }
+          }
+          
+          // Override window.onscroll
+          window.onscroll = function() {
+            // Panggil original
+            if (originalOnScroll) {
+              try {
+                originalOnScroll();
+              } catch(e) {}
+            }
+            // Handle navbar - PRIORITAS
+            handleScroll();
+          };
+          
+          // Juga listen dengan addEventListener sebagai backup
+          window.addEventListener('scroll', handleScroll, { passive: true });
+          
+          // Check initial
+          handleScroll();
+          
+          // Periodic check setiap 200ms - PASTI NAVBAR STICKY
+          setInterval(function() {
+            const scrollY = window.pageYOffset || window.scrollY || document.documentElement.scrollTop;
+            if (scrollY > 50 && headerNavbar && !headerNavbar.classList.contains("sticky")) {
+              headerNavbar.classList.add("sticky");
+              headerNavbar.style.setProperty('position', 'fixed', 'important');
+              headerNavbar.style.setProperty('z-index', '9999', 'important');
+              headerNavbar.style.setProperty('top', '0', 'important');
+            }
+          }, 200);
+        }
+        
+        // Init setelah DOM ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initNavbar);
+        } else {
+          initNavbar();
+        }
+        
+        // Backup init
+        setTimeout(initNavbar, 500);
+        window.addEventListener('load', initNavbar);
+      })();
+    </script>
+    
+    <!-- Counter Animation Script -->
+    <script>
+      // Counter animation for stats
+      let hasAnimated = false;
+      
+      function animateCounter(counter) {
+        const target = parseInt(counter.getAttribute('data-count'));
+        const duration = 2000; // 2 seconds
+        const increment = target / (duration / 16); // 60fps
+        let current = 0;
+        
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            counter.innerText = target;
+            clearInterval(timer);
+          } else {
+            counter.innerText = Math.floor(current);
+          }
+        }, 16);
+      }
+      
+      // Trigger animation when stats section is visible
+      const statsSection = document.querySelector('.stats-section');
+      if (statsSection) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting && !hasAnimated) {
+              hasAnimated = true;
+              const counters = document.querySelectorAll('.stat-number');
+              counters.forEach(counter => {
+                animateCounter(counter);
+              });
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.5 });
+        
+        observer.observe(statsSection);
+      }
+      
+      // Smooth scroll for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          const href = this.getAttribute('href');
+          if (href !== '#' && href !== '#0') {
+            e.preventDefault();
+            const target = document.querySelector(href);
+            if (target) {
+              target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+              });
+            }
+          }
+        });
+      });
+      
+      // Handle avatar image errors - show initial if image fails to load
+      document.querySelectorAll('.dosen-avatar-img img').forEach(img => {
+        img.addEventListener('error', function() {
+          this.style.display = 'none';
+          const parent = this.parentElement;
+          if (parent && parent.classList.contains('dosen-avatar-img')) {
+            parent.style.background = 'linear-gradient(135deg, #2F80ED 0%, #6C63FF 100%)';
+            // Ensure initial is visible
+            const initial = parent.getAttribute('data-initial');
+            if (initial && !parent.querySelector('::before')) {
+              parent.innerHTML = '<span style="position: relative; z-index: 1; line-height: 1;">' + initial + '</span>';
+            }
+          }
+        });
+        
+        // Check if image loaded successfully
+        if (!img.complete || img.naturalHeight === 0) {
+          img.dispatchEvent(new Event('error'));
+        }
+      });
+      
+      // Fix: Pastikan avatar tidak mengikuti navbar saat scroll
+      window.addEventListener('scroll', function() {
+        const galeriDosen = document.querySelector('#galeri-dosen');
+        if (galeriDosen) {
+          const avatars = galeriDosen.querySelectorAll('.dosen-avatar-border, .dosen-avatar-img');
+          avatars.forEach(avatar => {
+            avatar.style.position = 'relative';
+            avatar.style.top = 'auto';
+            avatar.style.left = 'auto';
+            avatar.style.transform = 'none';
+            avatar.style.zIndex = '1';
+          });
+        }
+      }, { passive: true });
+    </script>
   </body>
 </html>
