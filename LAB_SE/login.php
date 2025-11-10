@@ -4,6 +4,18 @@ require_once __DIR__ . '/config/koneksi.php';
 require_once __DIR__ . '/config/anti_injection.php';
 require_once __DIR__ . '/fungsi/pesan_kilat.php';
 
+// Cek apakah tabel users sudah ada, jika belum redirect ke setup
+if ($koneksi) {
+    $check = @pg_query($koneksi, "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users')");
+    if ($check) {
+        $exists = pg_fetch_result($check, 0, 0);
+        if ($exists == 'f') {
+            header('Location: setup.php');
+            exit;
+        }
+    }
+}
+
 // Jika sudah login, redirect ke dashboard
 if (isset($_SESSION['login'])) {
     header('Location: module/admin/dashboard.php');
@@ -15,20 +27,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = clean_input($_POST['username']);
     $password = clean_input($_POST['password']);
     
-    $query = "SELECT * FROM users WHERE username = '$username' AND password = MD5('$password')";
-    $result = pg_query($koneksi, $query);
-    
-    if (!$result) {
-        error_log("Error query login: " . pg_last_error($koneksi));
-        pesan_kilat('Terjadi kesalahan sistem. Silakan coba lagi.', 'error');
-    } elseif (pg_num_rows($result) > 0) {
-        $user = pg_fetch_assoc($result);
-        $_SESSION['login'] = true;
-        $_SESSION['username'] = $username;
-        header('Location: module/admin/dashboard.php');
-        exit;
+    if (!$koneksi) {
+        pesan_kilat('Koneksi database gagal!', 'error');
     } else {
-        pesan_kilat('Username atau password salah', 'error');
+        $query = "SELECT * FROM users WHERE username = '$username' AND password = MD5('$password')";
+        $result = pg_query($koneksi, $query);
+        
+        if (!$result) {
+            $error = pg_last_error($koneksi);
+            if (strpos($error, 'does not exist') !== false) {
+                header('Location: setup.php');
+                exit;
+            }
+            pesan_kilat('Terjadi kesalahan sistem.', 'error');
+        } elseif (pg_num_rows($result) > 0) {
+            $user = pg_fetch_assoc($result);
+            $_SESSION['login'] = true;
+            $_SESSION['username'] = $username;
+            header('Location: module/admin/dashboard.php');
+            exit;
+        } else {
+            pesan_kilat('Username atau password salah', 'error');
+        }
     }
 }
 ?>

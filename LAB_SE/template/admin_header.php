@@ -7,8 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     
     <?php
-    // Deteksi path relatif berdasarkan lokasi file
-    $base_path = (strpos(__DIR__, 'module/admin') !== false) ? '../../' : '../';
+    // Path relatif dari module/admin ke root
+    // Karena admin_header.php selalu dipanggil dari module/admin, gunakan ../../ untuk naik ke root
+    $base_path = '../../';
     ?>
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/bootstrap-5.0.0-alpha-2.min.css" />
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/LineIcons.2.0.css"/>

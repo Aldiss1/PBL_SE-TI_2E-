@@ -30,7 +30,7 @@ require_once __DIR__ . '/config/koneksi.php';
             $has_table = false;
             if ($table_exists) {
               $row_check = pg_fetch_assoc($table_exists);
-              $has_table = $row_check['exists'] === 't' || $row_check['exists'] === true;
+              $has_table = ($row_check['exists'] === 't' || $row_check['exists'] === true || $row_check['exists'] === 'true');
             }
             
             $result = false;
@@ -69,9 +69,10 @@ require_once __DIR__ . '/config/koneksi.php';
             <div class="col-12">
                 <p class="text-center" style="color: #717791;">
                   <?php if (!$has_table): ?>
-                    Tabel database belum dibuat. Silakan import file <code>setup-database.sql</code> terlebih dahulu.
+                    Tabel database belum dibuat. Silakan import file <code>setup_complete.sql</code> terlebih dahulu.<br>
+                    <small>Lihat file <code>CARA_SETUP_DATABASE.md</code> untuk panduan lengkap.</small>
                   <?php else: ?>
-                    Belum ada data anggota.
+                    Belum ada data anggota. Silakan jalankan file <code>run_insert.sql</code> di pgAdmin untuk menambahkan data.
                   <?php endif; ?>
                 </p>
             </div>
