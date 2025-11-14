@@ -1,7 +1,3 @@
--- ============================================
--- Script Database untuk Lab SE
--- Database: PostgreSQL
--- ============================================
 
 
 CREATE DATABASE lab_se
@@ -11,13 +7,7 @@ CREATE DATABASE lab_se
     TABLESPACE = pg_default
     CONNECTION LIMIT = -1;
 
--- COMMENT ON DATABASE lab_se IS 'Database untuk Web Profile Laboratorium Software Engineering';
 
--- ============================================
--- 2. Membuat Tabel
--- ============================================
-
--- Tabel Users (Admin/User)
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
@@ -28,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabel Jabatan
+
 CREATE TABLE IF NOT EXISTS jabatan (
     id SERIAL PRIMARY KEY,
     nama_jabatan VARCHAR(255) NOT NULL,
@@ -36,7 +26,6 @@ CREATE TABLE IF NOT EXISTS jabatan (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabel Anggota (Dosen/Personil)
 CREATE TABLE IF NOT EXISTS anggota (
     id SERIAL PRIMARY KEY,
     nama VARCHAR(255) NOT NULL,
@@ -47,7 +36,6 @@ CREATE TABLE IF NOT EXISTS anggota (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabel Pendaftaran
 CREATE TABLE IF NOT EXISTS pendaftaran (
     id SERIAL PRIMARY KEY,
     nama VARCHAR(255) NOT NULL,
@@ -62,7 +50,6 @@ CREATE TABLE IF NOT EXISTS pendaftaran (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabel Blog
 CREATE TABLE IF NOT EXISTS blog (
     id SERIAL PRIMARY KEY,
     title VARCHAR(500) NOT NULL,
@@ -80,10 +67,6 @@ CREATE TABLE IF NOT EXISTS blog (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ============================================
--- 3. Membuat Index untuk Optimasi Query
--- ============================================
-
 CREATE INDEX IF NOT EXISTS idx_pendaftaran_status ON pendaftaran(status);
 CREATE INDEX IF NOT EXISTS idx_pendaftaran_tanggal ON pendaftaran(tanggal_daftar);
 CREATE INDEX IF NOT EXISTS idx_blog_published ON blog(is_published, published_at);
@@ -91,17 +74,10 @@ CREATE INDEX IF NOT EXISTS idx_blog_slug ON blog(slug);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_anggota_jabatan ON anggota(jabatan);
 
--- ============================================
--- 4. Insert Data Awal
--- ============================================
-
--- Insert Admin Default
--- Username: admin, Password: admin123 (MD5 hash)
 INSERT INTO users (username, password, full_name, role) 
 VALUES ('admin', MD5('admin123'), 'Administrator', 'admin')
 ON CONFLICT (username) DO NOTHING;
 
--- Insert Jabatan
 INSERT INTO jabatan (nama_jabatan) VALUES
     ('Ketua Lab'),
     ('Wakil Ketua Lab'),
@@ -110,7 +86,6 @@ INSERT INTO jabatan (nama_jabatan) VALUES
     ('Dosen Pembimbing')
 ON CONFLICT DO NOTHING;
 
--- Insert Anggota (Dosen)
 INSERT INTO anggota (nama, jabatan, foto, deskripsi) VALUES
     ('Dr. Andi Pratama, S.Kom., M.Kom.', 'Ketua Lab', 'assets/img/team/team-1/team-1.png', 'Ketua Laboratorium Software Engineering dengan fokus penelitian di bidang Quality Assurance dan Software Testing.'),
     ('Dr. Siti Nurhaliza, S.T., M.T.', 'Wakil Ketua Lab', 'assets/img/team/team-1/team-2.png', 'Wakil Ketua Laboratorium dengan spesialisasi di bidang Human-Computer Interaction (HCI) dan User Experience Design.'),
@@ -123,19 +98,4 @@ INSERT INTO anggota (nama, jabatan, foto, deskripsi) VALUES
     ('Prof. Dr. H. Muhammad Rizki, S.T., M.T.', 'Koordinator Penelitian', 'assets/img/team/team-1/team-1.png', 'Koordinator penelitian dengan fokus pada Software Engineering Research dan Academic Publication.'),
     ('Dr. Fitri Handayani, S.Kom., M.Sc.', 'Dosen Pembimbing', 'assets/img/team/team-1/team-2.png', 'Dosen pembimbing yang fokus pada penelitian Software Quality Assurance dan Testing Automation.')
 ON CONFLICT DO NOTHING;
-
--- ============================================
--- 5. Verifikasi Data
--- ============================================
-
--- Uncomment untuk melihat jumlah data setelah insert
--- SELECT 'Users' as tabel, COUNT(*) as jumlah FROM users
--- UNION ALL
--- SELECT 'Anggota', COUNT(*) FROM anggota
--- UNION ALL
--- SELECT 'Jabatan', COUNT(*) FROM jabatan
--- UNION ALL
--- SELECT 'Pendaftaran', COUNT(*) FROM pendaftaran
--- UNION ALL
--- SELECT 'Blog', COUNT(*) FROM blog;
 

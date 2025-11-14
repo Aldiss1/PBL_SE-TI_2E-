@@ -15,19 +15,8 @@
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/LineIcons.2.0.css"/>
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/animate.css"/>
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/lindy-uikit.css"/>
-    <style> 
-        html { overflow-y: scroll; }
-        .header.header-2 {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            width: 100% !important;
-            z-index: 99999 !important;
-            background: #fff !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
-        }
-    </style>
+    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-layout.css"/>
+    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-dashboard.css"/>
 </head>
 <body>
     <?php

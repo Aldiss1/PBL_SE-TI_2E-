@@ -3,75 +3,7 @@ require_once __DIR__ . '/config/koneksi.php';
 ?>
 <?php include __DIR__ . '/template/header.php'; ?>
 
-<style>
-  body { background-color: #f4f7fb; }
-  .hero-section-wrapper-2 {
-    background-color: #ffffff;
-    padding: 60px 0;
-    text-align: center;
-    border-bottom: 2px solid #f0f0f0;
-    margin-top: 80px;
-  }
-  .hero-section-wrapper-2 h2 {
-    font-size: 2rem;
-    color: #2F80ED;
-    font-weight: 600;
-    margin-bottom: 20px;
-  }
-  .roadmap-card {
-    background: #fff;
-    border-radius: 15px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    margin-bottom: 30px;
-    padding: 25px;
-    transition: all 0.3s ease;
-  }
-  .roadmap-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  }
-  .roadmap-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  .roadmap-header h3 {
-    font-size: 1.6rem;
-    color: #2F80ED;
-    font-weight: 600;
-    margin: 0;
-  }
-  .roadmap-year {
-    margin-left: 20px;
-    color: #999;
-    font-size: 1rem;
-    font-weight: 500;
-  }
-  .roadmap-content h5 {
-    color: #2F80ED;
-    font-size: 1.3rem;
-    margin-bottom: 20px;
-    font-weight: 500;
-  }
-  .roadmap-content ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .roadmap-content li {
-    font-size: 1rem;
-    color: #515e7b;
-    display: flex;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-  }
-  .roadmap-content li i {
-    margin-right: 15px;
-    color: #27AE60;
-    font-size: 1.2rem;
-  }
-</style>
+<link rel="stylesheet" href="assets/css/roadmap.css" />
 
 <section class="hero-section-wrapper-2">
     <div class="container">

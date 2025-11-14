@@ -7,7 +7,7 @@
     </footer>
 
     <?php
-    $base_path = (strpos(__DIR__, 'module/admin') !== false) ? '../../' : '../';
+    $base_path = '../../';
     ?>
     <script src="<?php echo $base_path; ?>assets/js/bootstrap.5.0.0.alpha-2-min.js"></script>
     <script src="<?php echo $base_path; ?>assets/js/count-up.min.js"></script>

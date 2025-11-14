@@ -210,11 +210,22 @@
         $has_table = ($row['exists'] === 't' || $row['exists'] === true || $row['exists'] === 'true');
       }
       
-      // Ambil data dosen dari database (jika tabel ada)
       $result_dosen = false;
       if ($has_table) {
+        // Cek jumlah data dulu
+        $count_query = "SELECT COUNT(*) as total FROM anggota WHERE jabatan IS NOT NULL";
+        $count_result = pg_query($koneksi, $count_query);
+        $total_data = 0;
+        if ($count_result) {
+          $count_row = pg_fetch_assoc($count_result);
+          $total_data = (int)$count_row['total'];
+        }
+        
         // Query yang lebih inklusif untuk mengambil semua anggota (dosen, ketua, dll)
-        $query_dosen = "SELECT * FROM anggota WHERE jabatan LIKE '%Dosen%' OR jabatan LIKE '%Ketua%' OR jabatan LIKE '%Koordinator%' OR jabatan LIKE '%Pembimbing%' ORDER BY 
+        $query_dosen = "SELECT * FROM anggota 
+          WHERE jabatan IS NOT NULL 
+          AND (jabatan LIKE '%Dosen%' OR jabatan LIKE '%Ketua%' OR jabatan LIKE '%Koordinator%' OR jabatan LIKE '%Pembimbing%')
+          ORDER BY 
           CASE jabatan
             WHEN 'Ketua Lab' THEN 1
             WHEN 'Wakil Ketua Lab' THEN 2
@@ -222,7 +233,8 @@
             WHEN 'Dosen Pembimbing' THEN 4
             WHEN 'Dosen Pengampu' THEN 5
             ELSE 6
-          END, id ASC LIMIT 6";
+          END, id ASC 
+          LIMIT 6";
         $result_dosen = pg_query($koneksi, $query_dosen);
         if (!$result_dosen) {
           error_log("Error query dosen: " . pg_last_error($koneksi));
@@ -251,10 +263,15 @@
       <div class="col-12 text-center">
         <p style="color: #717791; margin-bottom: 20px;">
           <?php if (!$has_table): ?>
-            Tabel database belum dibuat. Silakan import file <code>setup_complete.sql</code> terlebih dahulu.<br>
-            <small>Lihat file <code>CARA_SETUP_DATABASE.md</code> untuk panduan lengkap.</small>
+            Tabel database belum dibuat. Silakan jalankan <a href="setup.php" style="color: #2F80ED;">setup.php</a> terlebih dahulu.<br>
           <?php else: ?>
-            Data dosen akan segera ditambahkan. Silakan jalankan file <code>run_insert.sql</code> di pgAdmin untuk menambahkan data.
+            <?php if (isset($total_data) && $total_data > 0): ?>
+              Data ada di database (<?php echo $total_data; ?> anggota), tapi tidak sesuai filter. 
+              <br><small>Silakan cek data di <a href="personil.php" style="color: #2F80ED;">halaman personil</a> atau tambahkan data melalui admin.</small>
+            <?php else: ?>
+              Belum ada data anggota di database. 
+              <br><small>Silakan jalankan file <code>database.sql</code> bagian INSERT anggota, atau tambahkan data melalui admin.</small>
+            <?php endif; ?>
           <?php endif; ?>
         </p>
         <?php if ($has_table): ?>

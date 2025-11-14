@@ -1,0 +1,54 @@
+.single-input {
+	position: relative;
+	margin-bottom: 25px;
+}
+
+.single-input label {
+	position: relative;
+	z-index: 1;
+}
+
+.single-input .form-input {
+	position: relative;
+}
+
+.single-input i {
+	position: absolute;
+	left: 15px;
+	top: 38px;
+	color: #2F80ED;
+	font-size: 1.1rem;
+	z-index: 2;
+	pointer-events: none;
+}
+
+.single-input .form-input:focus {
+	outline: none;
+	border-color: #2F80ED;
+	box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.1);
+}
+
+.single-input .form-input:hover {
+	border-color: #2F80ED;
+}
+
+.button:hover {
+	background: rgba(47, 128, 237, 0.9) !important;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(47,128,237,.15) !important;
+}
+
+.gradient-text {
+	background: linear-gradient(135deg, #2F80ED 0%, #6C63FF 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	font-weight: 700;
+	font-size: 2.5rem;
+}
+
+@media (max-width: 767px) {
+	.gradient-text { font-size: 2rem; }
+	.contact-form-wrapper { padding: 30px 20px !important; }
+}
+

@@ -35,43 +35,7 @@ if (!$personil) {
 ?>
 <?php include __DIR__ . '/template/header.php'; ?>
 
-<style>
-  .profile-details h3 {
-    color: #323450;
-    font-weight: 600;
-    margin-bottom: 10px;
-  }
-  .profile-details .role {
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: #2F80ED;
-    margin-bottom: 25px;
-  }
-  .profile-details .contact-info {
-    list-style: none;
-    padding: 0;
-    margin: 25px 0;
-  }
-  .profile-details .contact-info li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    font-size: 1rem;
-  }
-  .profile-details .contact-info li i {
-    font-size: 1.2rem;
-    color: #2F80ED;
-    margin-right: 15px;
-    width: 20px;
-    text-align: center;
-  }
-  .profile-details .section-heading {
-    margin-top: 40px;
-    margin-bottom: 20px;
-    font-weight: 600;
-    color: #323450;
-  }
-</style>
+<link rel="stylesheet" href="assets/css/detail-personil.css" />
 
 <section class="pt-150 pb-50" style="background: #f3f3f3; margin-top: 80px;">
     <div class="container">

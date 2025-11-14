@@ -1,0 +1,10 @@
+.article-content p {
+	margin-bottom: 1.5rem;
+	line-height: 1.8;
+	color: #585978;
+}
+.article-content h3 { margin-top: 2.5rem; margin-bottom: 1rem; }
+.article-content ul, .article-content ol { margin-bottom: 1.5rem; padding-left: 2rem; color: #585978; }
+.article-content li { margin-bottom: 0.5rem; }
+.article-content img { border-radius: 10px; }
+
