@@ -1,5 +1,9 @@
 /* Admin Dashboard specific styles */
 
+.header-2 {
+	display: none;
+}
+
 .stat-card {
 	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 	border-radius: 15px;
@@ -110,9 +114,9 @@
 .admin-sidebar {
 	position: fixed;
 	left: 0;
-	top: 80px;
+	top: 0;
 	width: 260px;
-	height: calc(100vh - 80px);
+	height: 100vh;
 	background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
 	box-shadow: 2px 0 10px rgba(0,0,0,0.1);
 	overflow-y: auto;
@@ -223,7 +227,7 @@
 	margin-left: 260px;
 	padding: 0;
 	transition: all 0.3s ease;
-	min-height: calc(100vh - 80px);
+	min-height: 100vh;
 	background: #f8f9fa;
 }
 
@@ -252,7 +256,7 @@
 	display: none;
 	position: fixed;
 	left: 20px;
-	top: 90px;
+	top: 20px;
 	z-index: 1001;
 	background: #2F80ED;
 	color: white;
@@ -273,10 +277,10 @@
 .sidebar-overlay {
 	display: none;
 	position: fixed;
-	top: 80px;
+	top: 0;
 	left: 0;
 	width: 100%;
-	height: calc(100vh - 80px);
+	height: 100vh;
 	background: rgba(0,0,0,0.5);
 	z-index: 999;
 	opacity: 0;
