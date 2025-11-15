@@ -50,9 +50,6 @@
                             <li class="nav-item">
                               <a class="page-scroll active" href="<?php echo $base_path; ?>module/admin/dashboard.php">Dashboard</a>
                             </li>
-                            <li class="nav-item">
-                              <a class="page-scroll" href="<?php echo $base_path; ?>index.php" target="_blank">Lihat Website</a>
-                            </li>
                         </ul>
                       <a href="<?php echo $base_path; ?>logout.php" class="button button-sm radius-10 border-button d-none d-lg-flex">Logout</a>
                     </div>

@@ -116,6 +116,42 @@ if ($result_recent && pg_num_rows($result_recent) > 0) {
         $recent_pendaftar[] = $row;
     }
 }
+
+// Ambil data pendaftaran per bulan (6 bulan terakhir)
+$chart_data = [
+    'labels' => [],
+    'data' => []
+];
+
+// Generate 6 bulan terakhir
+$months = [];
+for ($i = 5; $i >= 0; $i--) {
+    $date = date('Y-m', strtotime("-$i months"));
+    $month_name = date('M Y', strtotime("-$i months"));
+    $months[] = [
+        'period' => $date,
+        'label' => $month_name
+    ];
+}
+
+// Query untuk mendapatkan jumlah pendaftaran per bulan
+foreach ($months as $month) {
+    $chart_data['labels'][] = $month['label'];
+    
+    $query_chart = "SELECT COUNT(*) as total 
+                    FROM pendaftaran 
+                    WHERE DATE_TRUNC('month', tanggal_daftar) = DATE_TRUNC('month', '{$month['period']}-01'::date)";
+    $result_chart = pg_query($koneksi, $query_chart);
+    if ($result_chart) {
+        $row_chart = pg_fetch_assoc($result_chart);
+        $chart_data['data'][] = (int)$row_chart['total'];
+    } else {
+        $chart_data['data'][] = 0;
+    }
+}
+
+// Data untuk chart dalam format JSON
+$chart_json = json_encode($chart_data);
 ?>
 
 <!-- Sidebar Toggle Button (Mobile) -->
