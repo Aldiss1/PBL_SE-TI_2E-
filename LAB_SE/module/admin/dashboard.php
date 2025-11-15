@@ -2,6 +2,36 @@
 $page_title = "Admin Dashboard - Web Profile Laboratorium SE";
 require_once __DIR__ . '/../../config/koneksi.php';
 require_once __DIR__ . '/../../cek_login.php';
+
+// Set active menu
+$current_page = basename($_SERVER['PHP_SELF']);
+$menu_items = [
+    'dashboard.php' => [
+        'title' => 'Dashboard',
+        'icon' => 'lni lni-home',
+        'link' => '../../module/admin/dashboard.php',
+        'active' => ($current_page === 'dashboard.php')
+    ],
+    'anggota' => [
+        'title' => 'Kelola Anggota',
+        'icon' => 'lni lni-users',
+        'link' => '../../module/anggota/index.php',
+        'active' => false
+    ],
+    'jabatan' => [
+        'title' => 'Kelola Jabatan',
+        'icon' => 'lni lni-briefcase',
+        'link' => '../../module/jabatan/index.php',
+        'active' => false
+    ],
+    'pendaftar' => [
+        'title' => 'Kelola Pendaftar',
+        'icon' => 'lni lni-list',
+        'link' => '../../list-pendaftar.php',
+        'active' => false
+    ]
+];
+
 include __DIR__ . '/../../template/admin_header.php';
 
 // Ambil statistik dari database
@@ -88,7 +118,66 @@ if ($result_recent && pg_num_rows($result_recent) > 0) {
 }
 ?>
 
-<section class="pt-150 pb-50" style="background: #f8f9fa; margin-top: 80px;">
+<!-- Sidebar Toggle Button (Mobile) -->
+<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+    <i class="lni lni-menu"></i>
+</button>
+
+<!-- Sidebar Overlay (Mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- Admin Sidebar -->
+<aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+        <h4>Admin Panel</h4>
+        <p><i class="lni lni-user"></i> <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Admin'; ?></p>
+    </div>
+    <ul class="sidebar-menu">
+        <li>
+            <a href="<?php echo $menu_items['dashboard.php']['link']; ?>" class="<?php echo $menu_items['dashboard.php']['active'] ? 'active' : ''; ?>">
+                <i class="<?php echo $menu_items['dashboard.php']['icon']; ?>"></i>
+                <span class="menu-text"><?php echo $menu_items['dashboard.php']['title']; ?></span>
+            </a>
+        </li>
+        <li>
+            <a href="<?php echo $menu_items['anggota']['link']; ?>" class="<?php echo $menu_items['anggota']['active'] ? 'active' : ''; ?>">
+                <i class="<?php echo $menu_items['anggota']['icon']; ?>"></i>
+                <span class="menu-text"><?php echo $menu_items['anggota']['title']; ?></span>
+            </a>
+        </li>
+        <li>
+            <a href="<?php echo $menu_items['jabatan']['link']; ?>" class="<?php echo $menu_items['jabatan']['active'] ? 'active' : ''; ?>">
+                <i class="<?php echo $menu_items['jabatan']['icon']; ?>"></i>
+                <span class="menu-text"><?php echo $menu_items['jabatan']['title']; ?></span>
+            </a>
+        </li>
+        <li>
+            <a href="<?php echo $menu_items['pendaftar']['link']; ?>" class="<?php echo $menu_items['pendaftar']['active'] ? 'active' : ''; ?>">
+                <i class="<?php echo $menu_items['pendaftar']['icon']; ?>"></i>
+                <span class="menu-text"><?php echo $menu_items['pendaftar']['title']; ?></span>
+            </a>
+        </li>
+    </ul>
+    <div class="sidebar-divider"></div>
+    <ul class="sidebar-menu">
+        <li>
+            <a href="../../index.php" target="_blank">
+                <i class="lni lni-world"></i>
+                <span class="menu-text">Lihat Website</span>
+            </a>
+        </li>
+        <li>
+            <a href="../../logout.php" style="color: #e74c3c;">
+                <i class="lni lni-exit"></i>
+                <span class="menu-text">Logout</span>
+            </a>
+        </li>
+    </ul>
+</aside>
+
+<!-- Main Content -->
+<main class="admin-main-content">
+<section class="pt-50 pb-50" style="padding-top: 30px !important; background: transparent;">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
@@ -208,7 +297,7 @@ if ($result_recent && pg_num_rows($result_recent) > 0) {
 </section>
 
 <!-- Module Management Section -->
-<section id="admin-menu" class="pt-50 pb-100" style="background: #ffffff;">
+<section id="admin-menu" class="pt-50 pb-100" style="background: transparent;">
     <div class="container">
         <div class="row">
             <div class="col-lg-12 mb-50">
@@ -254,6 +343,40 @@ if ($result_recent && pg_num_rows($result_recent) > 0) {
         </div>
     </div>
 </section>
+</main>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('adminSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (window.innerWidth <= 991) {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+}
+
+// Close sidebar when clicking overlay on mobile
+document.getElementById('sidebarOverlay').addEventListener('click', function() {
+    if (window.innerWidth <= 991) {
+        const sidebar = document.getElementById('adminSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+    }
+});
+
+// Close sidebar on window resize if desktop
+window.addEventListener('resize', function() {
+    const sidebar = document.getElementById('adminSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    
+    if (window.innerWidth > 991) {
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+    }
+});
+</script>
 
 <?php include __DIR__ . '/../../template/admin_footer.php'; ?>
 
