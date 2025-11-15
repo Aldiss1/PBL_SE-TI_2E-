@@ -4,13 +4,13 @@ require_once __DIR__ . '/../../config/koneksi.php';
 require_once __DIR__ . '/../../cek_login.php';
 
 // Set active menu
-$current_page = basename($_SERVER['PHP_SELF']);
+$current_page = 'dashboard';
 $menu_items = [
     'dashboard.php' => [
         'title' => 'Dashboard',
         'icon' => 'lni lni-home',
         'link' => '../../module/admin/dashboard.php',
-        'active' => ($current_page === 'dashboard.php')
+        'active' => true
     ],
     'anggota' => [
         'title' => 'Kelola Anggota',
@@ -28,6 +28,12 @@ $menu_items = [
         'title' => 'Kelola Pendaftar',
         'icon' => 'lni lni-list',
         'link' => '../../list-pendaftar.php',
+        'active' => false
+    ],
+    'blog' => [
+        'title' => 'Kelola Blog',
+        'icon' => 'lni lni-text-format',
+        'link' => '../../module/blog/index.php',
         'active' => false
     ]
 ];
@@ -123,93 +129,84 @@ $chart_data = [
     'data' => []
 ];
 
-// Generate 6 bulan terakhir
-$months = [];
-for ($i = 5; $i >= 0; $i--) {
-    $date = date('Y-m', strtotime("-$i months"));
-    $month_name = date('M Y', strtotime("-$i months"));
-    $months[] = [
-        'period' => $date,
-        'label' => $month_name
-    ];
-}
+// Cek apakah tabel pendaftaran ada sebelum query chart
+$table_check_pendaftar_chart = "SELECT EXISTS (
+    SELECT FROM information_schema.tables 
+    WHERE table_schema = 'public' 
+    AND table_name = 'pendaftaran'
+)";
+$check_pendaftar_chart = pg_query($koneksi, $table_check_pendaftar_chart);
 
-// Query untuk mendapatkan jumlah pendaftaran per bulan
-foreach ($months as $month) {
-    $chart_data['labels'][] = $month['label'];
-    
-    $query_chart = "SELECT COUNT(*) as total 
-                    FROM pendaftaran 
-                    WHERE DATE_TRUNC('month', tanggal_daftar) = DATE_TRUNC('month', '{$month['period']}-01'::date)";
-    $result_chart = pg_query($koneksi, $query_chart);
-    if ($result_chart) {
-        $row_chart = pg_fetch_assoc($result_chart);
-        $chart_data['data'][] = (int)$row_chart['total'];
+if ($check_pendaftar_chart) {
+    $row_check_chart = pg_fetch_assoc($check_pendaftar_chart);
+    if ($row_check_chart['exists'] === 't' || $row_check_chart['exists'] === true) {
+        // Generate 6 bulan terakhir
+        $months = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = date('Y-m', strtotime("-$i months"));
+            $month_name = date('M Y', strtotime("-$i months"));
+            $months[] = [
+                'period' => $date,
+                'label' => $month_name
+            ];
+        }
+
+        // Query untuk mendapatkan jumlah pendaftaran per bulan
+        foreach ($months as $month) {
+            $chart_data['labels'][] = $month['label'];
+            
+            // Query dengan format date yang benar untuk PostgreSQL
+            $month_period = pg_escape_string($koneksi, $month['period']);
+            $query_chart = "SELECT COUNT(*) as total 
+                            FROM pendaftaran 
+                            WHERE DATE_TRUNC('month', tanggal_daftar) = DATE_TRUNC('month', DATE '{$month_period}-01')";
+            $result_chart = pg_query($koneksi, $query_chart);
+            if ($result_chart && pg_num_rows($result_chart) > 0) {
+                $row_chart = pg_fetch_assoc($result_chart);
+                $chart_data['data'][] = (int)$row_chart['total'];
+            } else {
+                $chart_data['data'][] = 0;
+            }
+        }
     } else {
+        // Jika tabel tidak ada, buat data kosong
+        for ($i = 5; $i >= 0; $i--) {
+            $month_name = date('M Y', strtotime("-$i months"));
+            $chart_data['labels'][] = $month_name;
+            $chart_data['data'][] = 0;
+        }
+    }
+} else {
+    // Jika error, buat data kosong
+    for ($i = 5; $i >= 0; $i--) {
+        $month_name = date('M Y', strtotime("-$i months"));
+        $chart_data['labels'][] = $month_name;
         $chart_data['data'][] = 0;
     }
 }
 
-// Data untuk chart dalam format JSON
-$chart_json = json_encode($chart_data);
+// Data untuk chart dalam format JSON dengan validasi
+if (!isset($chart_data['labels']) || !isset($chart_data['data'])) {
+    $chart_data = ['labels' => [], 'data' => []];
+}
+
+// Pastikan labels dan data memiliki jumlah yang sama
+if (count($chart_data['labels']) !== count($chart_data['data'])) {
+    // Reset jika tidak sama
+    $chart_data = ['labels' => [], 'data' => []];
+    for ($i = 5; $i >= 0; $i--) {
+        $month_name = date('M Y', strtotime("-$i months"));
+        $chart_data['labels'][] = $month_name;
+        $chart_data['data'][] = 0;
+    }
+}
+
+// Encode JSON dengan escape untuk keamanan
+$chart_json = json_encode($chart_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
 ?>
 
-<!-- Sidebar Toggle Button (Mobile) -->
-<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
-    <i class="lni lni-menu"></i>
-</button>
-
-<!-- Sidebar Overlay (Mobile) -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-<!-- Admin Sidebar -->
-<aside class="admin-sidebar" id="adminSidebar">
-    <div class="sidebar-header">
-        <h4>Admin Panel</h4>
-        <p><i class="lni lni-user"></i> <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'Admin'; ?></p>
-    </div>
-    <ul class="sidebar-menu">
-        <li>
-            <a href="<?php echo $menu_items['dashboard.php']['link']; ?>" class="<?php echo $menu_items['dashboard.php']['active'] ? 'active' : ''; ?>">
-                <i class="<?php echo $menu_items['dashboard.php']['icon']; ?>"></i>
-                <span class="menu-text"><?php echo $menu_items['dashboard.php']['title']; ?></span>
-            </a>
-        </li>
-        <li>
-            <a href="<?php echo $menu_items['anggota']['link']; ?>" class="<?php echo $menu_items['anggota']['active'] ? 'active' : ''; ?>">
-                <i class="<?php echo $menu_items['anggota']['icon']; ?>"></i>
-                <span class="menu-text"><?php echo $menu_items['anggota']['title']; ?></span>
-            </a>
-        </li>
-        <li>
-            <a href="<?php echo $menu_items['jabatan']['link']; ?>" class="<?php echo $menu_items['jabatan']['active'] ? 'active' : ''; ?>">
-                <i class="<?php echo $menu_items['jabatan']['icon']; ?>"></i>
-                <span class="menu-text"><?php echo $menu_items['jabatan']['title']; ?></span>
-            </a>
-        </li>
-        <li>
-            <a href="<?php echo $menu_items['pendaftar']['link']; ?>" class="<?php echo $menu_items['pendaftar']['active'] ? 'active' : ''; ?>">
-                <i class="<?php echo $menu_items['pendaftar']['icon']; ?>"></i>
-                <span class="menu-text"><?php echo $menu_items['pendaftar']['title']; ?></span>
-            </a>
-        </li>
-    </ul>
-    <div class="sidebar-divider"></div>
-    <ul class="sidebar-menu">
-        <li>
-            <a href="../../index.php" target="_blank">
-                <i class="lni lni-world"></i>
-                <span class="menu-text">Lihat Website</span>
-            </a>
-        </li>
-        <li>
-            <a href="../../logout.php" style="color: #e74c3c;">
-                <i class="lni lni-exit"></i>
-                <span class="menu-text">Logout</span>
-            </a>
-        </li>
-    </ul>
-</aside>
+<!-- Sidebar -->
+<?php include __DIR__ . '/../../template/admin_sidebar.php'; ?>
 
 <!-- Main Content -->
 <main class="admin-main-content">
@@ -332,48 +329,19 @@ $chart_json = json_encode($chart_data);
     </div>
 </section>
 
-<!-- Module Management Section -->
-<section id="admin-menu" class="pt-50 pb-100" style="background: transparent;">
+<!-- Chart Section -->
+<section class="pt-50 pb-50" style="background: transparent; padding-top: 20px !important;">
     <div class="container">
         <div class="row">
-            <div class="col-lg-12 mb-50">
-                <div class="section-title text-center">
-                    <h3 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Modul Manajemen</h3>
-                    <p class="wow fadeInUp" data-wow-delay=".3s">Akses cepat ke semua fitur manajemen laboratorium</p>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xl-4 col-lg-4 col-md-6 mb-30">
-                <div class="module-card wow fadeInUp" data-wow-delay=".4s">
-                    <div class="module-icon">
-                        <i class="lni lni-users"></i>
+            <div class="col-lg-12 mb-30">
+                <div class="chart-container wow fadeInUp" data-wow-delay=".2s">
+                    <div class="chart-header">
+                        <h4><i class="lni lni-bar-chart mr-2"></i> Grafik Pendaftaran Siswa</h4>
+                        <p>Statistik jumlah siswa yang mendaftar ke laboratorium dalam 6 bulan terakhir</p>
                     </div>
-                    <h5>Kelola Anggota</h5>
-                    <p>Tambah, edit, atau hapus data anggota laboratorium. Kelola profil dan informasi anggota.</p>
-                    <a href="../../module/anggota/index.php" class="button button-sm radius-10 mt-20">Mulai Kelola</a>
-                </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-4 col-md-6 mb-30">
-                <div class="module-card wow fadeInUp" data-wow-delay=".5s">
-                    <div class="module-icon">
-                        <i class="lni lni-briefcase"></i>
+                    <div class="chart-wrapper">
+                        <canvas id="pendaftaranChart"></canvas>
                     </div>
-                    <h5>Kelola Jabatan</h5>
-                    <p>Tambah, edit, atau hapus data jabatan anggota. Atur struktur organisasi laboratorium.</p>
-                    <a href="../../module/jabatan/index.php" class="button button-sm radius-10 mt-20">Mulai Kelola</a>
-                </div>
-            </div>
-
-            <div class="col-xl-4 col-lg-4 col-md-6 mb-30">
-                <div class="module-card wow fadeInUp" data-wow-delay=".6s">
-                    <div class="module-icon">
-                        <i class="lni lni-list"></i>
-                    </div>
-                    <h5>Kelola Pendaftar</h5>
-                    <p>Lihat dan kelola data mahasiswa yang mendaftar ke laboratorium. Review dan verifikasi pendaftaran.</p>
-                    <a href="../../list-pendaftar.php" class="button button-sm radius-10 mt-20">Lihat Daftar</a>
                 </div>
             </div>
         </div>
@@ -381,38 +349,187 @@ $chart_json = json_encode($chart_data);
 </section>
 </main>
 
+<?php include __DIR__ . '/../../template/admin_footer.php'; ?>
+
 <script>
-function toggleSidebar() {
-    const sidebar = document.getElementById('adminSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
+// Chart.js Configuration - Tunggu semua resource dimuat
+(function() {
+    // Validasi data chart dari PHP
+    const chartData = <?php echo $chart_json; ?> || { labels: [], data: [] };
     
-    if (window.innerWidth <= 991) {
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
+    // Validasi struktur data
+    if (!chartData.labels || !chartData.data) {
+        console.error('Invalid chart data structure');
+        return;
     }
-}
-
-// Close sidebar when clicking overlay on mobile
-document.getElementById('sidebarOverlay').addEventListener('click', function() {
-    if (window.innerWidth <= 991) {
-        const sidebar = document.getElementById('adminSidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-    }
-});
-
-// Close sidebar on window resize if desktop
-window.addEventListener('resize', function() {
-    const sidebar = document.getElementById('adminSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
     
-    if (window.innerWidth > 991) {
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
+    let initAttempts = 0;
+    const maxAttempts = 50;
+    
+    function initChart() {
+        initAttempts++;
+        
+        // Cek apakah Chart.js sudah dimuat
+        if (typeof Chart === 'undefined') {
+            if (initAttempts < maxAttempts) {
+                setTimeout(initChart, 100);
+            } else {
+                console.error('Chart.js failed to load after maximum attempts');
+            }
+            return;
+        }
+        
+        // Cek apakah canvas sudah ada
+        const canvas = document.getElementById('pendaftaranChart');
+        if (!canvas) {
+            if (initAttempts < maxAttempts) {
+                setTimeout(initChart, 100);
+            } else {
+                console.error('Chart canvas not found after maximum attempts');
+            }
+            return;
+        }
+        
+        // Pastikan chart belum diinisialisasi
+        if (canvas.chartInstance) {
+            return;
+        }
+        
+        try {
+            const ctx = canvas.getContext('2d');
+            
+            // Destroy chart jika sudah ada
+            if (canvas.chartInstance) {
+                canvas.chartInstance.destroy();
+            }
+            
+            // Buat chart baru
+            canvas.chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.labels || [],
+                    datasets: [{
+                        label: 'Jumlah Pendaftar',
+                        data: chartData.data || [],
+                        borderColor: '#2F80ED',
+                        backgroundColor: 'rgba(47, 128, 237, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#2F80ED',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: '#1E5FCC',
+                        pointHoverBorderColor: '#ffffff',
+                        pointHoverBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 2.5,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    weight: '500'
+                                },
+                                color: '#2c3e50'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            borderColor: '#2F80ED',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Pendaftar: ' + context.parsed.y + ' siswa';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 12
+                                },
+                                color: '#6c757d'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 12
+                                },
+                                color: '#6c757d'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+            
+            console.log('Chart initialized successfully with data:', chartData);
+        } catch (error) {
+            console.error('Error initializing chart:', error);
+            console.error('Chart data:', chartData);
+        }
     }
-});
+    
+    // Inisialisasi chart setelah semua resource dimuat
+    function startInit() {
+        // Tunggu sedikit untuk memastikan semua script sudah dimuat
+        setTimeout(function() {
+            initChart();
+        }, 200);
+    }
+    
+    // Cek apakah document sudah ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startInit);
+    } else {
+        // Document sudah ready, tunggu window load
+        if (document.readyState === 'complete') {
+            startInit();
+        } else {
+            window.addEventListener('load', startInit);
+        }
+    }
+})();
 </script>
 
-<?php include __DIR__ . '/../../template/admin_footer.php'; ?>
 
