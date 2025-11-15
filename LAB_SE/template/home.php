@@ -286,6 +286,119 @@
 </section>
 <!-- ========================= Galeri Dosen End ========================= -->
 
+<!-- ========================= Blog Section ========================= -->
+<section id="blog" class="feature-section feature-style-2 pt-100 pb-70" style="background: #f8f9fa;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="section-title text-center mb-60">
+          <h3 class="mb-15 wow fadeInUp gradient-text" data-wow-delay=".2s">Blog & Artikel</h3>
+          <p class="wow fadeInUp" data-wow-delay=".4s">Artikel dan berita terkini dari Laboratorium Software Engineering</p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <?php
+      // Cek apakah tabel blog ada
+      $table_check_blog = "SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'blog'
+      )";
+      $table_exists_blog = pg_query($koneksi, $table_check_blog);
+      $has_table_blog = false;
+      if ($table_exists_blog) {
+        $row = pg_fetch_assoc($table_exists_blog);
+        $has_table_blog = ($row['exists'] === 't' || $row['exists'] === true || $row['exists'] === 'true');
+      }
+      
+      $result_blog = false;
+      $total_blog_count = 0;
+      if ($has_table_blog) {
+        // Hitung total blog yang published
+        $count_query = "SELECT COUNT(*) as total FROM blog WHERE is_published = true";
+        $count_result = pg_query($koneksi, $count_query);
+        if ($count_result) {
+          $count_row = pg_fetch_assoc($count_result);
+          $total_blog_count = (int)$count_row['total'];
+        }
+        
+        // Ambil blog yang sudah published (maksimal 6)
+        $query_blog = "SELECT id, title, excerpt, featured_image, category, published_at, created_at, slug, views 
+                       FROM blog 
+                       WHERE is_published = true 
+                       ORDER BY published_at DESC, created_at DESC 
+                       LIMIT 6";
+        $result_blog = pg_query($koneksi, $query_blog);
+        if (!$result_blog) {
+          error_log("Error query blog: " . pg_last_error($koneksi));
+        }
+      }
+      
+      if ($result_blog && pg_num_rows($result_blog) > 0) {
+        while ($blog_item = pg_fetch_assoc($result_blog)) {
+          $blog_link = "blog-detail.php?id=" . $blog_item['id'];
+          $blog_image = $blog_item['featured_image'] ? $blog_item['featured_image'] : 'assets/img/blog/blog-1-1.jpg';
+          $blog_excerpt = $blog_item['excerpt'] ? htmlspecialchars(substr($blog_item['excerpt'], 0, 100)) . '...' : '';
+          $blog_date = $blog_item['published_at'] ? date('d F Y', strtotime($blog_item['published_at'])) : date('d F Y', strtotime($blog_item['created_at']));
+      ?>
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="single-feature blog-card-item wow fadeInUp" data-wow-delay=".2s" style="background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: all 0.3s ease; height: 100%;">
+          <div class="image" style="height: 200px; overflow: hidden; position: relative;">
+            <img src="<?php echo htmlspecialchars($blog_image); ?>" alt="<?php echo htmlspecialchars($blog_item['title']); ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
+          </div>
+          <div class="content" style="padding: 20px;">
+            <?php if ($blog_item['category']): ?>
+            <span style="color: #2F80ED; font-size: 12px; font-weight: 600; text-transform: uppercase;"><?php echo htmlspecialchars($blog_item['category']); ?></span>
+            <?php endif; ?>
+            <h5 style="margin-top: 10px; margin-bottom: 10px; color: #2c3e50; min-height: 60px;">
+              <a href="<?php echo $blog_link; ?>" style="color: #2c3e50; text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                <?php echo htmlspecialchars($blog_item['title']); ?>
+              </a>
+            </h5>
+            <?php if ($blog_excerpt): ?>
+            <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-height: 60px;">
+              <?php echo $blog_excerpt; ?>
+            </p>
+            <?php endif; ?>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
+              <span style="color: #999; font-size: 12px;">
+                <i class="lni lni-calendar"></i> <?php echo $blog_date; ?>
+              </span>
+              <a href="<?php echo $blog_link; ?>" class="button button-sm radius-10" style="padding: 5px 15px; font-size: 12px;">Baca</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <?php
+        }
+      } else {
+      ?>
+      <div class="col-12 text-center">
+        <p style="color: #717791; margin-bottom: 20px;">
+          <?php if (!$has_table_blog): ?>
+            Tabel blog belum dibuat. Silakan jalankan <a href="database.sql" style="color: #2F80ED;">database.sql</a> terlebih dahulu.
+          <?php else: ?>
+            Belum ada artikel blog yang dipublikasikan.
+            <br><small>Silakan tambahkan blog melalui admin panel dan pastikan statusnya "Published".</small>
+          <?php endif; ?>
+        </p>
+      </div>
+      <?php
+      }
+      ?>
+    </div>
+    <?php if ($total_blog_count > 6): ?>
+    <div class="row mt-4">
+      <div class="col-12 text-center">
+        <a href="blog-list.php" class="button radius-10">Lihat Semua Artikel (<?php echo $total_blog_count; ?>)</a>
+      </div>
+    </div>
+    <?php endif; ?>
+  </div>
+</section>
+<!-- ========================= Blog Section End ========================= -->
+
 <!-- ========================= Contact Section ========================= -->
 <section id="contact" class="contact-section contact-style-6 pt-150 pb-100">
   <div class="container">

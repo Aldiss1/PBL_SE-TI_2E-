@@ -26,7 +26,7 @@
     <a class="page-scroll" href="daftar.php">Daftar</a>
   </li>
   <li class="nav-item">
-    <a class="page-scroll" href="blog-detail.php">Blog</a>
+    <a class="page-scroll" href="index.php#blog">Blog</a>
   </li>
   <li class="nav-item dropdown">
     <a class="page-scroll dropdown-toggle" href="#" id="navbarDropdownStats" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -50,7 +50,7 @@
       <a class="dropdown-item" href="list-pendaftar.php">
         <i class="lni lni-graduation mr-2" style="color: #27AE60;"></i> Pendaftar: <strong><?php echo $stats['pendaftar']; ?></strong>
       </a>
-      <a class="dropdown-item" href="blog-detail.php">
+      <a class="dropdown-item" href="blog-list.php">
         <i class="lni lni-book mr-2" style="color: #6C63FF;"></i> Blog: <strong><?php echo $stats['blog']; ?></strong>
       </a>
     </div>

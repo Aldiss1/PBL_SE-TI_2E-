@@ -1,0 +1,43 @@
+/* Blog List Styles */
+.blog-card {
+	transition: all 0.3s ease;
+}
+
+.blog-card:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 5px 20px rgba(0,0,0,0.1) !important;
+}
+
+.blog-card:hover .blog-image img {
+	transform: scale(1.1);
+}
+
+.blog-card-item {
+	cursor: pointer;
+}
+
+.blog-card-item:hover h5 a {
+	color: #2F80ED !important;
+}
+
+/* Pagination Styles */
+.pagination-wrapper {
+	margin-top: 40px;
+}
+
+.pagination .page-link {
+	transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+	background: #2F80ED;
+	color: white;
+	border-color: #2F80ED;
+}
+
+.pagination .page-item.active .page-link {
+	background: #2F80ED;
+	border-color: #2F80ED;
+	color: white;
+}
+

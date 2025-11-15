@@ -80,6 +80,32 @@ section,
 	box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
 }
 
+/* Blog Card Hover Effect */
+.blog-card-item {
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.blog-card-item:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 5px 20px rgba(0,0,0,0.1) !important;
+}
+
+.blog-card-item:hover .image img {
+	transform: scale(1.1);
+}
+
+.blog-card-item:hover h5 a {
+	color: #2F80ED !important;
+	transition: color 0.3s ease;
+}
+
+/* Blog Section */
+#blog {
+	z-index: 1 !important;
+	position: relative !important;
+}
+
 /* Navbar area juga harus fixed */
 .header .navbar-area,
 .header.header-2 .navbar-area,
