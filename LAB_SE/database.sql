@@ -26,9 +26,6 @@ CREATE TABLE IF NOT EXISTS jabatan (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Ensures nama_jabatan is unique (case-insensitive)
-CREATE UNIQUE INDEX IF NOT EXISTS idx_jabatan_nama_unique ON jabatan (LOWER(nama_jabatan));
-
 CREATE TABLE IF NOT EXISTS anggota (
     id SERIAL PRIMARY KEY,
     nama VARCHAR(255) NOT NULL,
@@ -44,15 +41,13 @@ CREATE TABLE IF NOT EXISTS pendaftaran (
     nama VARCHAR(255) NOT NULL,
     nim VARCHAR(50) NOT NULL,
     jurusan VARCHAR(100) NOT NULL,
-    email VARCHAR(255),
     minat TEXT,
     status VARCHAR(50) DEFAULT 'pending',
     tanggal_daftar TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     tanggal_review TIMESTAMP,
     catatan_admin TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT pendaftaran_status_check CHECK (status IN ('pending','accepted','rejected'))
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS blog (
@@ -78,49 +73,6 @@ CREATE INDEX IF NOT EXISTS idx_blog_published ON blog(is_published, published_at
 CREATE INDEX IF NOT EXISTS idx_blog_slug ON blog(slug);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_anggota_jabatan ON anggota(jabatan);
-
--- Add missing columns/constraints for existing deployments
-ALTER TABLE pendaftaran ADD COLUMN IF NOT EXISTS email VARCHAR(255);
-DO $$ BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.table_constraints 
-        WHERE constraint_name = 'pendaftaran_status_check'
-          AND table_name = 'pendaftaran'
-    ) THEN
-        ALTER TABLE pendaftaran ADD CONSTRAINT pendaftaran_status_check CHECK (status IN ('pending','accepted','rejected'));
-    END IF;
-END $$;
-
--- Auto-update updated_at on row modifications
-CREATE OR REPLACE FUNCTION set_updated_at() RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'tr_users_updated_at') THEN
-        CREATE TRIGGER tr_users_updated_at BEFORE UPDATE ON users
-        FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'tr_jabatan_updated_at') THEN
-        CREATE TRIGGER tr_jabatan_updated_at BEFORE UPDATE ON jabatan
-        FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'tr_anggota_updated_at') THEN
-        CREATE TRIGGER tr_anggota_updated_at BEFORE UPDATE ON anggota
-        FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'tr_pendaftaran_updated_at') THEN
-        CREATE TRIGGER tr_pendaftaran_updated_at BEFORE UPDATE ON pendaftaran
-        FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'tr_blog_updated_at') THEN
-        CREATE TRIGGER tr_blog_updated_at BEFORE UPDATE ON blog
-        FOR EACH ROW EXECUTE FUNCTION set_updated_at();
-    END IF;
-END $$;
 
 INSERT INTO users (username, password, full_name, role) 
 VALUES ('admin', MD5('admin123'), 'Administrator', 'admin')
