@@ -103,8 +103,6 @@ if ($has_table) {
                                 <th style="padding: 15px;">ID</th>
                                 <th style="padding: 15px;">Nama</th>
                                 <th style="padding: 15px;">Jabatan</th>
-                                <th style="padding: 15px;">Foto</th>
-                                <th style="padding: 15px;">Deskripsi</th>
                                 <th style="padding: 15px; text-align: center;">Aksi</th>
                             </tr>
                         </thead>
@@ -114,17 +112,7 @@ if ($has_table) {
                                 <tr>
                                     <td style="padding: 15px;"><?php echo $a['id']; ?></td>
                                     <td style="padding: 15px;"><strong><?php echo htmlspecialchars($a['nama']); ?></strong></td>
-                                    <td style="padding: 15px;"><?php echo htmlspecialchars($a['jabatan'] ?? '-'); ?></td>
-                                    <td style="padding: 15px;">
-                                        <?php if (!empty($a['foto'])): ?>
-                                            <img src="<?php echo htmlspecialchars($a['foto']); ?>" alt="foto" style="height: 40px; width: 40px; object-fit: cover; border-radius: 50%;">
-                                        <?php else: ?>
-                                            <span class="text-muted">-</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td style="padding: 15px; max-width: 320px;">
-                                        <small class="text-muted"><?php echo htmlspecialchars(substr((string)$a['deskripsi'], 0, 80)); ?><?php echo strlen((string)$a['deskripsi']) > 80 ? '...' : ''; ?></small>
-                                    </td>
+                                    <td style="padding: 15px;">&nbsp;<?php echo htmlspecialchars($a['jabatan'] ?? '-'); ?></td>
                                     <td style="padding: 15px; text-align: center;">
                                         <a href="edit.php?id=<?php echo $a['id']; ?>" class="button button-sm radius-10" style="background: #2F80ED; color: white; padding: 5px 15px; margin-right: 5px;">
                                             <i class="lni lni-pencil"></i> Edit
@@ -137,7 +125,7 @@ if ($has_table) {
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="6" class="text-center" style="padding: 40px;">
+                                    <td colspan="4" class="text-center" style="padding: 40px;">
                                         <i class="lni lni-inbox" style="font-size: 48px; color: #dee2e6;"></i>
                                         <p class="mt-3 text-muted">Belum ada data anggota. <a href="tambah.php">Tambah anggota</a></p>
                                     </td>

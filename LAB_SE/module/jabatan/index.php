@@ -69,7 +69,7 @@ include __DIR__ . '/../../template/admin_header.php';
 
 		<div class="row mb-30">
 			<div class="col-lg-12">
-				<a href="../../fungsi/tambah.php?module=jabatan" class="button button-sm radius-10 wow fadeInUp" data-wow-delay=".2s">
+				<a href="tambah.php" class="button button-sm radius-10 wow fadeInUp" data-wow-delay=".2s">
 					<i class="lni lni-plus"></i> Tambah Jabatan
 				</a>
 			</div>
@@ -81,18 +81,18 @@ include __DIR__ . '/../../template/admin_header.php';
 					<table class="table table-striped table-hover" style="background: white; border-radius: 10px; overflow: hidden;">
 						<thead style="background: #2c3e50; color: white;">
 							<tr>
-								<th style="padding: 15px;">ID</th>
-								<th style="padding: 15px;">Nama Jabatan</th>
-								<th style="padding: 15px; text-align: center;">Aksi</th>
+								<th style="padding: 12px;">ID</th>
+								<th style="padding: 12px;">Nama Jabatan</th>
+								<th style="padding: 12px; text-align: center;">Aksi</th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php if ($result && pg_num_rows($result) > 0): ?>
-								<?php while ($row = pg_fetch_assoc($result)): ?>
+								<?php $no = 1; while ($row = pg_fetch_assoc($result)): ?>
 								<tr>
-									<td style="padding: 15px;">&nbsp;<?php echo $row['id']; ?></td>
-									<td style="padding: 15px;"><strong><?php echo htmlspecialchars($row['nama_jabatan']); ?></strong></td>
-									<td style="padding: 15px; text-align: center;">
+									<td style="padding: 12px;"><?php echo $no++; ?></td>
+									<td style="padding: 12px;"><strong><?php echo htmlspecialchars($row['nama_jabatan']); ?></strong></td>
+									<td style="padding: 12px; text-align: center;">
 										<a href="edit/index.php?id=<?php echo $row['id']; ?>" class="button button-sm radius-10" style="background: #2F80ED; color: white; padding: 5px 15px; margin-right: 5px;">
 											<i class="lni lni-pencil"></i> Edit
 										</a>

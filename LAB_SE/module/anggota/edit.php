@@ -54,26 +54,29 @@ if (!$data) {
     exit;
 }
 
-// Proses form
+// Ambil daftar jabatan untuk dropdown
+$list_jabatan = [];
+$q_jabatan = pg_query($koneksi, "SELECT nama_jabatan FROM jabatan ORDER BY nama_jabatan ASC");
+if ($q_jabatan && pg_num_rows($q_jabatan) > 0) {
+	while ($row = pg_fetch_assoc($q_jabatan)) {
+		$list_jabatan[] = $row['nama_jabatan'];
+	}
+}
+
+// Proses form (Update)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = clean_input($_POST['nama'] ?? '');
     $jabatan = clean_input($_POST['jabatan'] ?? '');
-    $foto = clean_input($_POST['foto'] ?? '');
-    $deskripsi = trim($_POST['deskripsi'] ?? '');
 
     if ($nama === '') {
         pesan_kilat('Nama wajib diisi.', 'error');
     } else {
         $nama_e = pg_escape_string($koneksi, $nama);
         $jabatan_e = pg_escape_string($koneksi, $jabatan);
-        $foto_e = pg_escape_string($koneksi, $foto);
-        $deskripsi_e = pg_escape_string($koneksi, $deskripsi);
 
         $query = "UPDATE anggota SET 
                     nama = '$nama_e',
                     jabatan = NULLIF('$jabatan_e',''),
-                    foto = NULLIF('$foto_e',''),
-                    deskripsi = NULLIF('$deskripsi_e',''),
                     updated_at = NOW()
                   WHERE id = $id";
         $result = pg_query($koneksi, $query);
@@ -119,22 +122,12 @@ include __DIR__ . '/../../template/admin_header.php';
                             </div>
                             <div class="col-lg-6">
                                 <label for="jabatan" class="form-label" style="font-weight: 600; color: #2c3e50;">Jabatan</label>
-                                <input type="text" class="form-control" id="jabatan" name="jabatan" value="<?php echo htmlspecialchars($data['jabatan']); ?>" placeholder="Contoh: Dosen Pengampu, Ketua Lab" style="padding: 12px; border-radius: 5px; border: 1px solid #dee2e6;">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-lg-12">
-                                <label for="foto" class="form-label" style="font-weight: 600; color: #2c3e50;">URL Foto</label>
-                                <input type="text" class="form-control" id="foto" name="foto" value="<?php echo htmlspecialchars($data['foto']); ?>" placeholder="Contoh: assets/img/team/team-1/team-1.png" style="padding: 12px; border-radius: 5px; border: 1px solid #dee2e6;">
-                                <small class="form-text text-muted">Masukkan path/URL gambar foto profil.</small>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-lg-12">
-                                <label for="deskripsi" class="form-label" style="font-weight: 600; color: #2c3e50;">Deskripsi</label>
-                                <textarea class="form-control" id="deskripsi" name="deskripsi" rows="6" style="padding: 12px; border-radius: 5px; border: 1px solid #dee2e6; font-family: inherit;"><?php echo htmlspecialchars($data['deskripsi']); ?></textarea>
+                                <select class="form-select" id="jabatan" name="jabatan" style="padding: 12px; border-radius: 5px; border: 1px solid #dee2e6;">
+                                    <option value="">Pilih Jabatan</option>
+                                    <?php foreach ($list_jabatan as $j): ?>
+                                    <option value="<?php echo htmlspecialchars($j); ?>" <?php echo ($data['jabatan'] === $j) ? 'selected' : ''; ?>><?php echo htmlspecialchars($j); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                         </div>
 

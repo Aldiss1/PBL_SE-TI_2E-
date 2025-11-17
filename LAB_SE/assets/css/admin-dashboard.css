@@ -30,8 +30,8 @@
 	background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
 }
 .stat-card .stat-icon {
-	font-size: 48px;
-	margin-bottom: 15px;
+	font-size: 32px;
+	margin-bottom: 10px;
 	opacity: 0.9;
 }
 .stat-card .stat-number {

@@ -99,3 +99,18 @@ INSERT INTO anggota (nama, jabatan, foto, deskripsi) VALUES
     ('Dr. Fitri Handayani, S.Kom., M.Sc.', 'Dosen Pembimbing', 'assets/img/team/team-1/team-2.png', 'Dosen pembimbing yang fokus pada penelitian Software Quality Assurance dan Testing Automation.')
 ON CONFLICT DO NOTHING;
 
+-- Riwayat perubahan status pendaftaran (untuk kebutuhan admin)
+CREATE TABLE IF NOT EXISTS riwayat_pendaftaran (
+    id SERIAL PRIMARY KEY,
+    pendaftaran_id INTEGER NOT NULL REFERENCES pendaftaran(id) ON DELETE CASCADE,
+    status_lama VARCHAR(50),
+    status_baru VARCHAR(50) NOT NULL,
+    catatan TEXT,
+    changed_by INTEGER REFERENCES users(id),
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT riwayat_status_check CHECK (status_baru IN ('pending','accepted','rejected'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_riwayat_pendaftaran_id ON riwayat_pendaftaran(pendaftaran_id);
+CREATE INDEX IF NOT EXISTS idx_riwayat_pendaftaran_changed_at ON riwayat_pendaftaran(changed_at);
+
