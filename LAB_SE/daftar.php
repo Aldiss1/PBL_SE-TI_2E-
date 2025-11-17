@@ -9,15 +9,92 @@ session_start();
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama = clean_input($_POST['name']);
     $nim = clean_input($_POST['nim']);
+    $email = isset($_POST['email']) ? clean_input($_POST['email']) : '';
     $jurusan = clean_input($_POST['jurusan']);
-    
-    require_once __DIR__ . '/fungsi/tambah.php';
-    if (tambah_data('pendaftaran', ['nama' => $nama, 'nim' => $nim, 'jurusan' => $jurusan, 'tanggal_daftar' => date('Y-m-d H:i:s')])) {
-        pesan_kilat('Pendaftaran berhasil dikirim!', 'success');
-        header('Location: daftar.php');
-        exit;
+
+    // Validasi sederhana sisi server
+    if ($nama === '' || $nim === '' || $jurusan === '' || $email === '') {
+        pesan_kilat('Semua field wajib diisi.', 'error');
     } else {
-        pesan_kilat('Gagal mengirim pendaftaran. Silakan coba lagi.', 'error');
+        // Validasi format email sederhana
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            pesan_kilat('Format email tidak valid.', 'error');
+            header('Location: daftar.php');
+            exit;
+        }
+
+        // Pastikan tabel pendaftaran tersedia
+        $checkTbl = @pg_query($koneksi, "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'pendaftaran')");
+        if ($checkTbl) {
+            $exists = pg_fetch_result($checkTbl, 0, 0);
+            if ($exists == 'f') {
+                // Buat tabel pendaftaran jika belum ada (minimal kolom yang dibutuhkan)
+                $createSql = "
+                    CREATE TABLE IF NOT EXISTS pendaftaran (
+                        id SERIAL PRIMARY KEY,
+                        nama VARCHAR(255) NOT NULL,
+                        nim VARCHAR(50) NOT NULL,
+                        email VARCHAR(255),
+                        jurusan VARCHAR(100) NOT NULL,
+                        foto VARCHAR(500),
+                        minat TEXT,
+                        status VARCHAR(50) DEFAULT 'pending',
+                        tanggal_daftar TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        tanggal_review TIMESTAMP,
+                        catatan_admin TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                ";
+                @pg_query($koneksi, $createSql);
+            }
+            // Pastikan kolom email dan foto tersedia pada tabel yang sudah ada
+            @pg_query($koneksi, "ALTER TABLE pendaftaran ADD COLUMN IF NOT EXISTS email VARCHAR(255)");
+            @pg_query($koneksi, "ALTER TABLE pendaftaran ADD COLUMN IF NOT EXISTS foto VARCHAR(500)");
+        }
+
+        // Handle upload foto (opsional)
+        $foto_path = '';
+        if (isset($_FILES['foto']) && is_uploaded_file($_FILES['foto']['tmp_name'])) {
+            $allowed_ext = ['jpg','jpeg','png','webp'];
+            $max_size = 2 * 1024 * 1024; // 2MB
+            $original_name = $_FILES['foto']['name'];
+            $tmp_path = $_FILES['foto']['tmp_name'];
+            $size = (int)$_FILES['foto']['size'];
+
+            $ext = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
+            if (!in_array($ext, $allowed_ext)) {
+                pesan_kilat('Format foto tidak didukung. Gunakan JPG, JPEG, PNG, atau WEBP.', 'error');
+                header('Location: daftar.php');
+                exit;
+            }
+            if ($size > $max_size) {
+                pesan_kilat('Ukuran foto maksimal 2MB.', 'error');
+                header('Location: daftar.php');
+                exit;
+            }
+
+            $uploadDir = __DIR__ . '/uploads/pendaftar/';
+            if (!is_dir($uploadDir)) {
+                @mkdir($uploadDir, 0775, true);
+            }
+            $safeBase = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower(pathinfo($original_name, PATHINFO_FILENAME)));
+            $newName = $safeBase . '_' . time() . '_' . mt_rand(1000,9999) . '.' . $ext;
+            $destPath = $uploadDir . $newName;
+            if (@move_uploaded_file($tmp_path, $destPath)) {
+                // Path relatif untuk disimpan di DB
+                $foto_path = 'uploads/pendaftar/' . $newName;
+            }
+        }
+    
+        require_once __DIR__ . '/fungsi/tambah.php';
+        if (tambah_data('pendaftaran', ['nama' => $nama, 'nim' => $nim, 'email' => $email, 'jurusan' => $jurusan, 'foto' => $foto_path, 'tanggal_daftar' => date('Y-m-d H:i:s')])) {
+            pesan_kilat('Pendaftaran berhasil dikirim!', 'success');
+            header('Location: daftar.php');
+            exit;
+        } else {
+            pesan_kilat('Gagal mengirim pendaftaran. Silakan coba lagi.', 'error');
+        }
     }
 }
 ?>
@@ -38,13 +115,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php tampilkan_pesan(); ?>
 
             <div class="contact-form-wrapper wow fadeInUp" data-wow-delay=".6s" style="background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                <form method="POST" action="">
+                <form method="POST" action="" enctype="multipart/form-data">
                   <div class="row">
                     <div class="col-md-12">
                       <div class="single-input">
                         <label for="name" style="color: #22243e; font-weight: 600; margin-bottom: 8px; display: block;">Nama Lengkap</label>
                         <input type="text" id="name" name="name" class="form-input" placeholder="Masukkan Nama Lengkap Anda" required style="width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: all 0.3s;">
                         <i class="lni lni-user"></i>
+                      </div>
+                    </div>
+                    <div class="col-md-12">
+                      <div class="single-input">
+                        <label for="email" style="color: #22243e; font-weight: 600; margin-bottom: 8px; display: block;">Email</label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="nama@email.com" required style="width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: all 0.3s;">
+                        <i class="lni lni-envelope"></i>
                       </div>
                     </div>
                     <div class="col-md-12">
@@ -59,6 +143,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <label for="jurusan" style="color: #22243e; font-weight: 600; margin-bottom: 8px; display: block;">Jurusan</label>
                         <input type="text" id="jurusan" name="jurusan" class="form-input" placeholder="cth: JTI, Teknik Elektro, dll." required style="width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: all 0.3s;">
                         <i class="lni lni-apartment"></i>
+                      </div>
+                    </div>
+                    <div class="col-md-12">
+                      <div class="single-input">
+                        <label for="foto" style="color: #22243e; font-weight: 600; margin-bottom: 8px; display: block;">Foto (opsional)</label>
+                        <input type="file" id="foto" name="foto" class="form-input" accept=".jpg,.jpeg,.png,.webp" style="width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; background: #fff;">
                       </div>
                     </div>
                     <div class="col-md-12">

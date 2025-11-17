@@ -269,6 +269,7 @@ include __DIR__ . '/template/admin_header.php';
 								<tr>
 									<th>No.</th>
 									<th>Nama Lengkap</th>
+									<th>Email</th>
 									<th>NIM</th>
 									<th>Jurusan</th>
 									<th>Minat</th>
@@ -288,15 +289,23 @@ include __DIR__ . '/template/admin_header.php';
 										<td>
 											<div class="user-info">
 												<div class="user-avatar">
-													<?php echo strtoupper(substr($p['nama'], 0, 1)); ?>
+													<?php if (!empty($p['foto'])): ?>
+														<img src="<?php echo htmlspecialchars($p['foto']); ?>" alt="<?php echo htmlspecialchars($p['nama']); ?>" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">
+													<?php else: ?>
+														<?php echo strtoupper(substr($p['nama'], 0, 1)); ?>
+													<?php endif; ?>
 												</div>
 												<div class="user-details">
 													<strong><?php echo htmlspecialchars($p['nama']); ?></strong>
-													<?php if (isset($p['email']) && !empty($p['email'])): ?>
-													<small><?php echo htmlspecialchars($p['email']); ?></small>
-													<?php endif; ?>
 												</div>
 											</div>
+										</td>
+										<td>
+											<?php if (isset($p['email']) && !empty($p['email'])): ?>
+												<a href="mailto:<?php echo htmlspecialchars($p['email']); ?>"><?php echo htmlspecialchars($p['email']); ?></a>
+											<?php else: ?>
+												<span class="text-muted">-</span>
+											<?php endif; ?>
 										</td>
 										<td>
 											<span class="nim-badge"><?php echo htmlspecialchars($p['nim']); ?></span>
@@ -469,12 +478,82 @@ include __DIR__ . '/template/admin_header.php';
 
 /* Responsive tweaks */
 @media (max-width: 991px) { .stat-card { padding: 16px; } .stat-card .stat-icon { font-size: 28px; } .stat-card .stat-number { font-size: 24px; } .stat-card .stat-label { font-size: 11px; } }
+
+/* Detail Modal */
+#detailOverlay { display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px; }
+.detail-modal { background: #fff; border-radius: 12px; max-width: 640px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; }
+.detail-header { padding: 16px 20px; border-bottom: 1px solid #f1f1f1; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.detail-header h4 { margin: 0; color: #2c3e50; font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+.detail-close { background: transparent; border: none; font-size: 20px; cursor: pointer; color: #6c757d; }
+.detail-body { padding: 18px 20px; }
+.detail-grid { display: grid; grid-template-columns: 150px 1fr; gap: 10px 16px; }
+.detail-label { color: #6c757d; font-size: 13px; }
+.detail-value { color: #2c3e50; font-size: 14px; font-weight: 600; }
+.detail-footer { padding: 12px 20px; background: #fafafa; border-top: 1px solid #f1f1f1; display: flex; justify-content: flex-end; }
+.detail-status-badge { padding: 6px 12px; border-radius: 16px; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; }
 </style>
+
+<?php
+$pendaftar_map = [];
+foreach ($pendaftar as $pp) {
+	$pendaftar_map[(string)$pp['id']] = [
+		'id' => (int)$pp['id'],
+		'nama' => $pp['nama'] ?? '',
+		'email' => $pp['email'] ?? '',
+		'nim' => $pp['nim'] ?? '',
+		'jurusan' => $pp['jurusan'] ?? '',
+		'minat' => $pp['minat'] ?? '',
+		'foto' => $pp['foto'] ?? '',
+		'status' => $pp['status'] ?? 'pending',
+		'tanggal_daftar' => $pp['tanggal_daftar'] ?? '',
+		'tanggal_review' => $pp['tanggal_review'] ?? null,
+		'catatan_admin' => $pp['catatan_admin'] ?? ''
+	];
+}
+?>
+<script>
+window.pendaftarData = <?php echo json_encode($pendaftar_map); ?>;
+</script>
 
 <script>
 function viewDetail(id) {
-	// Bisa dikembangkan untuk menampilkan modal detail
-	alert('Detail pendaftar ID: ' + id + '\n\nFitur detail lengkap akan segera tersedia.');
+	var data = (window.pendaftarData && window.pendaftarData[id]) ? window.pendaftarData[id] : null;
+	if (!data) {
+		alert('Data pendaftar tidak ditemukan.');
+		return;
+	}
+
+	var overlay = document.getElementById('detailOverlay');
+	// Populate
+	document.getElementById('detailNama').textContent = data.nama || '-';
+	document.getElementById('detailNim').textContent = data.nim || '-';
+	document.getElementById('detailJurusan').textContent = data.jurusan || '-';
+	document.getElementById('detailMinat').textContent = data.minat ? data.minat : '-';
+	document.getElementById('detailEmail').textContent = data.email || '-';
+	document.getElementById('detailEmail').href = data.email ? ('mailto:' + data.email) : 'javascript:void(0)';
+	document.getElementById('detailTanggalDaftar').textContent = data.tanggal_daftar || '-';
+	document.getElementById('detailTanggalReview').textContent = data.tanggal_review ? data.tanggal_review : '-';
+	document.getElementById('detailCatatan').textContent = data.catatan_admin ? data.catatan_admin : '-';
+
+	// Foto
+	var fotoEl = document.getElementById('detailFoto');
+	if (data.foto) {
+		fotoEl.innerHTML = '<img src="'+ data.foto +'" alt="Foto '+ (data.nama || "") +'" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">';
+	} else {
+		fotoEl.textContent = '-';
+	}
+
+	// Status badge
+	var statusBadge = document.getElementById('detailStatus');
+	var statusText = 'Pending';
+	var statusClass = 'status-pending';
+	var statusIcon = 'lni-hourglass';
+	if (data.status === 'accepted') { statusText = 'Diterima'; statusClass = 'status-accepted'; statusIcon = 'lni-checkmark-circle'; }
+	else if (data.status === 'rejected') { statusText = 'Ditolak'; statusClass = 'status-rejected'; statusIcon = 'lni-close'; }
+	statusBadge.className = 'detail-status-badge ' + statusClass;
+	statusBadge.innerHTML = '<i class="lni ' + statusIcon + '"></i> ' + statusText;
+
+	overlay.style.display = 'flex';
 }
 
 (function() {
@@ -565,5 +644,54 @@ function viewDetail(id) {
 	window.updateStatus = function(id, status) { openConfirm(id, status); }
 })();
 </script>
+
+<!-- Detail Modal -->
+<div id="detailOverlay" onclick="if(event.target===this){ this.style.display='none'; }">
+	<div class="detail-modal">
+		<div class="detail-header">
+			<h4>
+				<i class="lni lni-eye" style="color:#2F80ED;"></i>
+				Detail Pendaftar
+			</h4>
+			<button class="detail-close" title="Tutup" onclick="document.getElementById('detailOverlay').style.display='none'">&times;</button>
+		</div>
+		<div class="detail-body">
+			<div class="detail-grid">
+				<div class="detail-label">Nama Lengkap</div>
+				<div class="detail-value" id="detailNama">-</div>
+
+				<div class="detail-label">NIM</div>
+				<div class="detail-value" id="detailNim">-</div>
+
+				<div class="detail-label">Jurusan</div>
+				<div class="detail-value" id="detailJurusan">-</div>
+
+				<div class="detail-label">Minat</div>
+				<div class="detail-value" id="detailMinat">-</div>
+
+				<div class="detail-label">Email</div>
+				<div class="detail-value"><a id="detailEmail" href="javascript:void(0)">-</a></div>
+
+				<div class="detail-label">Foto</div>
+				<div class="detail-value" id="detailFoto">-</div>
+
+				<div class="detail-label">Status</div>
+				<div class="detail-value"><span id="detailStatus" class="detail-status-badge status-pending"><i class="lni lni-hourglass"></i> Pending</span></div>
+
+				<div class="detail-label">Tanggal Daftar</div>
+				<div class="detail-value" id="detailTanggalDaftar">-</div>
+
+				<div class="detail-label">Tanggal Review</div>
+				<div class="detail-value" id="detailTanggalReview">-</div>
+
+				<div class="detail-label">Catatan Admin</div>
+				<div class="detail-value" id="detailCatatan">-</div>
+			</div>
+		</div>
+		<div class="detail-footer">
+			<button class="button radius-10 border-button" onclick="document.getElementById('detailOverlay').style.display='none'">Tutup</button>
+		</div>
+	</div>
+</div>
 
 <?php include __DIR__ . '/template/admin_footer.php'; ?>

@@ -6,7 +6,19 @@
     ======================= */
 	window.onload = function () {
 		window.setTimeout(fadeout, 300);
+	};
+
+	// Hide preloader earlier (don't wait for all images)
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', function() {
+			window.setTimeout(fadeout, 200);
+		});
+	} else {
+		window.setTimeout(fadeout, 200);
 	}
+
+	// Watchdog: ensure preloader hides even if onload never fires
+	window.setTimeout(fadeout, 3000);
 
 	function fadeout() {
 		var preloader = document.querySelector('.preloader');
