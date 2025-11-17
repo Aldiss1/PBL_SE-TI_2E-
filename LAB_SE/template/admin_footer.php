@@ -7,7 +7,9 @@
     </footer>
 
     <?php
-    $base_path = '../../';
+    if (!isset($base_path)) {
+        $base_path = '../../';
+    }
     ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="<?php echo $base_path; ?>assets/js/bootstrap.5.0.0.alpha-2-min.js"></script>
