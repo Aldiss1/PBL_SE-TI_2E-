@@ -66,30 +66,65 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin</title>
+    <title>Login</title>
+    
     <link rel="stylesheet" href="assets/css/bootstrap-5.0.0-alpha-2.min.css" />
+    <link rel="stylesheet" href="assets/css/Linelcons.2.0.css" /> 
+    
+    <link rel="stylesheet" href="assets/css/login.css" />
+    
 </head>
-<body>
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <h2 class="text-center mb-4">Login Admin</h2>
-                <?php tampilkan_pesan(); ?>
-                
-                <form method="POST">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
-                </form>
+<body class="login-page-wrapper">
+    <div class="row justify-content-center w-100"> 
+        
+        <div class="login-card"> 
+            
+            <div class="text-center">
+                 <h2 class="login-title">Login</h2>
+                 <p class="login-subtitle">Akses ke Sistem Laboratorium</p>
             </div>
+            
+            <?php tampilkan_pesan(); ?>
+            
+            <form method="POST">
+                
+                <div class="mb-4 input-icon-group">
+                    <label for="username" class="form-label visually-hidden">Nama Pengguna</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Nama Pengguna" required>
+                </div>
+                
+                <div class="mb-4 input-icon-group">
+                    <label for="password" class="form-label visually-hidden">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Kata Sandi" required>
+                </div>
+                
+                <button type="submit" class="btn btn-main w-100">LOGIN</button>
+                
+                <div class="back-link-container">
+                    <a href="index.php">← Kembali ke Website Utama</a>
+                </div>
+                
+            </form>
         </div>
     </div>
+    <script src="js/bootstrap.5.0.0.alpha-2-min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var closeButtons = document.querySelectorAll('.alert .btn-close, .alert .close, .alert button[data-dismiss="alert"]');
+            
+            closeButtons.forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var alert = this.closest('.alert');
+                    if (alert) {
+                        alert.style.display = 'none';n
+                        alert.remove();
+                    }
+                });
+            });
+        });
+    </script>
+
 </body>
 </html>
-
