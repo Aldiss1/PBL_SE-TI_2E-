@@ -7,12 +7,10 @@ CREATE DATABASE lab_se
     TABLESPACE = pg_default
     CONNECTION LIMIT = -1;
 
-
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    full_name VARCHAR(255),
     role VARCHAR(50) DEFAULT 'admin',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -43,7 +41,6 @@ CREATE TABLE IF NOT EXISTS pendaftaran (
     nama VARCHAR(255) NOT NULL,
     nim VARCHAR(50) NOT NULL,
 	email VARCHAR(255),
-    jurusan VARCHAR(100) NOT NULL,
 	foto VARCHAR(500),
     minat TEXT,
     status VARCHAR(50) DEFAULT 'pending',
@@ -82,16 +79,9 @@ INSERT INTO users (username, password, full_name, role)
 VALUES ('admin', MD5('admin123'), 'Administrator', 'admin')
 ON CONFLICT (username) DO NOTHING;
 
-INSERT INTO jabatan (nama_jabatan) VALUES
-    ('Ketua Lab'),
-    ('Wakil Ketua Lab'),
-    ('Dosen Pengampu'),
-    ('Koordinator Penelitian'),
-    ('Dosen Pembimbing')
-ON CONFLICT DO NOTHING;
 
 
-
+x
 CREATE TABLE IF NOT EXISTS riwayat_pendaftaran (
     id SERIAL PRIMARY KEY,
     pendaftaran_id INTEGER NOT NULL REFERENCES pendaftaran(id) ON DELETE CASCADE,

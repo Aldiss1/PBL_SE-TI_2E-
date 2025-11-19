@@ -18,7 +18,11 @@ if ($koneksi) {
 
 // Jika sudah login, redirect ke dashboard
 if (isset($_SESSION['login'])) {
-    header('Location: module/admin/dashboard.php');
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'mahasiswa') {
+        header('Location: module/mahasiswa/dashboard.php');
+    } else {
+        header('Location: module/admin/dashboard.php');
+    }
     exit;
 }
 
@@ -44,7 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $user = pg_fetch_assoc($result);
             $_SESSION['login'] = true;
             $_SESSION['username'] = $username;
-            header('Location: module/admin/dashboard.php');
+            $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'admin';
+            if ($_SESSION['role'] === 'mahasiswa') {
+                header('Location: module/mahasiswa/dashboard.php');
+            } else {
+                header('Location: module/admin/dashboard.php');
+            }
             exit;
         } else {
             pesan_kilat('Username atau password salah', 'error');

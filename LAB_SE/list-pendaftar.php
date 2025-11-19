@@ -137,6 +137,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 	}
 }
 
+// Proses pembuatan akun mahasiswa dari pendaftar accepted
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'create_account') {
+	$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+	$current_filter = isset($_POST['current_filter']) ? clean_input($_POST['current_filter']) : 'all';
+
+	if ($id > 0) {
+		// Ambil data pendaftar
+		$id_escaped = pg_escape_string($koneksi, $id);
+		$q = "SELECT * FROM pendaftaran WHERE id = $id_escaped LIMIT 1";
+		$res = pg_query($koneksi, $q);
+		if ($res && pg_num_rows($res) === 1) {
+			$pd = pg_fetch_assoc($res);
+			$nim = trim($pd['nim'] ?? '');
+			$nama = trim($pd['nama'] ?? '');
+			$email = trim($pd['email'] ?? '');
+			$status = $pd['status'] ?? 'pending';
+
+			if ($status !== 'accepted') {
+				pesan_kilat('Akun hanya bisa dibuat untuk pendaftar yang sudah diterima.', 'error');
+			} elseif ($nim === '' || $nama === '') {
+				pesan_kilat('Data pendaftar tidak lengkap (NIM/Nama).', 'error');
+			} else {
+				// Cek apakah user sudah ada (username = NIM)
+				$nim_escaped = pg_escape_string($koneksi, $nim);
+				$check_user = pg_query($koneksi, "SELECT id FROM users WHERE username = '$nim_escaped' LIMIT 1");
+				if ($check_user && pg_num_rows($check_user) > 0) {
+					pesan_kilat('Akun sudah ada untuk NIM tersebut.', 'error');
+				} else {
+					// Buat akun: username = NIM, password default = MD5(NIM), role = mahasiswa
+					$nama_escaped = pg_escape_string($koneksi, $nama);
+					$email_escaped = pg_escape_string($koneksi, $email);
+					$insert = pg_query($koneksi, "
+						INSERT INTO users (username, password, full_name, role)
+						VALUES ('$nim_escaped', MD5('$nim_escaped'), '$nama_escaped', 'mahasiswa')
+					");
+					if ($insert) {
+						pesan_kilat('Akun mahasiswa berhasil dibuat. Username & password awal: NIM.', 'success');
+					} else {
+						pesan_kilat('Gagal membuat akun: ' . pg_last_error($koneksi), 'error');
+					}
+				}
+			}
+		} else {
+			pesan_kilat('Data pendaftar tidak ditemukan.', 'error');
+		}
+
+		$redirect_url = 'list-pendaftar.php';
+		if ($current_filter !== 'all') {
+			$redirect_url .= '?status=' . $current_filter;
+		}
+		header('Location: ' . $redirect_url);
+		exit;
+	}
+}
+
 // Query pendaftar
 $pendaftar = [];
 if ($has_table) {
@@ -371,6 +426,23 @@ include __DIR__ . '/template/admin_header.php';
 												<button class="btn-action btn-reject" title="Tolak" onclick="updateStatus(<?php echo $p['id']; ?>, 'rejected')">
 													<i class="lni lni-close"></i>
 												</button>
+												<?php else: ?>
+												<?php
+												// Tampilkan tombol buat akun bila belum ada user dengan username = NIM
+												$nimTmp = pg_escape_string($koneksi, $p['nim']);
+												$existsRes = pg_query($koneksi, "SELECT 1 FROM users WHERE username = '$nimTmp' LIMIT 1");
+												$hasUser = $existsRes && pg_num_rows($existsRes) > 0;
+												if (!$hasUser):
+												?>
+												<form method="POST" action="" style="display:inline-block;">
+													<input type="hidden" name="action" value="create_account">
+													<input type="hidden" name="id" value="<?php echo (int)$p['id']; ?>">
+													<input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
+													<button type="submit" class="btn-action btn-accept" title="Buat Akun">
+														<i class="lni lni-user"></i>
+													</button>
+												</form>
+												<?php endif; ?>
 												<?php endif; ?>
 											</div>
 										</td>
