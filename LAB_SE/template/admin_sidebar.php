@@ -91,6 +91,14 @@ foreach ($menu_items as $key => $item) {
             </a>
         </li>
         <?php endif; ?>
+        <?php if (isset($menu_items['profil'])): ?>
+        <li>
+          <a href="<?php echo $menu_items['profil']['link']; ?>" class="<?php echo $menu_items['profil']['active'] ? 'active' : ''; ?>">
+            <i class="<?php echo $menu_items['profil']['icon']; ?>"></i>
+              <span class="menu-text"><?php echo $menu_items['profil']['title']; ?></span>
+          </a>
+        </li>
+        <?php endif; ?>
     </ul>
     <div class="sidebar-divider"></div>
     <ul class="sidebar-menu">

@@ -6,7 +6,7 @@ require_once __DIR__ . '/check_pgsql.php';
 $host = "localhost";
 $port = "5432";
 $username = "postgres";
-$password = "123456";
+$password = "12345678";
 $database = "lab_se";
 
 // Membuat connection string
@@ -17,7 +17,7 @@ $koneksi = @pg_connect($connection_string);
 
 // Cek koneksi
 if (!$koneksi) {
-    $error = pg_last_error();
+    
     // Tampilkan error detail untuk debugging (bisa diubah di production)
     $error_msg = "Koneksi ke database gagal!\n\n";
     $error_msg .= "Error: " . $error . "\n\n";

@@ -68,7 +68,12 @@ $menu_items = [
 		'icon' => 'lni lni-text-format',
 		'link' => '../../../module/blog/index.php',
 		'active' => false
-	]
+	],
+	'profil' => [ 
+        'title' => 'Kelola Profil', 
+        'icon'  => 'lni lni-cog', 
+        'link'  => '../../module/profil/index.php', 
+    ]
 ];
 
 // Set base path for sidebar links in nested directory

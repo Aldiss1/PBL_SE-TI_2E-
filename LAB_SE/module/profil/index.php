@@ -1,11 +1,11 @@
 <?php
 $page_title = "Kelola Profil Kami - Admin";
-require_once __DIR__ . '/config/koneksi.php';
-require_once __DIR__ . '/../../../config/anti_injection.php';
-require_once __DIR__ . '/../../../fungsi/pesan_kilat.php';
-require_once __DIR__ . '/../../../cek_login.php';
+require_once __DIR__ . '/../../config/koneksi.php';
+require_once __DIR__ . '/../../config/anti_injection.php';
+require_once __DIR__ . '/../../fungsi/pesan_kilat.php';
+require_once __DIR__ . '/../../cek_login.php';
 
-$current_page = 'blog';
+$current_page = 'pengaturan';
 $menu_items = [
     'dashboard.php' => [
         'title' => 'Dashboard',
@@ -36,6 +36,11 @@ $menu_items = [
         'icon' => 'lni lni-text-format',
         'link' => '../../module/blog/index.php',
         'active' => true
+    ],
+    'profil' => [ 
+        'title' => 'Kelola Profil', 
+        'icon'  => 'lni lni-cog', 
+        'link'  => '../../module/profil/index.php', 
     ]
 ];
 

@@ -38,6 +38,11 @@ $menu_items = [
         'icon' => 'lni lni-text-format',
         'link' => '../../module/blog/index.php',
         'active' => true
+    ],
+    'profil' => [ 
+        'title' => 'Kelola Profil', 
+        'icon'  => 'lni lni-cog', 
+        'link'  => '../../module/profil/index.php', 
     ]
 ];
 
