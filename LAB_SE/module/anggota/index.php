@@ -26,6 +26,12 @@ $menu_items = [
         'link' => '../../module/jabatan/index.php',
         'active' => false
     ],
+    'user' => [
+        'title' => 'Kelola User',
+        'icon' => 'lni lni-user',
+        'link' => '../../module/user/index.php',
+        'active' => false
+    ],
     'pendaftar' => [
         'title' => 'Kelola Pendaftar',
         'icon' => 'lni lni-list',
@@ -105,7 +111,7 @@ if ($has_table) {
                     <table class="table table-striped table-hover" style="background: white; border-radius: 10px; overflow: hidden;">
                         <thead style="background: #2c3e50; color: white;">
                             <tr>
-                                <th style="padding: 15px;">ID</th>
+                                <th style="padding: 15px;">NO</th>
                                 <th style="padding: 15px;">Nama</th>
                                 <th style="padding: 15px;">Jabatan</th>
                                 <th style="padding: 15px; text-align: center;">Aksi</th>
@@ -113,9 +119,9 @@ if ($has_table) {
                         </thead>
                         <tbody>
                             <?php if ($has_table && count($anggota) > 0): ?>
-                                <?php foreach ($anggota as $a): ?>
+                                <?php $no = 1; foreach ($anggota as $a): ?>
                                 <tr>
-                                    <td style="padding: 15px;"><?php echo $a['id']; ?></td>
+                                    <td style="padding: 15px;"><?php echo $no++; ?></td>
                                     <td style="padding: 15px;">
                                         <div style="display:flex; align-items:center; gap:10px;">
                                             <?php 

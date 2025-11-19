@@ -23,36 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             exit;
         }
 
-        // Pastikan tabel pendaftaran tersedia
-        $checkTbl = @pg_query($koneksi, "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'pendaftaran')");
-        if ($checkTbl) {
-            $exists = pg_fetch_result($checkTbl, 0, 0);
-            if ($exists == 'f') {
-                // Buat tabel pendaftaran jika belum ada (minimal kolom yang dibutuhkan)
-                $createSql = "
-                    CREATE TABLE IF NOT EXISTS pendaftaran (
-                        id SERIAL PRIMARY KEY,
-                        nama VARCHAR(255) NOT NULL,
-                        nim VARCHAR(50) NOT NULL,
-                        email VARCHAR(255),
-                        jurusan VARCHAR(100) NOT NULL,
-                        foto VARCHAR(500),
-                        minat TEXT,
-                        status VARCHAR(50) DEFAULT 'pending',
-                        tanggal_daftar TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        tanggal_review TIMESTAMP,
-                        catatan_admin TEXT,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    );
-                ";
-                @pg_query($koneksi, $createSql);
-            }
-            // Pastikan kolom email dan foto tersedia pada tabel yang sudah ada
-            @pg_query($koneksi, "ALTER TABLE pendaftaran ADD COLUMN IF NOT EXISTS email VARCHAR(255)");
-            @pg_query($koneksi, "ALTER TABLE pendaftaran ADD COLUMN IF NOT EXISTS foto VARCHAR(500)");
-        }
-
         // Handle upload foto (opsional)
         $foto_path = '';
         if (isset($_FILES['foto']) && is_uploaded_file($_FILES['foto']['tmp_name'])) {

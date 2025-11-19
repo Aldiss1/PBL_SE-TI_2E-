@@ -74,6 +74,15 @@ foreach ($menu_items as $key => $item) {
         </li>
         <?php endif; ?>
         
+        <?php if (isset($menu_items['user'])): ?>
+        <li>
+            <a href="<?php echo $menu_items['user']['link']; ?>" class="<?php echo $menu_items['user']['active'] ? 'active' : ''; ?>">
+                <i class="<?php echo $menu_items['user']['icon']; ?>"></i>
+                <span class="menu-text"><?php echo $menu_items['user']['title']; ?></span>
+            </a>
+        </li>
+        <?php endif; ?>
+        
         <?php if (isset($menu_items['pendaftar'])): ?>
         <li>
             <a href="<?php echo $menu_items['pendaftar']['link']; ?>" class="<?php echo $menu_items['pendaftar']['active'] ? 'active' : ''; ?>">

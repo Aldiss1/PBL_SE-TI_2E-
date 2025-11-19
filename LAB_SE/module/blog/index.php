@@ -27,6 +27,12 @@ $menu_items = [
         'link' => '../../module/jabatan/index.php',
         'active' => false
     ],
+    'user' => [
+        'title' => 'Kelola User',
+        'icon' => 'lni lni-user',
+        'link' => '../../module/user/index.php',
+        'active' => false
+    ],
     'pendaftar' => [
         'title' => 'Kelola Pendaftar',
         'icon' => 'lni lni-list',
@@ -159,7 +165,7 @@ include __DIR__ . '/../../template/admin_header.php';
                         <table class="table table-striped table-hover" style="background: white; border-radius: 10px; overflow: hidden;">
                             <thead style="background: #2c3e50; color: white;">
                                 <tr>
-                                    <th style="padding: 15px;">ID</th>
+                                    <th style="padding: 15px;">NO</th>
                                     <th style="padding: 15px;">Judul</th>
                                     <th style="padding: 15px;">Kategori</th>
                                     <th style="padding: 15px;">Status</th>
@@ -170,9 +176,9 @@ include __DIR__ . '/../../template/admin_header.php';
                             </thead>
                             <tbody>
                                 <?php if (count($blogs) > 0): ?>
-                                    <?php foreach ($blogs as $blog_item): ?>
+                                    <?php $no = 1; foreach ($blogs as $blog_item): ?>
                                     <tr>
-                                        <td style="padding: 15px;"><?php echo $blog_item['id']; ?></td>
+                                        <td style="padding: 15px;"><?php echo $no++; ?></td>
                                         <td style="padding: 15px;">
                                             <strong><?php echo htmlspecialchars($blog_item['title']); ?></strong>
                                             <?php if ($blog_item['excerpt']): ?>

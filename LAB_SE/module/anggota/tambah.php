@@ -26,6 +26,12 @@ $menu_items = [
         'link' => '../../module/jabatan/index.php',
         'active' => false
     ],
+    'user' => [
+        'title' => 'Kelola User',
+        'icon' => 'lni lni-user',
+        'link' => '../../module/user/index.php',
+        'active' => false
+    ],
     'pendaftar' => [
         'title' => 'Kelola Pendaftar',
         'icon' => 'lni lni-list',
@@ -60,10 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $jabatan = clean_input($_POST['jabatan'] ?? '');
     $instagram = clean_input($_POST['instagram'] ?? '');
     $linkedin = clean_input($_POST['linkedin'] ?? '');
-
-    // Pastikan kolom baru tersedia
-    @pg_query($koneksi, "ALTER TABLE anggota ADD COLUMN IF NOT EXISTS instagram VARCHAR(255)");
-    @pg_query($koneksi, "ALTER TABLE anggota ADD COLUMN IF NOT EXISTS linkedin VARCHAR(255)");
 
     // Handle upload foto (opsional)
     $foto_path = '';

@@ -26,6 +26,12 @@ $menu_items = [
         'link' => '../../module/jabatan/index.php',
         'active' => true
     ],
+    'user' => [
+        'title' => 'Kelola User',
+        'icon' => 'lni lni-user',
+        'link' => '../../module/user/index.php',
+        'active' => false
+    ],
     'pendaftar' => [
         'title' => 'Kelola Pendaftar',
         'icon' => 'lni lni-list',

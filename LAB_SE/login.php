@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } elseif (pg_num_rows($result) > 0) {
             $user = pg_fetch_assoc($result);
             $_SESSION['login'] = true;
+            $_SESSION['user_id'] = isset($user['id']) ? (int)$user['id'] : 0;
             $_SESSION['username'] = $username;
             $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'admin';
             if ($_SESSION['role'] === 'mahasiswa') {

@@ -32,6 +32,12 @@ $menu_items = [
 		'link' => '../../module/jabatan/index.php',
 		'active' => true
 	],
+	'user' => [
+		'title' => 'Kelola User',
+		'icon' => 'lni lni-user',
+		'link' => '../../module/user/index.php',
+		'active' => false
+	],
 	'pendaftar' => [
 		'title' => 'Kelola Pendaftar',
 		'icon' => 'lni lni-list',
@@ -86,7 +92,7 @@ include __DIR__ . '/../../template/admin_header.php';
 					<table class="table table-striped table-hover" style="background: white; border-radius: 10px; overflow: hidden;">
 						<thead style="background: #2c3e50; color: white;">
 							<tr>
-								<th style="padding: 12px;">ID</th>
+								<th style="padding: 12px;">NO</th>
 								<th style="padding: 12px;">Nama Jabatan</th>
 								<th style="padding: 12px; text-align: center;">Aksi</th>
 							</tr>
