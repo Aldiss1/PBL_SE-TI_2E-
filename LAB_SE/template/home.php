@@ -1,3 +1,4 @@
+<?php $labseHomeBase = defined('LABSE_BASE_PATH') ? LABSE_BASE_PATH : ''; ?>
       <!-- ========================= hero-2 start ========================= -->
         <!-- Start of Selection -->
         <div class="row align-items-center justify-content-center">
@@ -12,7 +13,7 @@
                   <p style="font-size: 1.15rem; color: #717791; margin-bottom: 40px;">
                     Untuk mahasiswa yang ingin mengakses Laboratorium Software Engineering<br>silahkan klik tombol di bawah
                   </p>
-                  <a href="daftar.php" 
+                  <a href="<?php echo $labseHomeBase; ?>/pages/pendaftaran/daftar.php" 
                      style="display: inline-block; font-weight: 600; color: #fff; background: #2F80ED; border-radius: 8px; padding: 12px 38px; font-size: 1.09rem; box-shadow: 0 2px 8px rgba(47,128,237,.07); text-decoration: none; transition: all 0.3s;">
                     Daftar
                   </a>
@@ -135,7 +136,7 @@
           </div>
         </div>
         <div class="text-center mt-4">
-          <a href="visi-misi.php" class="button button-sm radius-10">Lihat Selengkapnya</a>
+          <a href="<?php echo $labseHomeBase; ?>/pages/profil/visi-misi.php" class="button button-sm radius-10">Lihat Selengkapnya</a>
         </div>
       </div>
     </div>
@@ -176,7 +177,7 @@
           </div>
         </div>
         <div class="text-center mt-4">
-          <a href="roadmap.php" class="button button-sm radius-10">Lihat Selengkapnya</a>
+          <a href="<?php echo $labseHomeBase; ?>/pages/profil/roadmap.php" class="button button-sm radius-10">Lihat Selengkapnya</a>
         </div>
       </div>
     </div>
@@ -233,7 +234,7 @@
           <div class="info">
             <h6><?php echo htmlspecialchars($dosen['nama']); ?></h6>
             <p><?php echo htmlspecialchars($dosen['jabatan'] ?? 'Dosen'); ?></p>
-            <a href="detail-personil.php?id=<?php echo $dosen['id']; ?>" class="button button-sm radius-10 border-button mt-20">Lihat Profil</a>
+            <a href="<?php echo $labseHomeBase; ?>/pages/profil/detail-personil.php?id=<?php echo $dosen['id']; ?>" class="button button-sm radius-10 border-button mt-20">Lihat Profil</a>
           </div>
         </div>
       </div>
@@ -245,13 +246,13 @@
         <p style="color: #717791; margin-bottom: 20px;">
           <?php if (isset($total_data) && $total_data > 0): ?>
             Data ada di database (<?php echo $total_data; ?> anggota), tapi tidak sesuai filter. 
-            <br><small>Silakan cek data di <a href="personil.php" style="color: #2F80ED;">halaman personil</a> atau tambahkan data melalui admin.</small>
+            <br><small>Silakan cek data di <a href="<?php echo $labseHomeBase; ?>/pages/profil/personil.php" style="color: #2F80ED;">halaman personil</a> atau tambahkan data melalui admin.</small>
           <?php else: ?>
             Belum ada data anggota di database. 
             <br><small>Silakan jalankan file <code>database.sql</code> bagian INSERT anggota, atau tambahkan data melalui admin.</small>
           <?php endif; ?>
         </p>
-        <a href="personil.php" class="button button-sm radius-10 mt-3">Lihat Semua Personil</a>
+        <a href="<?php echo $labseHomeBase; ?>/pages/profil/personil.php" class="button button-sm radius-10 mt-3">Lihat Semua Personil</a>
       </div>
       <?php
       }
@@ -293,7 +294,7 @@
       
       if ($result_blog && pg_num_rows($result_blog) > 0) {
         while ($blog_item = pg_fetch_assoc($result_blog)) {
-          $blog_link = "blog-detail.php?id=" . $blog_item['id'];
+          $blog_link = $labseHomeBase . "/pages/blog/blog-detail.php?id=" . $blog_item['id'];
           $blog_image = $blog_item['featured_image'] ? $blog_item['featured_image'] : 'assets/img/blog/blog-1-1.jpg';
           $blog_excerpt = $blog_item['excerpt'] ? htmlspecialchars(substr($blog_item['excerpt'], 0, 100)) . '...' : '';
           $blog_date = $blog_item['published_at'] ? date('d F Y', strtotime($blog_item['published_at'])) : date('d F Y', strtotime($blog_item['created_at']));
@@ -343,7 +344,7 @@
     <?php if ($total_blog_count > 6): ?>
     <div class="row mt-4">
       <div class="col-12 text-center">
-        <a href="blog-list.php" class="button radius-10">Lihat Semua Artikel (<?php echo $total_blog_count; ?>)</a>
+        <a href="<?php echo $labseHomeBase; ?>/pages/blog/blog-list.php" class="button radius-10">Lihat Semua Artikel (<?php echo $total_blog_count; ?>)</a>
       </div>
     </div>
     <?php endif; ?>
@@ -361,7 +362,7 @@
           <p class="wow fadeInUp" data-wow-delay=".4s">Daftarkan diri Anda untuk menjadi bagian dari Laboratorium Software Engineering</p>
         </div>
         <div class="contact-form-wrapper wow fadeInUp" data-wow-delay=".6s">
-          <a href="daftar.php" class="button radius-10 w-100 text-center" style="display: block; padding: 15px; font-size: 1.1rem;">Formulir Pendaftaran</a>
+          <a href="<?php echo $labseHomeBase; ?>/pages/pendaftaran/daftar.php" class="button radius-10 w-100 text-center" style="display: block; padding: 15px; font-size: 1.1rem;">Formulir Pendaftaran</a>
         </div>
       </div>
     </div>

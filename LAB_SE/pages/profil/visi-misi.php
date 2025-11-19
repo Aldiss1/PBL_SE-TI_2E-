@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/config/koneksi.php';
+require_once __DIR__ . '/../../config/koneksi.php';
 ?>
-<?php include __DIR__ . '/template/header.php'; ?>
+<?php include __DIR__ . '/../../template/header.php'; ?>
 
-<link rel="stylesheet" href="assets/css/visi-misi.css" />
+<link rel="stylesheet" href="../../assets/css/visi-misi.css" />
 
 <section class="visi-misi-hero">
   <div class="container">
@@ -65,5 +65,5 @@ require_once __DIR__ . '/config/koneksi.php';
   </div>
 </section>
 
-<?php include __DIR__ . '/template/footer.php'; ?>
+<?php include __DIR__ . '/../../template/footer.php'; ?>
 

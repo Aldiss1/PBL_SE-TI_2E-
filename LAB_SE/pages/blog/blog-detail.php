@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config/koneksi.php';
+require_once __DIR__ . '/../../config/koneksi.php';
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $slug = isset($_GET['slug']) ? $_GET['slug'] : '';
@@ -31,9 +31,9 @@ if ($id > 0) {
     }
 }
 ?>
-<?php include __DIR__ . '/template/header.php'; ?>
+<?php include __DIR__ . '/../../template/header.php'; ?>
 
-<link rel="stylesheet" href="assets/css/blog-detail.css" />
+<link rel="stylesheet" href="../../assets/css/blog-detail.css" />
 
 <section class="pt-150 pb-100" style="margin-top: 80px;">
     <div class="container">
@@ -82,11 +82,11 @@ if ($id > 0) {
             </div>
           <?php endif; ?>
           <hr class="my-5">
-          <a href="index.php#blog" class="button radius-10 border-button mt-20 wow fadeInUp" data-wow-delay="1s">← Kembali ke Daftar Blog</a>
+          <a href="../../index.php#blog" class="button radius-10 border-button mt-20 wow fadeInUp" data-wow-delay="1s">← Kembali ke Daftar Blog</a>
         </div>
       </div>
     </div>
 </section>
 
-<?php include __DIR__ . '/template/footer.php'; ?>
+<?php include __DIR__ . '/../../template/footer.php'; ?>
 

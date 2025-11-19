@@ -1,3 +1,27 @@
+<?php
+if (!defined('LABSE_BASE_PATH')) {
+  $documentRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_ROOT']) : '';
+  $appRoot = realpath(__DIR__ . '/..');
+
+  if ($documentRoot) {
+    $documentRoot = str_replace('\\', '/', $documentRoot);
+  }
+  if ($appRoot) {
+    $appRoot = str_replace('\\', '/', $appRoot);
+  }
+
+  $basePath = '';
+  if ($documentRoot && $appRoot && strpos($appRoot, $documentRoot) === 0) {
+    $basePath = substr($appRoot, strlen($documentRoot));
+    $basePath = '/' . trim($basePath, '/');
+    if ($basePath === '/') {
+      $basePath = '';
+    }
+  }
+
+  define('LABSE_BASE_PATH', $basePath);
+}
+?>
 <!DOCTYPE html>
 <html class="no-js" lang="id">
   <head>
@@ -8,11 +32,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <!-- ========================= CSS here ========================= -->
-    <link rel="stylesheet" href="assets/css/bootstrap-5.0.0-alpha-2.min.css" />
-    <link rel="stylesheet" href="assets/css/LineIcons.2.0.css"/>
-    <link rel="stylesheet" href="assets/css/animate.css"/>
-    <link rel="stylesheet" href="assets/css/lindy-uikit.css"/>
-    <link rel="stylesheet" href="assets/css/home.css"/>
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/bootstrap-5.0.0-alpha-2.min.css" />
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/LineIcons.2.0.css"/>
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/animate.css"/>
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/lindy-uikit.css"/>
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/home.css"/>
   </head>
   <body>
 
@@ -45,8 +69,8 @@
             <div class="row align-items-center">
               <div class="col-lg-12">
                 <nav class="navbar navbar-expand-lg">
-                  <a class="navbar-brand" href="index.php">
-                    <img src="assets/img/logo/logo.png" alt="Logo" />
+                  <a class="navbar-brand" href="<?php echo LABSE_BASE_PATH; ?>/index.php">
+                    <img src="<?php echo LABSE_BASE_PATH; ?>/assets/img/logo/logo.png" alt="Logo" />
                   </a>
                   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent2" aria-controls="navbarSupportedContent2" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="toggler-icon"></span>
@@ -88,7 +112,7 @@
                     }
                     ?>
                     <?php include __DIR__ . '/menu.php'; ?>
-                    <a href="login.php" class="button button-sm radius-10 d-none d-lg-flex">Admin</a>
+                    <a href="<?php echo LABSE_BASE_PATH; ?>/module/auth/login.php" class="button button-sm radius-10 d-none d-lg-flex">Admin</a>
                   </div>
                   <!-- navbar collapse -->
                 </nav>

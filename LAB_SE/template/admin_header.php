@@ -21,7 +21,7 @@
 </head>
 <body>
     <?php
-    require_once __DIR__ . '/../cek_login.php';
+    require_once __DIR__ . '/../module/auth/cek_login.php';
     ?>
     
     <div class="preloader">

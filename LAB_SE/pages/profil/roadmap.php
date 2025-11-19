@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/config/koneksi.php';
+require_once __DIR__ . '/../../config/koneksi.php';
 ?>
-<?php include __DIR__ . '/template/header.php'; ?>
+<?php include __DIR__ . '/../../template/header.php'; ?>
 
-<link rel="stylesheet" href="assets/css/roadmap.css" />
+<link rel="stylesheet" href="../../assets/css/roadmap.css" />
 
 <section class="hero-section-wrapper-2">
     <div class="container">
@@ -52,5 +52,5 @@ require_once __DIR__ . '/config/koneksi.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/template/footer.php'; ?>
+<?php include __DIR__ . '/../../template/footer.php'; ?>
 

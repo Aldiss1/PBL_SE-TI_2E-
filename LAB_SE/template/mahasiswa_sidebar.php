@@ -48,7 +48,7 @@ if (!isset($current_page)) {
     <div class="sidebar-divider"></div>
     <ul class="sidebar-menu">
         <li>
-            <a href="<?php echo $base_path; ?>logout.php" style="color:#e74c3c;">
+            <a href="<?php echo $base_path; ?>module/auth/logout.php" style="color:#e74c3c;">
                 <i class="lni lni-exit"></i>
                 <span class="menu-text">Logout</span>
             </a>

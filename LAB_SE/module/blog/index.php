@@ -1,7 +1,7 @@
 <?php
 $page_title = "Kelola Blog - Admin";
 require_once __DIR__ . '/../../config/koneksi.php';
-require_once __DIR__ . '/../../cek_login.php';
+require_once __DIR__ . '/../auth/cek_login.php';
 require_once __DIR__ . '/../../config/anti_injection.php';
 require_once __DIR__ . '/../../fungsi/pesan_kilat.php';
 require_once __DIR__ . '/../../fungsi/blog.php';
@@ -36,7 +36,7 @@ $menu_items = [
     'pendaftar' => [
         'title' => 'Kelola Pendaftar',
         'icon' => 'lni lni-list',
-        'link' => '../../list-pendaftar.php',
+        'link' => '../../module/pendaftar/index.php',
         'active' => false
     ],
     'blog' => [
@@ -204,7 +204,7 @@ include __DIR__ . '/../../template/admin_header.php';
                                         </td>
                                         <td style="padding: 15px; text-align: center;">
                                             <?php if ($blog_item['is_published']): ?>
-                                            <a href="../../blog-detail.php?id=<?php echo $blog_item['id']; ?>" target="_blank" class="button button-sm radius-10" style="background: #27AE60; color: white; padding: 5px 15px; margin-right: 5px;" title="Lihat di Website">
+                                            <a href="../../pages/blog/blog-detail.php?id=<?php echo $blog_item['id']; ?>" target="_blank" class="button button-sm radius-10" style="background: #27AE60; color: white; padding: 5px 15px; margin-right: 5px;" title="Lihat di Website">
                                                 <i class="lni lni-eye"></i> Preview
                                             </a>
                                             <?php endif; ?>
@@ -402,7 +402,7 @@ include __DIR__ . '/../../template/admin_header.php';
                                         <i class="lni lni-arrow-left"></i> Kembali
                                     </a>
                                     <?php if ($blog['is_published']): ?>
-                                    <a href="../../blog-detail.php?id=<?php echo $blog['id']; ?>" target="_blank" class="button radius-10" style="background: #27AE60; color: white; padding: 12px 30px; margin-left: 10px;">
+                                    <a href="../../pages/blog/blog-detail.php?id=<?php echo $blog['id']; ?>" target="_blank" class="button radius-10" style="background: #27AE60; color: white; padding: 12px 30px; margin-left: 10px;">
                                         <i class="lni lni-eye"></i> Preview
                                     </a>
                                     <?php endif; ?>

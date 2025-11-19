@@ -118,7 +118,7 @@ foreach ($menu_items as $key => $item) {
             </a>
         </li>
         <li>
-            <a href="<?php echo isset($base_path) ? $base_path : '../../'; ?>logout.php" style="color: #e74c3c;">
+            <a href="<?php echo isset($base_path) ? $base_path : '../../'; ?>module/auth/logout.php" style="color: #e74c3c;">
                 <i class="lni lni-exit"></i>
                 <span class="menu-text">Logout</span>
             </a>

@@ -1,3 +1,4 @@
+<?php $labseFooterBase = defined('LABSE_BASE_PATH') ? LABSE_BASE_PATH : ''; ?>
 		<!-- ========================= footer style-1 start ========================= -->
     <footer class="footer footer-style-1">
       <div class="container">
@@ -6,7 +7,7 @@
             <div class="col-xl-3 col-lg-4 col-md-6">
               <div class="footer-widget wow fadeInUp" data-wow-delay=".2s">
                 <div class="logo">
-                  <a href="#0"> <img src="assets/img/logo/logo.svg" alt=""> </a>
+                  <a href="#0"> <img src="<?php echo $labseFooterBase; ?>/assets/img/logo/logo.svg" alt=""> </a>
                 </div>
                 <p class="desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Facilisis nulla placerat amet amet congue.</p>
                 <ul class="socials">
@@ -65,10 +66,10 @@
 		
 
     <!-- ========================= JS here ========================= -->
-    <script src="assets/js/bootstrap.5.0.0.alpha-2-min.js"></script>
-    <script src="assets/js/count-up.min.js"></script>
-    <script src="assets/js/wow.min.js"></script>
-    <script src="assets/js/main.js"></script>
+    <script src="<?php echo $labseFooterBase; ?>/assets/js/bootstrap.5.0.0.alpha-2-min.js"></script>
+    <script src="<?php echo $labseFooterBase; ?>/assets/js/count-up.min.js"></script>
+    <script src="<?php echo $labseFooterBase; ?>/assets/js/wow.min.js"></script>
+    <script src="<?php echo $labseFooterBase; ?>/assets/js/main.js"></script>
     
     <!-- Navbar Sticky Fix - Memastikan navbar tidak hilang saat scroll -->
     <script>

@@ -1,15 +1,15 @@
 <?php
 session_start();
-require_once __DIR__ . '/config/koneksi.php';
-require_once __DIR__ . '/config/anti_injection.php';
-require_once __DIR__ . '/fungsi/pesan_kilat.php';
+require_once __DIR__ . '/../../config/koneksi.php';
+require_once __DIR__ . '/../../config/anti_injection.php';
+require_once __DIR__ . '/../../fungsi/pesan_kilat.php';
 
 // Jika sudah login, redirect ke dashboard
 if (isset($_SESSION['login'])) {
     if (isset($_SESSION['role']) && $_SESSION['role'] === 'mahasiswa') {
-        header('Location: module/mahasiswa/dashboard.php');
+        header('Location: ../mahasiswa/dashboard.php');
     } else {
-        header('Location: module/admin/dashboard.php');
+        header('Location: ../admin/dashboard.php');
     }
     exit;
 }
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!$result) {
             $error = pg_last_error($koneksi);
             if (strpos($error, 'does not exist') !== false) {
-                header('Location: setup.php');
+                header('Location: ../../setup.php');
                 exit;
             }
             pesan_kilat('Terjadi kesalahan sistem.', 'error');
@@ -39,9 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['username'] = $username;
             $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'admin';
             if ($_SESSION['role'] === 'mahasiswa') {
-                header('Location: module/mahasiswa/dashboard.php');
+                header('Location: ../mahasiswa/dashboard.php');
             } else {
-                header('Location: module/admin/dashboard.php');
+                header('Location: ../admin/dashboard.php');
             }
             exit;
         } else {
@@ -57,10 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     
-    <link rel="stylesheet" href="assets/css/bootstrap-5.0.0-alpha-2.min.css" />
-    <link rel="stylesheet" href="assets/css/Linelcons.2.0.css" /> 
+    <link rel="stylesheet" href="../../assets/css/bootstrap-5.0.0-alpha-2.min.css" />
+    <link rel="stylesheet" href="../../assets/css/Linelcons.2.0.css" /> 
     
-    <link rel="stylesheet" href="assets/css/login.css" />
+    <link rel="stylesheet" href="../../assets/css/login.css" />
     
 </head>
 <body class="login-page-wrapper">
@@ -90,13 +90,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <button type="submit" class="btn btn-main w-100">LOGIN</button>
                 
                 <div class="back-link-container">
-                    <a href="index.php">← Kembali ke Website Utama</a>
+                    <a href="../../index.php">← Kembali ke Website Utama</a>
                 </div>
                 
             </form>
         </div>
     </div>
-    <script src="js/bootstrap.5.0.0.alpha-2-min.js"></script>
+    <script src="../../assets/js/bootstrap.5.0.0.alpha-2-min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

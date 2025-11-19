@@ -3,7 +3,7 @@ $page_title = "Kelola Profil Kami - Admin";
 require_once __DIR__ . '/../../config/koneksi.php';
 require_once __DIR__ . '/../../config/anti_injection.php';
 require_once __DIR__ . '/../../fungsi/pesan_kilat.php';
-require_once __DIR__ . '/../../cek_login.php';
+require_once __DIR__ . '/../auth/cek_login.php';
 
 $current_page = 'pengaturan';
 $menu_items = [
@@ -28,7 +28,7 @@ $menu_items = [
     'pendaftar' => [
         'title' => 'Kelola Pendaftar',
         'icon' => 'lni lni-list',
-        'link' => '../../list-pendaftar.php',
+        'link' => '../../module/pendaftar/index.php',
         'active' => false
     ],
     'blog' => [

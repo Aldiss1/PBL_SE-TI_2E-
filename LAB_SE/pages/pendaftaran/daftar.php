@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/config/koneksi.php';
-require_once __DIR__ . '/config/anti_injection.php';
-require_once __DIR__ . '/fungsi/pesan_kilat.php';
+require_once __DIR__ . '/../../config/koneksi.php';
+require_once __DIR__ . '/../../config/anti_injection.php';
+require_once __DIR__ . '/../../fungsi/pesan_kilat.php';
 
 session_start();
 
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 exit;
             }
 
-            $uploadDir = __DIR__ . '/uploads/pendaftar/';
+            $uploadDir = __DIR__ . '/../../uploads/pendaftar/';
             if (!is_dir($uploadDir)) {
                 @mkdir($uploadDir, 0775, true);
             }
@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
     
-        require_once __DIR__ . '/fungsi/tambah.php';
+        require_once __DIR__ . '/../../fungsi/tambah.php';
         if (tambah_data('pendaftaran', ['nama' => $nama, 'nim' => $nim, 'email' => $email, 'jurusan' => $jurusan, 'foto' => $foto_path, 'tanggal_daftar' => date('Y-m-d H:i:s')])) {
             pesan_kilat('Pendaftaran berhasil dikirim!', 'success');
             header('Location: daftar.php');
@@ -68,9 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
-<?php include __DIR__ . '/template/header.php'; ?>
+<?php include __DIR__ . '/../../template/header.php'; ?>
 
-<link rel="stylesheet" href="assets/css/daftar.css" />
+<link rel="stylesheet" href="../../assets/css/daftar.css" />
 
 <section id="daftar" class="contact-section contact-style-6 pt-150 pb-100" style="margin-top: 80px;">
     <div class="container">
@@ -137,5 +137,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
  
 
-<?php include __DIR__ . '/template/footer.php'; ?>
+<?php include __DIR__ . '/../../template/footer.php'; ?>
 

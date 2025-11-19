@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../../config/koneksi.php';
 require_once __DIR__ . '/../../../config/anti_injection.php';
 require_once __DIR__ . '/../../../fungsi/pesan_kilat.php';
-require_once __DIR__ . '/../../../cek_login.php';
+require_once __DIR__ . '/../../auth/cek_login.php';
 
 $id = isset($_GET['id']) ? clean_input($_GET['id']) : '';
 
@@ -61,7 +61,7 @@ $menu_items = [
 	'pendaftar' => [
 		'title' => 'Kelola Pendaftar',
 		'icon' => 'lni lni-list',
-		'link' => '../../../list-pendaftar.php',
+		'link' => '../../../module/pendaftar/index.php',
 		'active' => false
 	],
 	'blog' => [

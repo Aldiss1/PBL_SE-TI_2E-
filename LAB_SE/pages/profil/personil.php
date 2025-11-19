@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/config/koneksi.php';
+require_once __DIR__ . '/../../config/koneksi.php';
 ?>
-<?php include __DIR__ . '/template/header.php'; ?>
+<?php include __DIR__ . '/../../template/header.php'; ?>
 
 <section class="pt-150 pb-50" style="background: #f3f3f3; margin-top: 80px;">
     <div class="container">
@@ -144,5 +144,5 @@ function closePersonilModal(){ document.getElementById('personilOverlay').style.
 </div>
 <?php endif; ?>
 
-<?php include __DIR__ . '/template/footer.php'; ?>
+<?php include __DIR__ . '/../../template/footer.php'; ?>
 

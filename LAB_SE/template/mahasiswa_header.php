@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-layout.css"/>
 </head>
 <body>
-    <?php require_once __DIR__ . '/../cek_login_mahasiswa.php'; ?>
+    <?php require_once __DIR__ . '/../module/auth/cek_login_mahasiswa.php'; ?>
 
     <div class="preloader">
       <div class="loader">

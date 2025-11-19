@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/config/koneksi.php';
-require_once __DIR__ . '/config/anti_injection.php';
+require_once __DIR__ . '/../../config/koneksi.php';
+require_once __DIR__ . '/../../config/anti_injection.php';
 
 $id = isset($_GET['id']) ? clean_input($_GET['id']) : '';
 $personil = null;
@@ -18,9 +18,9 @@ if (!$personil) {
     exit;
 }
 ?>
-<?php include __DIR__ . '/template/header.php'; ?>
+<?php include __DIR__ . '/../../template/header.php'; ?>
 
-<link rel="stylesheet" href="assets/css/detail-personil.css" />
+<link rel="stylesheet" href="../../assets/css/detail-personil.css" />
 
 <section class="pt-150 pb-50" style="background: #f3f3f3; margin-top: 80px;">
     <div class="container">
@@ -78,5 +78,5 @@ if (!$personil) {
     </div>
 </section>
 
-<?php include __DIR__ . '/template/footer.php'; ?>
+<?php include __DIR__ . '/../../template/footer.php'; ?>
 

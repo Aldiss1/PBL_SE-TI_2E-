@@ -38,7 +38,7 @@ $menu_items = [
 	'pendaftar' => [
 		'title' => 'Kelola Pendaftar',
 		'icon' => 'lni lni-list',
-		'link' => '../../list-pendaftar.php',
+		'link' => '../../module/pendaftar/index.php',
 		'active' => false
 	],
 	'blog' => [

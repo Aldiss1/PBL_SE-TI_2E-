@@ -1,7 +1,7 @@
 <?php
 $page_title = "Admin Dashboard - Web Profile Laboratorium SE";
 require_once __DIR__ . '/../../config/koneksi.php';
-require_once __DIR__ . '/../../cek_login.php';
+require_once __DIR__ . '/../auth/cek_login.php';
 
 // Set active menu
 $current_page = 'dashboard';
@@ -33,7 +33,7 @@ $menu_items = [
     'pendaftar' => [
         'title' => 'Kelola Pendaftar',
         'icon' => 'lni lni-list',
-        'link' => '../../list-pendaftar.php',
+        'link' => '../../module/pendaftar/index.php',
         'active' => false
     ],
     'blog' => [
@@ -220,7 +220,7 @@ $chart_json = json_encode($chart_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_AP
                             </div>
                         <?php endforeach; ?>
                         <div class="text-center mt-20">
-                            <a href="../../list-pendaftar.php" class="button button-sm radius-10">Lihat Semua Pendaftar</a>
+                            <a href="../../module/pendaftar/index.php" class="button button-sm radius-10">Lihat Semua Pendaftar</a>
                         </div>
                     <?php else: ?>
                         <div class="text-center py-4">
@@ -248,7 +248,7 @@ $chart_json = json_encode($chart_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_AP
                             <i class="lni lni-eye mr-2"></i> Review Pendaftar
                         </div>
                         <div class="activity-meta">
-                            <a href="../../list-pendaftar.php" style="color: #F2994A; text-decoration: none;"><?php echo $stats['pendaftar_pending']; ?> pending →</a>
+                            <a href="../../module/pendaftar/index.php" style="color: #F2994A; text-decoration: none;"><?php echo $stats['pendaftar_pending']; ?> pending →</a>
                         </div>
                     </div>
                     <div class="activity-item" style="border-left-color: #9B59B6;">

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config/koneksi.php';
+require_once __DIR__ . '/../../config/koneksi.php';
 
 // Pagination
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -30,9 +30,9 @@ if ($result && pg_num_rows($result) > 0) {
     }
 }
 ?>
-<?php include __DIR__ . '/template/header.php'; ?>
+<?php include __DIR__ . '/../../template/header.php'; ?>
 
-<link rel="stylesheet" href="assets/css/blog-list.css" />
+<link rel="stylesheet" href="../../assets/css/blog-list.css" />
 
 <section class="pt-150 pb-100" style="margin-top: 80px; background: #f8f9fa;">
     <div class="container">
@@ -50,7 +50,7 @@ if ($result && pg_num_rows($result) > 0) {
                 <?php foreach ($blogs as $blog_item): ?>
                 <?php
                     $blog_link = "blog-detail.php?id=" . $blog_item['id'];
-                    $blog_image = $blog_item['featured_image'] ? $blog_item['featured_image'] : 'assets/img/blog/blog-1-1.jpg';
+                    $blog_image = $blog_item['featured_image'] ? $blog_item['featured_image'] : '../../assets/img/blog/blog-1-1.jpg';
                     $blog_excerpt = $blog_item['excerpt'] ? htmlspecialchars(substr($blog_item['excerpt'], 0, 150)) . '...' : (strlen($blog_item['title']) > 100 ? htmlspecialchars(substr($blog_item['title'], 0, 100)) . '...' : htmlspecialchars($blog_item['title']));
                     $blog_date = $blog_item['published_at'] ? date('d F Y', strtotime($blog_item['published_at'])) : date('d F Y', strtotime($blog_item['created_at']));
                 ?>
@@ -134,5 +134,5 @@ if ($result && pg_num_rows($result) > 0) {
     </div>
 </section>
 
-<?php include __DIR__ . '/template/footer.php'; ?>
+<?php include __DIR__ . '/../../template/footer.php'; ?>
 

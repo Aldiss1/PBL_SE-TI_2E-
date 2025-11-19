@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../../config/koneksi.php';
-require_once __DIR__ . '/../../cek_login.php';
+require_once __DIR__ . '/../auth/cek_login.php';
 require_once __DIR__ . '/../../config/anti_injection.php';
 require_once __DIR__ . '/../../fungsi/pesan_kilat.php';
 
