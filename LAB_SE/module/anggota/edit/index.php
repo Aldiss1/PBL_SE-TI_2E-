@@ -10,12 +10,7 @@ $id = isset($_GET['id']) ? clean_input($_GET['id']) : '';
 // Ambil data anggota berdasarkan ID
 $query = "SELECT * FROM anggota WHERE id = '$id'";
 $result = pg_query($koneksi, $query);
-if (!$result) {
-    error_log("Error query anggota edit: " . pg_last_error($koneksi));
-    header('Location: ../index.php');
-    exit;
-}
-$data = pg_fetch_assoc($result);
+$data = $result ? pg_fetch_assoc($result) : null;
 
 if (!$data) {
     header('Location: ../index.php');

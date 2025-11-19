@@ -10,9 +10,7 @@ if ($id > 0) {
     $id_escaped = pg_escape_string($koneksi, $id);
     $query = "SELECT * FROM blog WHERE id = $id_escaped AND is_published = true";
     $result = pg_query($koneksi, $query);
-    if (!$result) {
-        error_log("Error query blog detail: " . pg_last_error($koneksi));
-    } elseif (pg_num_rows($result) > 0) {
+    if ($result && pg_num_rows($result) > 0) {
         $blog = pg_fetch_assoc($result);
         
         // Update views counter
@@ -23,9 +21,7 @@ if ($id > 0) {
     $slug_escaped = pg_escape_string($koneksi, $slug);
     $query = "SELECT * FROM blog WHERE slug = '$slug_escaped' AND is_published = true";
     $result = pg_query($koneksi, $query);
-    if (!$result) {
-        error_log("Error query blog detail: " . pg_last_error($koneksi));
-    } elseif (pg_num_rows($result) > 0) {
+    if ($result && pg_num_rows($result) > 0) {
         $blog = pg_fetch_assoc($result);
         
         // Update views counter

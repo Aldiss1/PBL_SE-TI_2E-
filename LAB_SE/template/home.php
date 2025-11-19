@@ -197,49 +197,30 @@
     </div>
     <div class="row">
       <?php
-      // Cek apakah tabel anggota ada
-      $table_check = "SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'anggota'
-      )";
-      $table_exists = pg_query($koneksi, $table_check);
-      $has_table = false;
-      if ($table_exists) {
-        $row = pg_fetch_assoc($table_exists);
-        $has_table = ($row['exists'] === 't' || $row['exists'] === true || $row['exists'] === 'true');
+      // Cek jumlah data dulu
+      $count_query = "SELECT COUNT(*) as total FROM anggota WHERE jabatan IS NOT NULL";
+      $count_result = pg_query($koneksi, $count_query);
+      $total_data = 0;
+      if ($count_result) {
+        $count_row = pg_fetch_assoc($count_result);
+        $total_data = (int)$count_row['total'];
       }
       
-      $result_dosen = false;
-      if ($has_table) {
-        // Cek jumlah data dulu
-        $count_query = "SELECT COUNT(*) as total FROM anggota WHERE jabatan IS NOT NULL";
-        $count_result = pg_query($koneksi, $count_query);
-        $total_data = 0;
-        if ($count_result) {
-          $count_row = pg_fetch_assoc($count_result);
-          $total_data = (int)$count_row['total'];
-        }
-        
-        // Query yang lebih inklusif untuk mengambil semua anggota (dosen, ketua, dll)
-        $query_dosen = "SELECT * FROM anggota 
-          WHERE jabatan IS NOT NULL 
-          AND (jabatan LIKE '%Dosen%' OR jabatan LIKE '%Ketua%' OR jabatan LIKE '%Koordinator%' OR jabatan LIKE '%Pembimbing%')
-          ORDER BY 
-          CASE jabatan
-            WHEN 'Ketua Lab' THEN 1
-            WHEN 'Wakil Ketua Lab' THEN 2
-            WHEN 'Koordinator Penelitian' THEN 3
-            WHEN 'Dosen Pembimbing' THEN 4
-            WHEN 'Dosen Pengampu' THEN 5
-            ELSE 6
-          END, id ASC 
-          LIMIT 6";
-        $result_dosen = pg_query($koneksi, $query_dosen);
-        if (!$result_dosen) {
-          error_log("Error query dosen: " . pg_last_error($koneksi));
-        }
-      }
+      // Query yang lebih inklusif untuk mengambil semua anggota (dosen, ketua, dll)
+      $query_dosen = "SELECT * FROM anggota 
+        WHERE jabatan IS NOT NULL 
+        AND (jabatan LIKE '%Dosen%' OR jabatan LIKE '%Ketua%' OR jabatan LIKE '%Koordinator%' OR jabatan LIKE '%Pembimbing%')
+        ORDER BY 
+        CASE jabatan
+          WHEN 'Ketua Lab' THEN 1
+          WHEN 'Wakil Ketua Lab' THEN 2
+          WHEN 'Koordinator Penelitian' THEN 3
+          WHEN 'Dosen Pembimbing' THEN 4
+          WHEN 'Dosen Pengampu' THEN 5
+          ELSE 6
+        END, id ASC 
+        LIMIT 6";
+      $result_dosen = pg_query($koneksi, $query_dosen);
       
       if ($result_dosen && pg_num_rows($result_dosen) > 0) {
         while ($dosen = pg_fetch_assoc($result_dosen)) {
@@ -262,21 +243,15 @@
       ?>
       <div class="col-12 text-center">
         <p style="color: #717791; margin-bottom: 20px;">
-          <?php if (!$has_table): ?>
-            Tabel database belum dibuat. Silakan jalankan <a href="setup.php" style="color: #2F80ED;">setup.php</a> terlebih dahulu.<br>
+          <?php if (isset($total_data) && $total_data > 0): ?>
+            Data ada di database (<?php echo $total_data; ?> anggota), tapi tidak sesuai filter. 
+            <br><small>Silakan cek data di <a href="personil.php" style="color: #2F80ED;">halaman personil</a> atau tambahkan data melalui admin.</small>
           <?php else: ?>
-            <?php if (isset($total_data) && $total_data > 0): ?>
-              Data ada di database (<?php echo $total_data; ?> anggota), tapi tidak sesuai filter. 
-              <br><small>Silakan cek data di <a href="personil.php" style="color: #2F80ED;">halaman personil</a> atau tambahkan data melalui admin.</small>
-            <?php else: ?>
-              Belum ada data anggota di database. 
-              <br><small>Silakan jalankan file <code>database.sql</code> bagian INSERT anggota, atau tambahkan data melalui admin.</small>
-            <?php endif; ?>
+            Belum ada data anggota di database. 
+            <br><small>Silakan jalankan file <code>database.sql</code> bagian INSERT anggota, atau tambahkan data melalui admin.</small>
           <?php endif; ?>
         </p>
-        <?php if ($has_table): ?>
-          <a href="personil.php" class="button button-sm radius-10 mt-3">Lihat Semua Personil</a>
-        <?php endif; ?>
+        <a href="personil.php" class="button button-sm radius-10 mt-3">Lihat Semua Personil</a>
       </div>
       <?php
       }
@@ -299,41 +274,22 @@
     </div>
     <div class="row">
       <?php
-      // Cek apakah tabel blog ada
-      $table_check_blog = "SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'blog'
-      )";
-      $table_exists_blog = pg_query($koneksi, $table_check_blog);
-      $has_table_blog = false;
-      if ($table_exists_blog) {
-        $row = pg_fetch_assoc($table_exists_blog);
-        $has_table_blog = ($row['exists'] === 't' || $row['exists'] === true || $row['exists'] === 'true');
+      // Hitung total blog yang published
+      $count_query = "SELECT COUNT(*) as total FROM blog WHERE is_published = true";
+      $count_result = pg_query($koneksi, $count_query);
+      $total_blog_count = 0;
+      if ($count_result) {
+        $count_row = pg_fetch_assoc($count_result);
+        $total_blog_count = (int)$count_row['total'];
       }
       
-      $result_blog = false;
-      $total_blog_count = 0;
-      if ($has_table_blog) {
-        // Hitung total blog yang published
-        $count_query = "SELECT COUNT(*) as total FROM blog WHERE is_published = true";
-        $count_result = pg_query($koneksi, $count_query);
-        if ($count_result) {
-          $count_row = pg_fetch_assoc($count_result);
-          $total_blog_count = (int)$count_row['total'];
-        }
-        
-        // Ambil blog yang sudah published (maksimal 6)
-        $query_blog = "SELECT id, title, excerpt, featured_image, category, published_at, created_at, slug, views 
-                       FROM blog 
-                       WHERE is_published = true 
-                       ORDER BY published_at DESC, created_at DESC 
-                       LIMIT 6";
-        $result_blog = pg_query($koneksi, $query_blog);
-        if (!$result_blog) {
-          error_log("Error query blog: " . pg_last_error($koneksi));
-        }
-      }
+      // Ambil blog yang sudah published (maksimal 6)
+      $query_blog = "SELECT id, title, excerpt, featured_image, category, published_at, created_at, slug, views 
+                     FROM blog 
+                     WHERE is_published = true 
+                     ORDER BY published_at DESC, created_at DESC 
+                     LIMIT 6";
+      $result_blog = pg_query($koneksi, $query_blog);
       
       if ($result_blog && pg_num_rows($result_blog) > 0) {
         while ($blog_item = pg_fetch_assoc($result_blog)) {
@@ -376,12 +332,8 @@
       ?>
       <div class="col-12 text-center">
         <p style="color: #717791; margin-bottom: 20px;">
-          <?php if (!$has_table_blog): ?>
-            Tabel blog belum dibuat. Silakan jalankan <a href="database.sql" style="color: #2F80ED;">database.sql</a> terlebih dahulu.
-          <?php else: ?>
-            Belum ada artikel blog yang dipublikasikan.
-            <br><small>Silakan tambahkan blog melalui admin panel dan pastikan statusnya "Published".</small>
-          <?php endif; ?>
+          Belum ada artikel blog yang dipublikasikan.
+          <br><small>Silakan tambahkan blog melalui admin panel dan pastikan statusnya "Published".</small>
         </p>
       </div>
       <?php

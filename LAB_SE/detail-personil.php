@@ -5,25 +5,10 @@ require_once __DIR__ . '/config/anti_injection.php';
 $id = isset($_GET['id']) ? clean_input($_GET['id']) : '';
 $personil = null;
 
-// Cek apakah tabel anggota ada
-$table_check = "SELECT EXISTS (
-  SELECT FROM information_schema.tables 
-  WHERE table_schema = 'public' 
-  AND table_name = 'anggota'
-)";
-$table_exists = pg_query($koneksi, $table_check);
-$has_table = false;
-if ($table_exists) {
-  $row_check = pg_fetch_assoc($table_exists);
-  $has_table = $row_check['exists'] === 't' || $row_check['exists'] === true;
-}
-
-if ($id && $has_table) {
+if ($id) {
     $query = "SELECT * FROM anggota WHERE id = '$id'";
     $result = pg_query($koneksi, $query);
-    if (!$result) {
-        error_log("Error query detail personil: " . pg_last_error($koneksi));
-    } elseif (pg_num_rows($result) > 0) {
+    if ($result && pg_num_rows($result) > 0) {
         $personil = pg_fetch_assoc($result);
     }
 }

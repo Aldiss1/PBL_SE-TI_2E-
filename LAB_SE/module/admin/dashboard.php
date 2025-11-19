@@ -45,7 +45,8 @@ $menu_items = [
     'profil' => [ 
         'title' => 'Kelola Profil', 
         'icon'  => 'lni lni-cog', 
-        'link'  => '../../module/profil/index.php', 
+        'link'  => '../../module/profil/index.php',
+        'active' => false
     ]
 ];
 
@@ -60,68 +61,35 @@ $stats = [
 ];
 
 // Hitung total anggota
-$table_check_anggota = "SELECT EXISTS (
-    SELECT FROM information_schema.tables 
-    WHERE table_schema = 'public' 
-    AND table_name = 'anggota'
-)";
-$check_anggota = pg_query($koneksi, $table_check_anggota);
-if ($check_anggota) {
-    $row_check = pg_fetch_assoc($check_anggota);
-    if ($row_check['exists'] === 't' || $row_check['exists'] === true) {
-        $query_anggota = "SELECT COUNT(*) as total FROM anggota";
-        $result_anggota = pg_query($koneksi, $query_anggota);
-        if ($result_anggota) {
-            $row = pg_fetch_assoc($result_anggota);
-            $stats['anggota'] = (int)$row['total'];
-        }
-    }
+$query_anggota = "SELECT COUNT(*) as total FROM anggota";
+$result_anggota = pg_query($koneksi, $query_anggota);
+if ($result_anggota) {
+    $row = pg_fetch_assoc($result_anggota);
+    $stats['anggota'] = (int)$row['total'];
 }
 
 // Hitung total pendaftar
-$table_check_pendaftar = "SELECT EXISTS (
-    SELECT FROM information_schema.tables 
-    WHERE table_schema = 'public' 
-    AND table_name = 'pendaftaran'
-)";
-$check_pendaftar = pg_query($koneksi, $table_check_pendaftar);
-if ($check_pendaftar) {
-    $row_check = pg_fetch_assoc($check_pendaftar);
-    if ($row_check['exists'] === 't' || $row_check['exists'] === true) {
-        $query_pendaftar = "SELECT COUNT(*) as total FROM pendaftaran";
-        $result_pendaftar = pg_query($koneksi, $query_pendaftar);
-        if ($result_pendaftar) {
-            $row = pg_fetch_assoc($result_pendaftar);
-            $stats['pendaftar'] = (int)$row['total'];
-        }
-        
-        // Hitung pendaftar pending
-        $query_pending = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'pending'";
-        $result_pending = pg_query($koneksi, $query_pending);
-        if ($result_pending) {
-            $row = pg_fetch_assoc($result_pending);
-            $stats['pendaftar_pending'] = (int)$row['total'];
-        }
+$query_pendaftar = "SELECT COUNT(*) as total FROM pendaftaran";
+$result_pendaftar = pg_query($koneksi, $query_pendaftar);
+if ($result_pendaftar) {
+    $row = pg_fetch_assoc($result_pendaftar);
+    $stats['pendaftar'] = (int)$row['total'];
+    
+    // Hitung pendaftar pending
+    $query_pending = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'pending'";
+    $result_pending = pg_query($koneksi, $query_pending);
+    if ($result_pending) {
+        $row = pg_fetch_assoc($result_pending);
+        $stats['pendaftar_pending'] = (int)$row['total'];
     }
 }
 
 // Hitung total jabatan
-$table_check_jabatan = "SELECT EXISTS (
-    SELECT FROM information_schema.tables 
-    WHERE table_schema = 'public' 
-    AND table_name = 'jabatan'
-)";
-$check_jabatan = pg_query($koneksi, $table_check_jabatan);
-if ($check_jabatan) {
-    $row_check = pg_fetch_assoc($check_jabatan);
-    if ($row_check['exists'] === 't' || $row_check['exists'] === true) {
-        $query_jabatan = "SELECT COUNT(*) as total FROM jabatan";
-        $result_jabatan = pg_query($koneksi, $query_jabatan);
-        if ($result_jabatan) {
-            $row = pg_fetch_assoc($result_jabatan);
-            $stats['jabatan'] = (int)$row['total'];
-        }
-    }
+$query_jabatan = "SELECT COUNT(*) as total FROM jabatan";
+$result_jabatan = pg_query($koneksi, $query_jabatan);
+if ($result_jabatan) {
+    $row = pg_fetch_assoc($result_jabatan);
+    $stats['jabatan'] = (int)$row['total'];
 }
 
 // Ambil pendaftar terbaru (5 terakhir)
@@ -140,74 +108,31 @@ $chart_data = [
     'data' => []
 ];
 
-// Cek apakah tabel pendaftaran ada sebelum query chart
-$table_check_pendaftar_chart = "SELECT EXISTS (
-    SELECT FROM information_schema.tables 
-    WHERE table_schema = 'public' 
-    AND table_name = 'pendaftaran'
-)";
-$check_pendaftar_chart = pg_query($koneksi, $table_check_pendaftar_chart);
+// Generate 6 bulan terakhir
+$months = [];
+for ($i = 5; $i >= 0; $i--) {
+    $date = date('Y-m', strtotime("-$i months"));
+    $month_name = date('M Y', strtotime("-$i months"));
+    $months[] = [
+        'period' => $date,
+        'label' => $month_name
+    ];
+}
 
-if ($check_pendaftar_chart) {
-    $row_check_chart = pg_fetch_assoc($check_pendaftar_chart);
-    if ($row_check_chart['exists'] === 't' || $row_check_chart['exists'] === true) {
-        // Generate 6 bulan terakhir
-        $months = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $date = date('Y-m', strtotime("-$i months"));
-            $month_name = date('M Y', strtotime("-$i months"));
-            $months[] = [
-                'period' => $date,
-                'label' => $month_name
-            ];
-        }
-
-        // Query untuk mendapatkan jumlah pendaftaran per bulan
-        foreach ($months as $month) {
-            $chart_data['labels'][] = $month['label'];
-            
-            // Query dengan format date yang benar untuk PostgreSQL
-            $month_period = pg_escape_string($koneksi, $month['period']);
-            $query_chart = "SELECT COUNT(*) as total 
-                            FROM pendaftaran 
-                            WHERE DATE_TRUNC('month', tanggal_daftar) = DATE_TRUNC('month', DATE '{$month_period}-01')";
-            $result_chart = pg_query($koneksi, $query_chart);
-            if ($result_chart && pg_num_rows($result_chart) > 0) {
-                $row_chart = pg_fetch_assoc($result_chart);
-                $chart_data['data'][] = (int)$row_chart['total'];
-            } else {
-                $chart_data['data'][] = 0;
-            }
-        }
+// Query untuk mendapatkan jumlah pendaftaran per bulan
+foreach ($months as $month) {
+    $chart_data['labels'][] = $month['label'];
+    
+    // Query dengan format date yang benar untuk PostgreSQL
+    $month_period = pg_escape_string($koneksi, $month['period']);
+    $query_chart = "SELECT COUNT(*) as total 
+                    FROM pendaftaran 
+                    WHERE DATE_TRUNC('month', tanggal_daftar) = DATE_TRUNC('month', DATE '{$month_period}-01')";
+    $result_chart = pg_query($koneksi, $query_chart);
+    if ($result_chart && pg_num_rows($result_chart) > 0) {
+        $row_chart = pg_fetch_assoc($result_chart);
+        $chart_data['data'][] = (int)$row_chart['total'];
     } else {
-        // Jika tabel tidak ada, buat data kosong
-        for ($i = 5; $i >= 0; $i--) {
-            $month_name = date('M Y', strtotime("-$i months"));
-            $chart_data['labels'][] = $month_name;
-            $chart_data['data'][] = 0;
-        }
-    }
-} else {
-    // Jika error, buat data kosong
-    for ($i = 5; $i >= 0; $i--) {
-        $month_name = date('M Y', strtotime("-$i months"));
-        $chart_data['labels'][] = $month_name;
-        $chart_data['data'][] = 0;
-    }
-}
-
-// Data untuk chart dalam format JSON dengan validasi
-if (!isset($chart_data['labels']) || !isset($chart_data['data'])) {
-    $chart_data = ['labels' => [], 'data' => []];
-}
-
-// Pastikan labels dan data memiliki jumlah yang sama
-if (count($chart_data['labels']) !== count($chart_data['data'])) {
-    // Reset jika tidak sama
-    $chart_data = ['labels' => [], 'data' => []];
-    for ($i = 5; $i >= 0; $i--) {
-        $month_name = date('M Y', strtotime("-$i months"));
-        $chart_data['labels'][] = $month_name;
         $chart_data['data'][] = 0;
     }
 }

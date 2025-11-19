@@ -20,27 +20,8 @@ require_once __DIR__ . '/config/koneksi.php';
     <div class="container">
         <div class="row">
             <?php
-            // Cek apakah tabel anggota ada
-            $table_check = "SELECT EXISTS (
-              SELECT FROM information_schema.tables 
-              WHERE table_schema = 'public' 
-              AND table_name = 'anggota'
-            )";
-            $table_exists = pg_query($koneksi, $table_check);
-            $has_table = false;
-            if ($table_exists) {
-              $row_check = pg_fetch_assoc($table_exists);
-              $has_table = ($row_check['exists'] === 't' || $row_check['exists'] === true || $row_check['exists'] === 'true');
-            }
-            
-            $result = false;
-            if ($has_table) {
-              $query = "SELECT * FROM anggota ORDER BY id DESC";
-              $result = pg_query($koneksi, $query);
-              if (!$result) {
-                error_log("Error query personil: " . pg_last_error($koneksi));
-              }
-            }
+            $query = "SELECT * FROM anggota ORDER BY id DESC";
+            $result = pg_query($koneksi, $query);
             
             if ($result && pg_num_rows($result) > 0) {
                 $anggota_map = [];
@@ -82,12 +63,7 @@ require_once __DIR__ . '/config/koneksi.php';
             ?>
             <div class="col-12">
                 <p class="text-center" style="color: #717791;">
-                  <?php if (!$has_table): ?>
-                    Tabel database belum dibuat. Silakan import file <code>setup_complete.sql</code> terlebih dahulu.<br>
-                    <small>Lihat file <code>CARA_SETUP_DATABASE.md</code> untuk panduan lengkap.</small>
-                  <?php else: ?>
-                    Belum ada data anggota. Silakan jalankan file <code>run_insert.sql</code> di pgAdmin untuk menambahkan data.
-                  <?php endif; ?>
+                    Belum ada data anggota.
                 </p>
             </div>
             <?php

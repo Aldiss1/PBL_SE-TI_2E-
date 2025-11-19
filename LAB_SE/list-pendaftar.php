@@ -7,7 +7,6 @@ require_once __DIR__ . '/fungsi/pesan_kilat.php';
 
 // Set active menu
 $current_page = 'pendaftar';
-$base_path = '';
 $menu_items = [
 	'dashboard.php' => [
 		'title' => 'Dashboard',
@@ -48,7 +47,8 @@ $menu_items = [
 	'profil' => [ 
         'title' => 'Kelola Profil', 
         'icon'  => 'lni lni-cog', 
-        'link'  => '../../module/profil/index.php', 
+        'link'  => '../../module/profil/index.php',
+        'active' => false
     ]
 ];
 
@@ -65,51 +65,36 @@ $stats = [
 	'rejected' => 0
 ];
 
-// Cek apakah tabel pendaftaran ada
-$table_check = "SELECT EXISTS (
-	SELECT FROM information_schema.tables 
-	WHERE table_schema = 'public' 
-	AND table_name = 'pendaftaran'
-)";
-$check_table = pg_query($koneksi, $table_check);
-$has_table = false;
-if ($check_table) {
-	$row_check = pg_fetch_assoc($check_table);
-	$has_table = ($row_check['exists'] === 't' || $row_check['exists'] === true || $row_check['exists'] === 'true');
+// Hitung total pendaftar
+$query_total = "SELECT COUNT(*) as total FROM pendaftaran";
+$result_total = pg_query($koneksi, $query_total);
+if ($result_total) {
+	$row_total = pg_fetch_assoc($result_total);
+	$stats['total'] = (int)$row_total['total'];
 }
 
-if ($has_table) {
-	// Hitung total pendaftar
-	$query_total = "SELECT COUNT(*) as total FROM pendaftaran";
-	$result_total = pg_query($koneksi, $query_total);
-	if ($result_total) {
-		$row_total = pg_fetch_assoc($result_total);
-		$stats['total'] = (int)$row_total['total'];
-	}
-	
-	// Hitung pending
-	$query_pending = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'pending'";
-	$result_pending = pg_query($koneksi, $query_pending);
-	if ($result_pending) {
-		$row_pending = pg_fetch_assoc($result_pending);
-		$stats['pending'] = (int)$row_pending['total'];
-	}
-	
-	// Hitung accepted
-	$query_accepted = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'accepted'";
-	$result_accepted = pg_query($koneksi, $query_accepted);
-	if ($result_accepted) {
-		$row_accepted = pg_fetch_assoc($result_accepted);
-		$stats['accepted'] = (int)$row_accepted['total'];
-	}
-	
-	// Hitung rejected
-	$query_rejected = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'rejected'";
-	$result_rejected = pg_query($koneksi, $query_rejected);
-	if ($result_rejected) {
-		$row_rejected = pg_fetch_assoc($result_rejected);
-		$stats['rejected'] = (int)$row_rejected['total'];
-	}
+// Hitung pending
+$query_pending = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'pending'";
+$result_pending = pg_query($koneksi, $query_pending);
+if ($result_pending) {
+	$row_pending = pg_fetch_assoc($result_pending);
+	$stats['pending'] = (int)$row_pending['total'];
+}
+
+// Hitung accepted
+$query_accepted = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'accepted'";
+$result_accepted = pg_query($koneksi, $query_accepted);
+if ($result_accepted) {
+	$row_accepted = pg_fetch_assoc($result_accepted);
+	$stats['accepted'] = (int)$row_accepted['total'];
+}
+
+// Hitung rejected
+$query_rejected = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'rejected'";
+$result_rejected = pg_query($koneksi, $query_rejected);
+if ($result_rejected) {
+	$row_rejected = pg_fetch_assoc($result_rejected);
+	$stats['rejected'] = (int)$row_rejected['total'];
 }
 
 // Filter berdasarkan status (ambil dulu sebelum proses update)
@@ -205,19 +190,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
 // Query pendaftar
 $pendaftar = [];
-if ($has_table) {
-	if ($status_filter === 'all') {
-		$query = "SELECT * FROM pendaftaran ORDER BY tanggal_daftar DESC";
-	} else {
-		$status_filter_escaped = pg_escape_string($koneksi, $status_filter);
-		$query = "SELECT * FROM pendaftaran WHERE status = '$status_filter_escaped' ORDER BY tanggal_daftar DESC";
-	}
-	
-	$result = pg_query($koneksi, $query);
-	if ($result && pg_num_rows($result) > 0) {
-		while ($row = pg_fetch_assoc($result)) {
-			$pendaftar[] = $row;
-		}
+if ($status_filter === 'all') {
+	$query = "SELECT * FROM pendaftaran ORDER BY tanggal_daftar DESC";
+} else {
+	$status_filter_escaped = pg_escape_string($koneksi, $status_filter);
+	$query = "SELECT * FROM pendaftaran WHERE status = '$status_filter_escaped' ORDER BY tanggal_daftar DESC";
+}
+
+$result = pg_query($koneksi, $query);
+if ($result && pg_num_rows($result) > 0) {
+	while ($row = pg_fetch_assoc($result)) {
+		$pendaftar[] = $row;
 	}
 }
 
@@ -466,9 +449,7 @@ include __DIR__ . '/template/admin_header.php';
 												<i class="lni lni-inbox"></i>
 												<h4>Tidak Ada Data</h4>
 												<p>
-													<?php if (!$has_table): ?>
-														Tabel database belum dibuat. Silakan jalankan <a href="database.sql">database.sql</a> terlebih dahulu.
-													<?php elseif ($status_filter !== 'all'): ?>
+													<?php if ($status_filter !== 'all'): ?>
 														Tidak ada pendaftar dengan status "<?php echo htmlspecialchars(ucfirst($status_filter)); ?>".
 													<?php else: ?>
 														Belum ada data pendaftar. Mahasiswa yang mendaftar akan muncul di sini.

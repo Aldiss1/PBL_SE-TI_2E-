@@ -13,10 +13,8 @@ if ($id > 0) {
         pesan_kilat('Tidak dapat menghapus user yang sedang aktif.', 'error');
     } else {
         // Cek apakah data ada
-        $check = pg_query($koneksi, "SELECT id, username FROM users WHERE id = $id");
+        $check = pg_query($koneksi, "SELECT id FROM users WHERE id = $id");
         if ($check && pg_num_rows($check) > 0) {
-            $user_data = pg_fetch_assoc($check);
-            
             // Hapus user
             $del = pg_query($koneksi, "DELETE FROM users WHERE id = $id");
             if ($del) {

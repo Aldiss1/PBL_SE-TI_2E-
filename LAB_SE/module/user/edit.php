@@ -97,15 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $query = "UPDATE users SET username = '$username_e', role = '$role_e', updated_at = NOW() WHERE id = $id";
             }
             
-            if (isset($query)) {
-                $result = pg_query($koneksi, $query);
-                if ($result) {
-                    pesan_kilat('User berhasil diperbarui!', 'success');
-                    header('Location: index.php');
-                    exit;
-                } else {
-                    pesan_kilat('Gagal memperbarui user. Error: ' . pg_last_error($koneksi), 'error');
-                }
+            $result = pg_query($koneksi, $query);
+            if ($result) {
+                pesan_kilat('User berhasil diperbarui!', 'success');
+                header('Location: index.php');
+                exit;
+            } else {
+                pesan_kilat('Gagal memperbarui user. Error: ' . pg_last_error($koneksi), 'error');
             }
         }
     }

@@ -9,12 +9,7 @@ $id = isset($_GET['id']) ? clean_input($_GET['id']) : '';
 // Ambil data jabatan berdasarkan ID
 $query = "SELECT * FROM jabatan WHERE id = '$id'";
 $result = pg_query($koneksi, $query);
-if (!$result) {
-	error_log("Error query jabatan edit: " . pg_last_error($koneksi));
-	header('Location: ../index.php');
-	exit;
-}
-$data = pg_fetch_assoc($result);
+$data = $result ? pg_fetch_assoc($result) : null;
 
 if (!$data) {
 	header('Location: ../index.php');
@@ -78,7 +73,8 @@ $menu_items = [
 	'profil' => [ 
         'title' => 'Kelola Profil', 
         'icon'  => 'lni lni-cog', 
-        'link'  => '../../module/profil/index.php', 
+        'link'  => '../../module/profil/index.php',
+        'active' => false
     ]
 ];
 

@@ -47,34 +47,20 @@ $menu_items = [
     'profil' => [ 
         'title' => 'Kelola Profil', 
         'icon'  => 'lni lni-cog', 
-        'link'  => '../../module/profil/index.php', 
+        'link'  => '../../module/profil/index.php',
+        'active' => false
     ]
 ];
 
 include __DIR__ . '/../../template/admin_header.php';
 
-// Cek keberadaan tabel
-$table_check = "SELECT EXISTS (
-    SELECT FROM information_schema.tables 
-    WHERE table_schema = 'public' 
-    AND table_name = 'anggota'
-)";
-$check = pg_query($koneksi, $table_check);
-$has_table = false;
-if ($check) {
-    $row_check = pg_fetch_assoc($check);
-    $has_table = ($row_check['exists'] === 't' || $row_check['exists'] === true);
-}
-
-// Ambil data anggota jika tabel ada
+// Ambil data anggota
 $anggota = [];
-if ($has_table) {
-    $query = "SELECT * FROM anggota ORDER BY id DESC";
-    $result = pg_query($koneksi, $query);
-    if ($result && pg_num_rows($result) > 0) {
-        while ($row = pg_fetch_assoc($result)) {
-            $anggota[] = $row;
-        }
+$query = "SELECT * FROM anggota ORDER BY id DESC";
+$result = pg_query($koneksi, $query);
+if ($result && pg_num_rows($result) > 0) {
+    while ($row = pg_fetch_assoc($result)) {
+        $anggota[] = $row;
     }
 }
 ?>
@@ -118,7 +104,7 @@ if ($has_table) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if ($has_table && count($anggota) > 0): ?>
+                            <?php if (count($anggota) > 0): ?>
                                 <?php $no = 1; foreach ($anggota as $a): ?>
                                 <tr>
                                     <td style="padding: 15px;"><?php echo $no++; ?></td>

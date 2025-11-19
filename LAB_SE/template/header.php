@@ -63,61 +63,28 @@
                       'blog' => 0
                     ];
                     
-                    // Cek dan hitung anggota
-                    $table_check_anggota = "SELECT EXISTS (
-                      SELECT FROM information_schema.tables 
-                      WHERE table_schema = 'public' 
-                      AND table_name = 'anggota'
-                    )";
-                    $check_anggota = pg_query($koneksi, $table_check_anggota);
-                    if ($check_anggota) {
-                      $row_check = pg_fetch_assoc($check_anggota);
-                      if ($row_check['exists'] === 't' || $row_check['exists'] === true) {
-                        $query_anggota = "SELECT COUNT(*) as total FROM anggota";
-                        $result_anggota = pg_query($koneksi, $query_anggota);
-                        if ($result_anggota) {
-                          $row = pg_fetch_assoc($result_anggota);
-                          $stats['anggota'] = (int)$row['total'];
-                        }
-                      }
+                    // Hitung anggota
+                    $query_anggota = "SELECT COUNT(*) as total FROM anggota";
+                    $result_anggota = pg_query($koneksi, $query_anggota);
+                    if ($result_anggota) {
+                      $row = pg_fetch_assoc($result_anggota);
+                      $stats['anggota'] = (int)$row['total'];
                     }
                     
-                    // Cek dan hitung pendaftar
-                    $table_check_pendaftar = "SELECT EXISTS (
-                      SELECT FROM information_schema.tables 
-                      WHERE table_schema = 'public' 
-                      AND table_name = 'pendaftaran'
-                    )";
-                    $check_pendaftar = pg_query($koneksi, $table_check_pendaftar);
-                    if ($check_pendaftar) {
-                      $row_check = pg_fetch_assoc($check_pendaftar);
-                      if ($row_check['exists'] === 't' || $row_check['exists'] === true) {
-                        $query_pendaftar = "SELECT COUNT(*) as total FROM pendaftaran";
-                        $result_pendaftar = pg_query($koneksi, $query_pendaftar);
-                        if ($result_pendaftar) {
-                          $row = pg_fetch_assoc($result_pendaftar);
-                          $stats['pendaftar'] = (int)$row['total'];
-                        }
-                      }
+                    // Hitung pendaftar
+                    $query_pendaftar = "SELECT COUNT(*) as total FROM pendaftaran";
+                    $result_pendaftar = pg_query($koneksi, $query_pendaftar);
+                    if ($result_pendaftar) {
+                      $row = pg_fetch_assoc($result_pendaftar);
+                      $stats['pendaftar'] = (int)$row['total'];
                     }
                     
-                    // Cek dan hitung blog
-                    $table_check_blog = "SELECT EXISTS (
-                      SELECT FROM information_schema.tables 
-                      WHERE table_schema = 'public' 
-                      AND table_name = 'blog'
-                    )";
-                    $check_blog = pg_query($koneksi, $table_check_blog);
-                    if ($check_blog) {
-                      $row_check = pg_fetch_assoc($check_blog);
-                      if ($row_check['exists'] === 't' || $row_check['exists'] === true) {
-                        $query_blog = "SELECT COUNT(*) as total FROM blog WHERE is_published = true";
-                        $result_blog = pg_query($koneksi, $query_blog);
-                        if ($result_blog) {
-                          $row = pg_fetch_assoc($result_blog);
-                          $stats['blog'] = (int)$row['total'];
-                        }
-                      }
+                    // Hitung blog
+                    $query_blog = "SELECT COUNT(*) as total FROM blog WHERE is_published = true";
+                    $result_blog = pg_query($koneksi, $query_blog);
+                    if ($result_blog) {
+                      $row = pg_fetch_assoc($result_blog);
+                      $stats['blog'] = (int)$row['total'];
                     }
                     ?>
                     <?php include __DIR__ . '/menu.php'; ?>

@@ -6,9 +6,6 @@ require_once __DIR__ . '/../../fungsi/pesan_kilat.php';
 // Ambil data jabatan
 $query = "SELECT * FROM jabatan ORDER BY id DESC";
 $result = pg_query($koneksi, $query);
-if (!$result) {
-	error_log("Error query jabatan: " . pg_last_error($koneksi));
-}
 
 // Set judul halaman dan menu aktif
 $page_title = "Kelola Jabatan - Admin";
@@ -53,7 +50,8 @@ $menu_items = [
 	'profil' => [ 
         'title' => 'Kelola Profil', 
         'icon'  => 'lni lni-cog', 
-        'link'  => '../../module/profil/index.php', 
+        'link'  => '../../module/profil/index.php',
+        'active' => false
     ]
 ];
 

@@ -4,18 +4,6 @@ require_once __DIR__ . '/config/koneksi.php';
 require_once __DIR__ . '/config/anti_injection.php';
 require_once __DIR__ . '/fungsi/pesan_kilat.php';
 
-// Cek apakah tabel users sudah ada, jika belum redirect ke setup
-if ($koneksi) {
-    $check = @pg_query($koneksi, "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users')");
-    if ($check) {
-        $exists = pg_fetch_result($check, 0, 0);
-        if ($exists == 'f') {
-            header('Location: setup.php');
-            exit;
-        }
-    }
-}
-
 // Jika sudah login, redirect ke dashboard
 if (isset($_SESSION['login'])) {
     if (isset($_SESSION['role']) && $_SESSION['role'] === 'mahasiswa') {
@@ -119,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     e.preventDefault();
                     var alert = this.closest('.alert');
                     if (alert) {
-                        alert.style.display = 'none';n
+                        alert.style.display = 'none';
                         alert.remove();
                     }
                 });
