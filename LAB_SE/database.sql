@@ -96,3 +96,38 @@ CREATE TABLE IF NOT EXISTS riwayat_pendaftaran (
 CREATE INDEX IF NOT EXISTS idx_riwayat_pendaftaran_id ON riwayat_pendaftaran(pendaftaran_id);
 CREATE INDEX IF NOT EXISTS idx_riwayat_pendaftaran_changed_at ON riwayat_pendaftaran(changed_at);
 
+-- database profile (belum fix)
+CREATE TABLE konten_page (
+    id SERIAL PRIMARY KEY,
+    page_key VARCHAR(100) NOT NULL UNIQUE,
+    title VARCHAR(255) NULL,
+    content TEXT NOT NULL,
+    last_updated TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE OR REPLACE FUNCTION update_last_updated_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.last_updated = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER last_updated_trg
+BEFORE UPDATE ON konten_page
+FOR EACH ROW
+EXECUTE PROCEDURE update_last_updated_column();
+
+
+TRUNCATE TABLE konten_page;
+
+-- Insert data profil
+INSERT INTO konten_page (page_key, title, content) VALUES 
+('roadmap_judul', 'Roadmap Laboratorium SE', 'Perjalanan dan Rencana Pengembangan Laboratorium Software Engineering.'),
+('visi_deskripsi', 'Visi Kami', 'Menjadi pusat penelitian software engineering yang relevan dan berdaya guna bagi pengembangan teknologi informasi di Indonesia.'),
+('misi_item_1', 'Misi Utama', 'Melakukan penelitian berkualitas di bidang perangkat lunak yang memberikan kontribusi nyata bagi industri dan akademisi.'),
+('tentang_kami', 'Tentang Lab SE', 'Laboratorium Software Engineering merupakan wadah kolaborasi mahasiswa dan dosen untuk penelitian dan pengembangan.');
+
+-- PENTING: Jika pakai DBeaver/pgAdmin, jangan lupa klik tombol COMMIT (ikon Disket/Centang Hijau) setelah menjalankan ini!
+-- Data ini masih dummy
+
