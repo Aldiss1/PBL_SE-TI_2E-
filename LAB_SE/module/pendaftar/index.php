@@ -8,54 +8,49 @@ require_once __DIR__ . '/../../fungsi/pesan_kilat.php';
 // Set active menu
 $current_page = 'pendaftar';
 $menu_items = [
-	'dashboard.php' => [
-		'title' => 'Dashboard',
-		'icon' => 'lni lni-home',
-		'link' => '../admin/dashboard.php',
-		'active' => false
-	],
-	'anggota' => [
-		'title' => 'Kelola Anggota',
-		'icon' => 'lni lni-users',
-		'link' => '../anggota/index.php',
-		'active' => false
-	],
-	'jabatan' => [
-		'title' => 'Kelola Jabatan',
-		'icon' => 'lni lni-briefcase',
-		'link' => '../jabatan/index.php',
-		'active' => false
-	],
-	'user' => [
-		'title' => 'Kelola User',
-		'icon' => 'lni lni-user',
-		'link' => '../user/index.php',
-		'active' => false
-	],
-	'pendaftar' => [
-		'title' => 'Kelola Pendaftar',
-		'icon' => 'lni lni-list',
-		'link' => 'index.php',
-		'active' => true
-	],
-	'blog' => [
-		'title' => 'Kelola Blog',
-		'icon' => 'lni lni-text-format',
-		'link' => '../blog/index.php',
-		'active' => false
-	],
-	'profil' => [
+    'dashboard.php' => [
+        'title' => 'Dashboard',
+        'icon' => 'lni lni-home',
+        'link' => '../../module/admin/dashboard.php',
+        'active' => false
+    ],
+    'anggota' => [
+        'title' => 'Kelola Anggota',
+        'icon' => 'lni lni-users',
+        'link' => '../../module/anggota/index.php',
+        'active' => false
+    ],
+    'jabatan' => [
+        'title' => 'Kelola Jabatan',
+        'icon' => 'lni lni-briefcase',
+        'link' => '../../module/jabatan/index.php',
+        'active' => false
+    ],
+    'user' => [
+        'title' => 'Kelola User',
+        'icon' => 'lni lni-user',
+        'link' => '../../module/user/index.php',
+        'active' => false
+    ],
+    'pendaftar' => [
+        'title' => 'Kelola Pendaftar',
+        'icon' => 'lni lni-list',
+        'link' => '../../module/pendaftar/index.php',
+        'active' => true
+    ],
+    'blog' => [
+        'title' => 'Kelola Blog',
+        'icon' => 'lni lni-text-format',
+        'link' => '../../module/blog/index.php',
+        'active' => false
+    ],
+    'profil' => [
         'title' => 'Kelola Profil',
         'icon'  => 'lni lni-cog',
-        'link'  => '../profil/index.php',
+        'link'  => '../../module/profil/index.php',
         'active' => false
     ]
 ];
-
-// Set base_path untuk sidebar
-if (!isset($base_path)) {
-	$base_path = '';
-}
 
 // Ambil statistik pendaftar
 $stats = [
@@ -162,11 +157,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 					pesan_kilat('Akun sudah ada untuk NIM tersebut.', 'error');
 				} else {
 					// Buat akun: username = NIM, password default = MD5(NIM), role = mahasiswa
-					$nama_escaped = pg_escape_string($koneksi, $nama);
-					$email_escaped = pg_escape_string($koneksi, $email);
 					$insert = pg_query($koneksi, "
-						INSERT INTO users (username, password, full_name, role)
-						VALUES ('$nim_escaped', MD5('$nim_escaped'), '$nama_escaped', 'mahasiswa')
+						INSERT INTO users (username, password, role)
+						VALUES ('$nim_escaped', MD5('$nim_escaped'), 'mahasiswa')
 					");
 					if ($insert) {
 						pesan_kilat('Akun mahasiswa berhasil dibuat. Username & password awal: NIM.', 'success');
@@ -212,38 +205,32 @@ include __DIR__ . '/../../template/admin_header.php';
 
 <!-- Main Content -->
 <main class="admin-main-content">
-<section class="pt-50 pb-50" style="background: #f8f9fa; min-height: calc(100vh - 80px); padding-top: 40px !important;">
+<section class="pt-50 pb-50" style="background: #f8f9fa; padding-top: 30px !important;">
 	<div class="container">
-		<!-- Header Section -->
-		<div class="row mb-40">
+		<div class="row">
 			<div class="col-lg-12">
-				<div class="section-title mb-30">
-					<h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s" style="color: #2c3e50; font-size: 28px; font-weight: 700;">
-						<i class="lni lni-list" style="color: #2F80ED; margin-right: 10px;"></i>
-						Kelola Pendaftar
-					</h2>
-					<p class="wow fadeInUp" data-wow-delay=".4s" style="color: #6c757d; font-size: 14px; margin: 0;">
-						Daftar mahasiswa yang telah mendaftar ke Laboratorium Software Engineering
-					</p>
+				<div class="section-title mb-50">
+					<h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Kelola Pendaftar</h2>
+					<p class="wow fadeInUp" data-wow-delay=".4s">Daftar mahasiswa yang telah mendaftar ke Laboratorium Software Engineering</p>
 				</div>
 			</div>
 		</div>
 
 		<?php tampilkan_pesan(); ?>
 
-		<!-- Statistik Cards -->
-		<div class="row mb-40">
-			<div class="col-lg-3 col-md-6 mb-4">
-				<div class="stat-card stat-card-blue wow fadeInUp" data-wow-delay=".2s">
+		<!-- Statistics Cards -->
+		<div class="row mb-50">
+			<div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+				<div class="stat-card blue wow fadeInUp" data-wow-delay=".2s" style="text-align: center;">
 					<div class="stat-icon">
-						<i class="lni lni-users"></i>
+						<i class="lni lni-graduation"></i>
 					</div>
 					<div class="stat-number"><?php echo number_format($stats['total']); ?></div>
 					<div class="stat-label">Total Pendaftar</div>
 				</div>
 			</div>
-			<div class="col-lg-3 col-md-6 mb-4">
-				<div class="stat-card stat-card-orange wow fadeInUp" data-wow-delay=".3s">
+			<div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+				<div class="stat-card orange wow fadeInUp" data-wow-delay=".3s" style="text-align: center;">
 					<div class="stat-icon">
 						<i class="lni lni-hourglass"></i>
 					</div>
@@ -251,8 +238,8 @@ include __DIR__ . '/../../template/admin_header.php';
 					<div class="stat-label">Pending</div>
 				</div>
 			</div>
-			<div class="col-lg-3 col-md-6 mb-4">
-				<div class="stat-card stat-card-green wow fadeInUp" data-wow-delay=".4s">
+			<div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+				<div class="stat-card green wow fadeInUp" data-wow-delay=".4s" style="text-align: center;">
 					<div class="stat-icon">
 						<i class="lni lni-checkmark-circle"></i>
 					</div>
@@ -260,8 +247,8 @@ include __DIR__ . '/../../template/admin_header.php';
 					<div class="stat-label">Diterima</div>
 				</div>
 			</div>
-			<div class="col-lg-3 col-md-6 mb-4">
-				<div class="stat-card stat-card-red wow fadeInUp" data-wow-delay=".5s">
+			<div class="col-xl-3 col-lg-6 col-md-6 mb-30">
+				<div class="stat-card purple wow fadeInUp" data-wow-delay=".5s" style="text-align: center;">
 					<div class="stat-icon">
 						<i class="lni lni-close"></i>
 					</div>
@@ -274,27 +261,22 @@ include __DIR__ . '/../../template/admin_header.php';
 		<!-- Filter Status -->
 		<div class="row mb-30">
 			<div class="col-lg-12">
-				<div class="filter-card wow fadeInUp" data-wow-delay=".2s">
-					<div class="filter-header">
-						<i class="lni lni-filter"></i>
-						<span>Filter Status</span>
-					</div>
-					<div class="filter-buttons">
-						<a href="?status=all" class="filter-btn <?php echo $status_filter === 'all' ? 'active' : ''; ?>">
+				<div class="wow fadeInUp" data-wow-delay=".2s" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+					<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
+						<span style="font-weight: 600; color: #2c3e50; font-size: 14px; margin-right: 5px;">
+							<i class="lni lni-filter" style="margin-right: 5px;"></i>Filter Status:
+						</span>
+						<a href="?status=all" class="button button-sm radius-10 <?php echo $status_filter === 'all' ? '' : 'border-button'; ?>" style="margin-right: 8px; <?php echo $status_filter === 'all' ? 'background: #2F80ED; color: white; border: none;' : ''; ?>">
 							<i class="lni lni-list"></i> Semua
-							<span class="badge"><?php echo $stats['total']; ?></span>
 						</a>
-						<a href="?status=pending" class="filter-btn <?php echo $status_filter === 'pending' ? 'active' : ''; ?>">
+						<a href="?status=pending" class="button button-sm radius-10 <?php echo $status_filter === 'pending' ? '' : 'border-button'; ?>" style="margin-right: 8px; <?php echo $status_filter === 'pending' ? 'background: #F2994A; color: white; border: none;' : ''; ?>">
 							<i class="lni lni-hourglass"></i> Pending
-							<span class="badge"><?php echo $stats['pending']; ?></span>
 						</a>
-						<a href="?status=accepted" class="filter-btn <?php echo $status_filter === 'accepted' ? 'active' : ''; ?>">
+						<a href="?status=accepted" class="button button-sm radius-10 <?php echo $status_filter === 'accepted' ? '' : 'border-button'; ?>" style="margin-right: 8px; <?php echo $status_filter === 'accepted' ? 'background: #27AE60; color: white; border: none;' : ''; ?>">
 							<i class="lni lni-checkmark-circle"></i> Diterima
-							<span class="badge"><?php echo $stats['accepted']; ?></span>
 						</a>
-						<a href="?status=rejected" class="filter-btn <?php echo $status_filter === 'rejected' ? 'active' : ''; ?>">
+						<a href="?status=rejected" class="button button-sm radius-10 <?php echo $status_filter === 'rejected' ? '' : 'border-button'; ?>" style="<?php echo $status_filter === 'rejected' ? 'background: #e74c3c; color: white; border: none;' : ''; ?>">
 							<i class="lni lni-close"></i> Ditolak
-							<span class="badge"><?php echo $stats['rejected']; ?></span>
 						</a>
 					</div>
 				</div>
@@ -304,164 +286,161 @@ include __DIR__ . '/../../template/admin_header.php';
 		<!-- Table Pendaftar -->
 		<div class="row">
 			<div class="col-lg-12">
-				<div class="table-card wow fadeInUp" data-wow-delay=".3s">
-					<div class="table-header">
-						<h4>
-							<i class="lni lni-graduation"></i>
-							Daftar Pendaftar
-						</h4>
-						<span class="table-count">Total: <?php echo count($pendaftar); ?> data</span>
-					</div>
-					<div class="table-responsive">
-						<table class="table table-pendaftar">
-							<thead>
+				<div class="table-responsive wow fadeInUp" data-wow-delay=".3s">
+					<table class="table table-striped table-hover" style="background: white; border-radius: 10px; overflow: hidden;">
+						<thead style="background: #2c3e50; color: white;">
+							<tr>
+								<th style="padding: 15px;">NO</th>
+								<th style="padding: 15px;">Nama Lengkap</th>
+								<th style="padding: 15px;">Email</th>
+								<th style="padding: 15px;">NIM</th>
+								<th style="padding: 15px;">Minat</th>
+								<th style="padding: 15px;">Status</th>
+								<th style="padding: 15px;">Tanggal Daftar</th>
+								<th style="padding: 15px; text-align: center;">Aksi</th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php if (count($pendaftar) > 0): ?>
+								<?php 
+								$no = 1;
+								foreach ($pendaftar as $p): 
+								?>
 								<tr>
-									<th>No.</th>
-									<th>Nama Lengkap</th>
-									<th>Email</th>
-									<th>NIM</th>
-									<th>Jurusan</th>
-									<th>Minat</th>
-									<th>Status</th>
-									<th>Tanggal Daftar</th>
-									<th>Aksi</th>
-								</tr>
-							</thead>
-							<tbody>
-								<?php if (count($pendaftar) > 0): ?>
-									<?php 
-									$no = 1;
-									foreach ($pendaftar as $p): 
-									?>
-									<tr>
-										<td><?php echo $no++; ?></td>
-										<td>
-											<div class="user-info">
-												<div class="user-avatar">
-													<?php if (!empty($p['foto'])): ?>
-														<img src="<?php echo htmlspecialchars($p['foto']); ?>" alt="<?php echo htmlspecialchars($p['nama']); ?>" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">
-													<?php else: ?>
-														<?php echo strtoupper(substr($p['nama'], 0, 1)); ?>
-													<?php endif; ?>
-												</div>
-												<div class="user-details">
-													<strong><?php echo htmlspecialchars($p['nama']); ?></strong>
-												</div>
-											</div>
-										</td>
-										<td>
-											<?php if (isset($p['email']) && !empty($p['email'])): ?>
-												<a href="mailto:<?php echo htmlspecialchars($p['email']); ?>"><?php echo htmlspecialchars($p['email']); ?></a>
+									<td style="padding: 15px;"><?php echo $no++; ?></td>
+									<td style="padding: 15px;">
+										<div style="display:flex; align-items:center; gap:10px;">
+											<?php if (!empty($p['foto'])): ?>
+												<img src="<?php echo htmlspecialchars($p['foto']); ?>" alt="<?php echo htmlspecialchars($p['nama']); ?>" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:1px solid #eee;">
 											<?php else: ?>
-												<span class="text-muted">-</span>
-											<?php endif; ?>
-										</td>
-										<td>
-											<span class="nim-badge"><?php echo htmlspecialchars($p['nim']); ?></span>
-										</td>
-										<td>
-											<span class="jurusan-tag"><?php echo htmlspecialchars($p['jurusan']); ?></span>
-										</td>
-										<td>
-											<?php if (!empty($p['minat'])): ?>
-												<div class="minat-text" title="<?php echo htmlspecialchars($p['minat']); ?>">
-													<?php echo htmlspecialchars(substr($p['minat'], 0, 50)); ?>
-													<?php echo strlen($p['minat']) > 50 ? '...' : ''; ?>
+												<?php $initial = strtoupper(substr($p['nama'], 0, 1)); ?>
+												<div style="width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; background: linear-gradient(135deg, #2F80ED 0%, #6C63FF 100%);">
+													<?php echo $initial; ?>
 												</div>
-											<?php else: ?>
-												<span class="text-muted">-</span>
 											<?php endif; ?>
-										</td>
-										<td>
-											<?php
-											$status = $p['status'] ?? 'pending';
-											$status_class = '';
-											$status_text = '';
-											$status_icon = '';
-											switch ($status) {
-												case 'accepted':
-													$status_class = 'status-accepted';
-													$status_text = 'Diterima';
-													$status_icon = 'lni-checkmark-circle';
-													break;
-												case 'rejected':
-													$status_class = 'status-rejected';
-													$status_text = 'Ditolak';
-													$status_icon = 'lni-close';
-													break;
-												case 'pending':
-												default:
-													$status_class = 'status-pending';
-													$status_text = 'Pending';
-													$status_icon = 'lni-hourglass';
-													break;
-											}
-											?>
-											<span class="status-badge <?php echo $status_class; ?>">
-												<i class="lni <?php echo $status_icon; ?>"></i>
-												<?php echo $status_text; ?>
+											<strong><?php echo htmlspecialchars($p['nama']); ?></strong>
+										</div>
+									</td>
+									<td style="padding: 15px;">
+										<?php if (isset($p['email']) && !empty($p['email'])): ?>
+											<a href="mailto:<?php echo htmlspecialchars($p['email']); ?>" style="color: #2F80ED; text-decoration: none;">
+												<i class="lni lni-envelope" style="margin-right: 5px;"></i><?php echo htmlspecialchars($p['email']); ?>
+											</a>
+										<?php else: ?>
+											<span style="color: #95a5a6;">-</span>
+										<?php endif; ?>
+									</td>
+									<td style="padding: 15px;">
+										<span style="background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+											<?php echo htmlspecialchars($p['nim']); ?>
+										</span>
+									</td>
+									<td style="padding: 15px;">
+										<?php if (!empty($p['minat'])): ?>
+											<span style="color: #495057; font-size: 13px;" title="<?php echo htmlspecialchars($p['minat']); ?>">
+												<?php echo htmlspecialchars(substr($p['minat'], 0, 50)); ?>
+												<?php echo strlen($p['minat']) > 50 ? '...' : ''; ?>
 											</span>
-										</td>
-										<td>
-											<div class="date-info">
-												<strong><?php echo date('d/m/Y', strtotime($p['tanggal_daftar'])); ?></strong>
-												<small><?php echo date('H:i', strtotime($p['tanggal_daftar'])); ?> WIB</small>
-											</div>
-										</td>
-										<td>
-											<div class="action-buttons">
-												<button class="btn-action btn-view" title="Lihat Detail" onclick="viewDetail(<?php echo $p['id']; ?>)">
-													<i class="lni lni-eye"></i>
-												</button>
-												<?php if ($status === 'pending'): ?>
-												<button class="btn-action btn-accept" title="Terima" onclick="updateStatus(<?php echo $p['id']; ?>, 'accepted')">
-													<i class="lni lni-checkmark-circle"></i>
-												</button>
-												<button class="btn-action btn-reject" title="Tolak" onclick="updateStatus(<?php echo $p['id']; ?>, 'rejected')">
-													<i class="lni lni-close"></i>
+										<?php else: ?>
+											<span style="color: #95a5a6;">-</span>
+										<?php endif; ?>
+									</td>
+									<td style="padding: 15px;">
+										<?php
+										$status = $p['status'] ?? 'pending';
+										$status_badge = '';
+										switch ($status) {
+											case 'accepted':
+												$status_badge = '<span style="background: #27AE60; color: white; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Diterima</span>';
+												break;
+											case 'rejected':
+												$status_badge = '<span style="background: #e74c3c; color: white; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Ditolak</span>';
+												break;
+											case 'pending':
+											default:
+												$status_badge = '<span style="background: #F2994A; color: white; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Pending</span>';
+												break;
+										}
+										echo $status_badge;
+										?>
+									</td>
+									<td style="padding: 15px;">
+										<?php 
+										if (!empty($p['tanggal_daftar'])) {
+											try {
+												// Konversi ke timezone WIB (Asia/Jakarta)
+												$date = new DateTime($p['tanggal_daftar'], new DateTimeZone('UTC'));
+												$date->setTimezone(new DateTimeZone('Asia/Jakarta'));
+												echo $date->format('d/m/Y H:i') . ' WIB';
+											} catch (Exception $e) {
+												// Fallback jika DateTime gagal
+												$tanggal = strtotime($p['tanggal_daftar']);
+												if ($tanggal !== false) {
+													// Tambah 7 jam untuk konversi UTC ke WIB
+													$tanggal_wib = $tanggal + (7 * 3600);
+													echo date('d/m/Y H:i', $tanggal_wib) . ' WIB';
+												} else {
+													echo htmlspecialchars($p['tanggal_daftar']);
+												}
+											}
+										} else {
+											echo '-';
+										}
+										?>
+									</td>
+									<td style="padding: 15px; text-align: center;">
+										<div style="display: flex; align-items: center; justify-content: center; gap: 5px; flex-wrap: wrap;">
+											<button type="button" class="button button-sm radius-10 border-button" style="padding: 5px 12px; margin-right: 5px;" onclick="viewDetail(<?php echo $p['id']; ?>)" title="Lihat Detail">
+												<i class="lni lni-eye"></i> Detail
+											</button>
+											<?php if ($status === 'pending'): ?>
+											<button type="button" class="button button-sm radius-10" style="background: #27AE60; color: white; padding: 5px 12px; margin-right: 5px; border: none;" onclick="updateStatus(<?php echo $p['id']; ?>, 'accepted')" title="Terima Pendaftar">
+												<i class="lni lni-checkmark-circle"></i> Terima
+											</button>
+											<button type="button" class="button button-sm radius-10" style="background: #e74c3c; color: white; padding: 5px 12px; border: none;" onclick="updateStatus(<?php echo $p['id']; ?>, 'rejected')" title="Tolak Pendaftar">
+												<i class="lni lni-close"></i> Tolak
+											</button>
+											<?php else: ?>
+											<?php
+											// Cek apakah user sudah ada dengan username = NIM
+											$nimTmp = pg_escape_string($koneksi, $p['nim']);
+											$existsRes = pg_query($koneksi, "SELECT id, username FROM users WHERE username = '$nimTmp' LIMIT 1");
+											$hasUser = $existsRes && pg_num_rows($existsRes) > 0;
+											
+											if ($hasUser): ?>
+												<span style="background: #d4edda; color: #155724; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;" title="Akun sudah dibuat (Username: <?php echo htmlspecialchars($p['nim']); ?>)">
+													<i class="lni lni-checkmark-circle"></i> Akun Aktif
+												</span>
+											<?php else: ?>
+												<?php if ($status === 'accepted'): ?>
+												<button type="button" class="button button-sm radius-10" style="background: #2F80ED; color: white; padding: 5px 12px; border: none;" onclick="showCreateAccountModal(<?php echo (int)$p['id']; ?>, '<?php echo htmlspecialchars($p['nim'], ENT_QUOTES); ?>')" title="Buat akun login dengan username dan password = NIM">
+													<i class="lni lni-user"></i> Buat Akun
 												</button>
 												<?php else: ?>
-												<?php
-												// Tampilkan tombol buat akun bila belum ada user dengan username = NIM
-												$nimTmp = pg_escape_string($koneksi, $p['nim']);
-												$existsRes = pg_query($koneksi, "SELECT 1 FROM users WHERE username = '$nimTmp' LIMIT 1");
-												$hasUser = $existsRes && pg_num_rows($existsRes) > 0;
-												if (!$hasUser):
-												?>
-												<form method="POST" action="" style="display:inline-block;">
-													<input type="hidden" name="action" value="create_account">
-													<input type="hidden" name="id" value="<?php echo (int)$p['id']; ?>">
-													<input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
-													<button type="submit" class="btn-action btn-accept" title="Buat Akun">
-														<i class="lni lni-user"></i>
-													</button>
-												</form>
+												<span style="color: #95a5a6; font-size: 12px;">-</span>
 												<?php endif; ?>
-												<?php endif; ?>
-											</div>
-										</td>
-									</tr>
-									<?php endforeach; ?>
-								<?php else: ?>
-									<tr>
-										<td colspan="8" class="empty-state">
-											<div class="empty-content">
-												<i class="lni lni-inbox"></i>
-												<h4>Tidak Ada Data</h4>
-												<p>
-													<?php if ($status_filter !== 'all'): ?>
-														Tidak ada pendaftar dengan status "<?php echo htmlspecialchars(ucfirst($status_filter)); ?>".
-													<?php else: ?>
-														Belum ada data pendaftar. Mahasiswa yang mendaftar akan muncul di sini.
-													<?php endif; ?>
-												</p>
-											</div>
-										</td>
-									</tr>
-								<?php endif; ?>
-							</tbody>
-						</table>
-					</div>
+											<?php endif; ?>
+											<?php endif; ?>
+										</div>
+									</td>
+								</tr>
+								<?php endforeach; ?>
+							<?php else: ?>
+								<tr>
+									<td colspan="8" class="text-center" style="padding: 40px;">
+										<i class="lni lni-inbox" style="font-size: 48px; color: #dee2e6;"></i>
+										<p class="mt-3 text-muted">
+											<?php if ($status_filter !== 'all'): ?>
+												Tidak ada pendaftar dengan status "<?php echo htmlspecialchars(ucfirst($status_filter)); ?>".
+											<?php else: ?>
+												Belum ada data pendaftar. Mahasiswa yang mendaftar akan muncul di sini.
+											<?php endif; ?>
+										</p>
+									</td>
+								</tr>
+							<?php endif; ?>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
@@ -486,63 +465,39 @@ include __DIR__ . '/../../template/admin_header.php';
 	</div>
 </div>
 
+<!-- Confirm Modal for Create Account -->
+<div id="createAccountOverlay" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px;">
+	<div style="background: #fff; border-radius: 12px; max-width: 480px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden;">
+		<div style="padding: 16px 20px; border-bottom: 1px solid #f1f1f1; display: flex; align-items: center; gap: 10px;">
+			<i class="lni lni-user" style="font-size: 20px; color: #2F80ED;"></i>
+			<h4 style="margin: 0; color: #2c3e50; font-weight: 600; font-size: 16px;">localhost says</h4>
+		</div>
+		<div style="padding: 20px;">
+			<p style="margin: 0 0 16px 0; color: #2c3e50; font-size: 14px; font-weight: 500;">
+				Buat akun login untuk mahasiswa ini?
+			</p>
+			<div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+				<div style="margin-bottom: 8px;">
+					<span style="color: #6c757d; font-size: 13px;">Username: </span>
+					<span id="createAccountUsername" style="color: #2c3e50; font-weight: 600; font-size: 14px;">-</span>
+				</div>
+				<div>
+					<span style="color: #6c757d; font-size: 13px;">Password: </span>
+					<span id="createAccountPassword" style="color: #2c3e50; font-weight: 600; font-size: 14px;">-</span>
+				</div>
+			</div>
+			<p style="margin: 0; color: #6c757d; font-size: 13px; line-height: 1.5;">
+				Mahasiswa bisa login ke halaman mahasiswa dengan NIM sebagai username dan password.
+			</p>
+		</div>
+		<div style="padding: 12px 20px; display: flex; justify-content: flex-end; gap: 8px; background: #fafafa;">
+			<button id="btnCancelCreateAccount" class="button radius-10" style="background: #6c757d; color: #fff; padding: 8px 16px; font-size: 14px; border: none;">Cancel</button>
+			<button id="btnConfirmCreateAccount" class="button radius-10" style="background: #9b59b6; color: #fff; padding: 8px 16px; font-size: 14px; border: none;">OK</button>
+		</div>
+	</div>
+</div>
+
 <style>
-/* Stat Cards (smaller) */
-.stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 20px; color: white; box-shadow: 0 8px 20px rgba(0,0,0,0.08); transition: all 0.2s ease; height: 100%; text-align: center; position: relative; overflow: hidden; }
-.stat-card::before { content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); animation: pulse 3s ease-in-out infinite; }
-@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 0.8; } }
-.stat-card:hover { transform: translateY(-5px); box-shadow: 0 14px 28px rgba(0,0,0,0.12); }
-.stat-card-blue { background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%); }
-.stat-card-orange { background: linear-gradient(135deg, #F2994A 0%, #E67E22 100%); }
-.stat-card-green { background: linear-gradient(135deg, #27AE60 0%, #1E8E4F 100%); }
-.stat-card-red { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
-.stat-card .stat-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.95; position: relative; z-index: 1; }
-.stat-card .stat-number { font-size: 28px; font-weight: 700; margin-bottom: 4px; position: relative; z-index: 1; text-shadow: 0 1px 6px rgba(0,0,0,0.2); }
-.stat-card .stat-label { font-size: 12px; opacity: 0.95; font-weight: 600; position: relative; z-index: 1; text-transform: uppercase; letter-spacing: 1px; }
-
-/* Filter Card */
-.filter-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border: 1px solid #e9ecef; }
-.filter-header { display: flex; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #f8f9fa; }
-.filter-header i { font-size: 20px; }
-.filter-header span { font-size: 16px; font-weight: 600; }
-.filter-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
-.filter-btn { padding: 10px 16px; border-radius: 8px; font-size: 13px; }
-.filter-btn .badge { padding: 3px 7px; font-size: 11px; }
-
-/* Table Card */
-.table-card { border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-.table-header { padding: 18px 22px; }
-.table-header h4 { font-size: 18px; }
-.table-count { padding: 5px 12px; font-size: 12px; }
-
-/* Empty state (compact) */
-.empty-state { padding: 24px 16px !important; }
-.empty-content { text-align: center; color: #6c757d; }
-.empty-content i { display: block; font-size: 28px; color: #ced4da; margin-bottom: 8px; }
-.empty-content h4 { font-size: 16px; color: #2c3e50; margin: 0 0 6px 0; font-weight: 600; }
-.empty-content p { font-size: 13px; margin: 0; }
-.empty-content a { color: #2F80ED; text-decoration: none; }
-.empty-content a:hover { text-decoration: underline; }
-
-/* Badges */
-.nim-badge { padding: 5px 10px; border-radius: 6px; font-size: 12px; }
-.jurusan-tag { padding: 5px 10px; border-radius: 6px; font-size: 12px; }
-.minat-text { font-size: 12px; }
-
-/* Status Badge */
-.status-badge { padding: 6px 12px; border-radius: 16px; font-size: 11px; }
-.status-badge i { font-size: 12px; }
-
-/* Date Info */
-.date-info strong { font-size: 13px; }
-.date-info small { font-size: 10px; }
-
-/* Action Buttons */
-.btn-action { width: 32px; height: 32px; font-size: 14px; }
-
-/* Responsive tweaks */
-@media (max-width: 991px) { .stat-card { padding: 16px; } .stat-card .stat-icon { font-size: 28px; } .stat-card .stat-number { font-size: 24px; } .stat-card .stat-label { font-size: 11px; } }
-
 /* Detail Modal */
 #detailOverlay { display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px; }
 .detail-modal { background: #fff; border-radius: 12px; max-width: 640px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; }
@@ -555,22 +510,78 @@ include __DIR__ . '/../../template/admin_header.php';
 .detail-value { color: #2c3e50; font-size: 14px; font-weight: 600; }
 .detail-footer { padding: 12px 20px; background: #fafafa; border-top: 1px solid #f1f1f1; display: flex; justify-content: flex-end; }
 .detail-status-badge { padding: 6px 12px; border-radius: 16px; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; }
+.status-pending { background: #fff3cd; color: #856404; }
+.status-accepted { background: #d4edda; color: #155724; }
+.status-rejected { background: #f8d7da; color: #721c24; }
+
+/* Table Styling Improvements */
+.table-striped tbody tr:nth-of-type(odd) { background-color: rgba(0,0,0,0.02); }
+.table-striped tbody tr:hover { background-color: rgba(47, 128, 237, 0.05); transition: background-color 0.2s ease; }
+.table thead th { font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+
+/* Button Hover Effects */
+.button:hover { transform: translateY(-1px); transition: all 0.2s ease; }
+.button:active { transform: translateY(0); }
+
+/* Filter Card Styling */
+.filter-card-wrapper { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+/* Responsive Table */
+@media (max-width: 768px) {
+	.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+	.table thead th, .table tbody td { white-space: nowrap; }
+}
 </style>
 
 <?php
 $pendaftar_map = [];
 foreach ($pendaftar as $pp) {
+	// Format tanggal_daftar ke WIB
+	$tanggal_daftar_formatted = '-';
+	if (!empty($pp['tanggal_daftar'])) {
+		try {
+			$date = new DateTime($pp['tanggal_daftar'], new DateTimeZone('UTC'));
+			$date->setTimezone(new DateTimeZone('Asia/Jakarta'));
+			$tanggal_daftar_formatted = $date->format('d/m/Y H:i') . ' WIB';
+		} catch (Exception $e) {
+			$tanggal = strtotime($pp['tanggal_daftar']);
+			if ($tanggal !== false) {
+				$tanggal_wib = $tanggal + (7 * 3600);
+				$tanggal_daftar_formatted = date('d/m/Y H:i', $tanggal_wib) . ' WIB';
+			} else {
+				$tanggal_daftar_formatted = $pp['tanggal_daftar'];
+			}
+		}
+	}
+	
+	// Format tanggal_review ke WIB
+	$tanggal_review_formatted = '-';
+	if (!empty($pp['tanggal_review'])) {
+		try {
+			$date = new DateTime($pp['tanggal_review'], new DateTimeZone('UTC'));
+			$date->setTimezone(new DateTimeZone('Asia/Jakarta'));
+			$tanggal_review_formatted = $date->format('d/m/Y H:i') . ' WIB';
+		} catch (Exception $e) {
+			$tanggal = strtotime($pp['tanggal_review']);
+			if ($tanggal !== false) {
+				$tanggal_wib = $tanggal + (7 * 3600);
+				$tanggal_review_formatted = date('d/m/Y H:i', $tanggal_wib) . ' WIB';
+			} else {
+				$tanggal_review_formatted = $pp['tanggal_review'];
+			}
+		}
+	}
+	
 	$pendaftar_map[(string)$pp['id']] = [
 		'id' => (int)$pp['id'],
 		'nama' => $pp['nama'] ?? '',
 		'email' => $pp['email'] ?? '',
 		'nim' => $pp['nim'] ?? '',
-		'jurusan' => $pp['jurusan'] ?? '',
 		'minat' => $pp['minat'] ?? '',
 		'foto' => $pp['foto'] ?? '',
 		'status' => $pp['status'] ?? 'pending',
-		'tanggal_daftar' => $pp['tanggal_daftar'] ?? '',
-		'tanggal_review' => $pp['tanggal_review'] ?? null,
+		'tanggal_daftar' => $tanggal_daftar_formatted,
+		'tanggal_review' => $tanggal_review_formatted,
 		'catatan_admin' => $pp['catatan_admin'] ?? ''
 	];
 }
@@ -591,7 +602,6 @@ function viewDetail(id) {
 	// Populate
 	document.getElementById('detailNama').textContent = data.nama || '-';
 	document.getElementById('detailNim').textContent = data.nim || '-';
-	document.getElementById('detailJurusan').textContent = data.jurusan || '-';
 	document.getElementById('detailMinat').textContent = data.minat ? data.minat : '-';
 	document.getElementById('detailEmail').textContent = data.email || '-';
 	document.getElementById('detailEmail').href = data.email ? ('mailto:' + data.email) : 'javascript:void(0)';
@@ -707,6 +717,67 @@ function viewDetail(id) {
 	// expose function
 	window.updateStatus = function(id, status) { openConfirm(id, status); }
 })();
+
+// Create Account Modal
+(function() {
+	let pendingAccount = { id: null, nim: null };
+	const overlay = document.getElementById('createAccountOverlay');
+	const usernameEl = document.getElementById('createAccountUsername');
+	const passwordEl = document.getElementById('createAccountPassword');
+	const btnConfirm = document.getElementById('btnConfirmCreateAccount');
+	const btnCancel = document.getElementById('btnCancelCreateAccount');
+
+	window.showCreateAccountModal = function(id, nim) {
+		pendingAccount.id = id;
+		pendingAccount.nim = nim;
+		usernameEl.textContent = nim;
+		passwordEl.textContent = nim;
+		overlay.style.display = 'flex';
+	};
+
+	function closeModal() {
+		pendingAccount.id = null;
+		pendingAccount.nim = null;
+		overlay.style.display = 'none';
+	}
+
+	btnCancel.addEventListener('click', function() { closeModal(); });
+	btnConfirm.addEventListener('click', function() {
+		if (!pendingAccount.id) return;
+		
+		// Submit form
+		var form = document.createElement('form');
+		form.method = 'POST';
+		form.action = '';
+		
+		var actionInput = document.createElement('input');
+		actionInput.type = 'hidden';
+		actionInput.name = 'action';
+		actionInput.value = 'create_account';
+		form.appendChild(actionInput);
+		
+		var idInput = document.createElement('input');
+		idInput.type = 'hidden';
+		idInput.name = 'id';
+		idInput.value = pendingAccount.id;
+		form.appendChild(idInput);
+		
+		var urlParams = new URLSearchParams(window.location.search);
+		var currentFilter = urlParams.get('status') || 'all';
+		var filterInput = document.createElement('input');
+		filterInput.type = 'hidden';
+		filterInput.name = 'current_filter';
+		filterInput.value = currentFilter;
+		form.appendChild(filterInput);
+		
+		document.body.appendChild(form);
+		form.submit();
+	});
+	
+	overlay.addEventListener('click', function(e) {
+		if (e.target === overlay) { closeModal(); }
+	});
+})();
 </script>
 
 <!-- Detail Modal -->
@@ -726,9 +797,6 @@ function viewDetail(id) {
 
 				<div class="detail-label">NIM</div>
 				<div class="detail-value" id="detailNim">-</div>
-
-				<div class="detail-label">Jurusan</div>
-				<div class="detail-value" id="detailJurusan">-</div>
 
 				<div class="detail-label">Minat</div>
 				<div class="detail-value" id="detailMinat">-</div>
@@ -758,4 +826,4 @@ function viewDetail(id) {
 	</div>
 </div>
 
-<?php include __DIR__ . '/template/admin_footer.php'; ?>
+<?php include __DIR__ . '/../../template/admin_footer.php'; ?>
