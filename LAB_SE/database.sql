@@ -51,6 +51,24 @@ CREATE TABLE IF NOT EXISTS pendaftaran (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Fix: Hapus NOT NULL constraint dari kolom jurusan jika ada
+-- Jika kolom jurusan tidak ada, query ini akan diabaikan
+DO $$
+BEGIN
+    -- Cek apakah kolom jurusan ada
+    IF EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'pendaftaran' 
+        AND column_name = 'jurusan'
+    ) THEN
+        -- Hapus NOT NULL constraint jika ada
+        ALTER TABLE pendaftaran ALTER COLUMN jurusan DROP NOT NULL;
+    END IF;
+END $$;
+
+drop table pendaftaran;
+
 CREATE TABLE IF NOT EXISTS blog (
     id SERIAL PRIMARY KEY,
     title VARCHAR(500) NOT NULL,

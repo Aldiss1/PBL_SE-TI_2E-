@@ -96,6 +96,8 @@ if ($result_rejected) {
 $status_filter = isset($_GET['status']) ? clean_input($_GET['status']) : 'all';
 
 // Proses update status
+// PENTING: Proses ini HANYA mengubah status pendaftaran, TIDAK membuat akun user secara otomatis
+// Akun user hanya dibuat ketika admin mengklik tombol "Buat Akun" secara manual
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_status') {
 	$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 	$new_status = isset($_POST['status']) ? clean_input($_POST['status']) : '';
@@ -105,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 		$id_escaped = pg_escape_string($koneksi, $id);
 		$status_escaped = pg_escape_string($koneksi, $new_status);
 		
+		// Hanya update status, TIDAK membuat akun user
 		$update_query = "UPDATE pendaftaran SET status = '$status_escaped', updated_at = NOW()";
 		if ($new_status === 'accepted' || $new_status === 'rejected') {
 			$update_query .= ", tanggal_review = NOW()";

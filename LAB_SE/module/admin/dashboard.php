@@ -94,7 +94,7 @@ if ($result_jabatan) {
 
 // Ambil pendaftar terbaru (5 terakhir)
 $recent_pendaftar = [];
-$query_recent = "SELECT nama, nim, jurusan, tanggal_daftar, status FROM pendaftaran ORDER BY tanggal_daftar DESC LIMIT 5";
+$query_recent = "SELECT nama, nim, tanggal_daftar, status FROM pendaftaran ORDER BY tanggal_daftar DESC LIMIT 5";
 $result_recent = pg_query($koneksi, $query_recent);
 if ($result_recent && pg_num_rows($result_recent) > 0) {
     while ($row = pg_fetch_assoc($result_recent)) {
@@ -214,7 +214,6 @@ $chart_json = json_encode($chart_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_AP
                                 </div>
                                 <div class="activity-meta">
                                     <i class="lni lni-id-card mr-1"></i> NIM: <?php echo htmlspecialchars($pendaftar['nim']); ?> | 
-                                    <i class="lni lni-graduation mr-1"></i> <?php echo htmlspecialchars($pendaftar['jurusan']); ?> | 
                                     <i class="lni lni-calendar mr-1"></i> <?php echo date('d/m/Y', strtotime($pendaftar['tanggal_daftar'])); ?>
                                 </div>
                             </div>
