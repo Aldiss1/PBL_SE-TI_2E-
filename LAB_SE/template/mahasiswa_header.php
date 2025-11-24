@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/animate.css"/>
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/lindy-uikit.css"/>
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-layout.css"/>
+    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-modules.css"/>
 </head>
 <body>
     <?php require_once __DIR__ . '/../module/auth/cek_login_mahasiswa.php'; ?>

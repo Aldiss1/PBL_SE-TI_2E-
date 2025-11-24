@@ -92,32 +92,8 @@ require_once __DIR__ . '/../../config/koneksi.php';
 <?php if (!empty($anggota_map)): ?>
 <script>
 window.personilData = <?php echo json_encode($anggota_map); ?>;
-function openPersonilDetail(id) {
-	var data = (window.personilData && window.personilData[id]) ? window.personilData[id] : null;
-	if (!data) { alert('Data personil tidak ditemukan.'); return; }
-
-	var overlay = document.getElementById('personilOverlay');
-	var img = document.getElementById('personilFoto');
-	var nama = document.getElementById('personilNama');
-	var jabatan = document.getElementById('personilJabatan');
-	var deskripsi = document.getElementById('personilDeskripsi');
-	var meta = document.getElementById('personilMeta');
-
-	img.src = data.foto && data.foto.length ? data.foto : 'https://via.placeholder.com/300';
-	img.alt = data.nama || 'Foto Personil';
-	nama.textContent = data.nama || '-';
-	jabatan.textContent = data.jabatan || 'Anggota';
-	deskripsi.textContent = data.deskripsi && data.deskripsi.length ? data.deskripsi : '-';
-
-	var metaText = [];
-	if (data.created_at) metaText.push('Dibuat: ' + data.created_at);
-	if (data.updated_at) metaText.push('Diubah: ' + data.updated_at);
-	meta.textContent = metaText.join(' • ');
-
-	overlay.style.display = 'flex';
-}
-function closePersonilModal(){ document.getElementById('personilOverlay').style.display='none'; }
 </script>
+<script src="../../assets/js/classes/PersonilModal.js"></script>
 
 <!-- Modal Detail Personil -->
 <div id="personilOverlay" onclick="if(event.target===this){ closePersonilModal(); }">

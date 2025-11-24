@@ -75,16 +75,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php include __DIR__ . '/../../template/mahasiswa_sidebar.php'; ?>
 
 <main class="admin-main-content">
-  <section class="pt-50 pb-50" style="background: #f8f9fa; min-height: calc(100vh - 80px); padding-top: 40px !important;">
+  <section class="pt-50 pb-50 admin-section-bg-full">
     <div class="container">
       <div class="row mb-40">
         <div class="col-lg-12">
           <div class="section-title mb-30">
-            <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s" style="color:#2c3e50; font-size:28px; font-weight:700;">
-              <i class="lni lni-user" style="color:#2F80ED; margin-right:10px;"></i>
+            <h2 class="mb-15 wow fadeInUp section-title-h2" data-wow-delay=".2s">
+              <i class="lni lni-user section-title-icon"></i>
               Profil
             </h2>
-            <p class="wow fadeInUp" data-wow-delay=".4s" style="color:#6c757d; font-size:14px; margin:0;">
+            <p class="wow fadeInUp section-title-p" data-wow-delay=".4s">
               Kelola informasi profil dan ganti password akun Anda.
             </p>
           </div>
@@ -103,11 +103,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST">
               <input type="hidden" name="mode" value="update_profile" />
               <div class="mb-3">
-                <label class="form-label" style="font-weight:600;">Username (NIM)</label>
+                <label class="form-label form-label-custom">Username (NIM)</label>
                 <input type="text" class="form-control" value="<?php echo htmlspecialchars($username); ?>" disabled />
               </div>
               <div class="mb-3">
-                <label class="form-label" style="font-weight:600;">Nama Lengkap</label>
+                <label class="form-label form-label-custom">Nama Lengkap</label>
                 <input type="text" name="full_name" class="form-control" value="<?php echo htmlspecialchars($user['full_name'] ?? ''); ?>" placeholder="Nama Lengkap" required />
               </div>
               <button type="submit" class="button radius-10">Simpan Perubahan</button>
@@ -124,15 +124,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST">
               <input type="hidden" name="mode" value="change_password" />
               <div class="mb-3">
-                <label class="form-label" style="font-weight:600;">Password Saat Ini</label>
+                <label class="form-label form-label-custom">Password Saat Ini</label>
                 <input type="password" name="current_password" class="form-control" placeholder="Password saat ini" required />
               </div>
               <div class="mb-3">
-                <label class="form-label" style="font-weight:600;">Password Baru</label>
+                <label class="form-label form-label-custom">Password Baru</label>
                 <input type="password" name="new_password" class="form-control" placeholder="Minimal 6 karakter" required />
               </div>
               <div class="mb-3">
-                <label class="form-label" style="font-weight:600;">Konfirmasi Password Baru</label>
+                <label class="form-label form-label-custom">Konfirmasi Password Baru</label>
                 <input type="password" name="confirm_password" class="form-control" placeholder="Ulangi password baru" required />
               </div>
               <button type="submit" class="button radius-10">Ubah Password</button>

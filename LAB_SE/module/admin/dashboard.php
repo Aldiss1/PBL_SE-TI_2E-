@@ -146,7 +146,7 @@ $chart_json = json_encode($chart_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_AP
 
 <!-- Main Content -->
 <main class="admin-main-content">
-<section class="pt-50 pb-50" style="padding-top: 30px !important; background: transparent;">
+<section class="pt-50 pb-50 admin-section-bg section-transparent">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
@@ -204,12 +204,16 @@ $chart_json = json_encode($chart_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_AP
                 <div class="recent-activity wow fadeInUp" data-wow-delay=".6s">
                     <h4><i class="lni lni-list mr-2"></i> Pendaftar Terbaru</h4>
                     <?php if (count($recent_pendaftar) > 0): ?>
-                        <?php foreach ($recent_pendaftar as $pendaftar): ?>
-                            <div class="activity-item">
+                        <?php 
+                        $delay = 0.7;
+                        foreach ($recent_pendaftar as $index => $pendaftar): 
+                            $delay += 0.1;
+                        ?>
+                            <div class="activity-item wow fadeInUp" data-wow-delay="<?php echo number_format($delay, 1); ?>s">
                                 <div class="activity-name">
                                     <?php echo htmlspecialchars($pendaftar['nama']); ?>
                                     <?php if ($pendaftar['status'] === 'pending'): ?>
-                                        <span class="badge badge-warning ml-2" style="background: #F2994A; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px;">Pending</span>
+                                        <span class="status-badge status-badge-pending status-badge-small">Pending</span>
                                     <?php endif; ?>
                                 </div>
                                 <div class="activity-meta">
@@ -218,12 +222,12 @@ $chart_json = json_encode($chart_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_AP
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                        <div class="text-center mt-20">
+                        <div class="text-center mt-20 wow fadeInUp" data-wow-delay="<?php echo number_format($delay + 0.1, 1); ?>s">
                             <a href="../../module/pendaftar/index.php" class="button button-sm radius-10">Lihat Semua Pendaftar</a>
                         </div>
                     <?php else: ?>
                         <div class="text-center py-4">
-                            <i class="lni lni-inbox" style="font-size: 48px; color: #dee2e6;"></i>
+                            <i class="lni lni-inbox admin-table-empty-icon"></i>
                             <p class="mt-3 text-muted">Belum ada data pendaftar</p>
                         </div>
                     <?php endif; ?>
@@ -234,28 +238,28 @@ $chart_json = json_encode($chart_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_AP
             <div class="col-xl-4 col-lg-4 mb-30">
                 <div class="recent-activity wow fadeInUp" data-wow-delay=".7s">
                     <h4><i class="lni lni-bolt mr-2"></i> Quick Actions</h4>
-                    <div class="activity-item" style="border-left-color: #27AE60;">
+                    <div class="activity-item activity-item-green">
                         <div class="activity-name">
                             <i class="lni lni-plus-circle mr-2"></i> Tambah Anggota Baru
                         </div>
                         <div class="activity-meta">
-                            <a href="../../module/anggota/index.php" style="color: #27AE60; text-decoration: none;">Klik untuk menambah →</a>
+                            <a href="../../module/anggota/index.php" class="activity-link activity-link-green">Klik untuk menambah →</a>
                         </div>
                     </div>
-                    <div class="activity-item" style="border-left-color: #F2994A;">
+                    <div class="activity-item activity-item-orange">
                         <div class="activity-name">
                             <i class="lni lni-eye mr-2"></i> Review Pendaftar
                         </div>
                         <div class="activity-meta">
-                            <a href="../../module/pendaftar/index.php" style="color: #F2994A; text-decoration: none;"><?php echo $stats['pendaftar_pending']; ?> pending →</a>
+                            <a href="../../module/pendaftar/index.php" class="activity-link activity-link-orange"><?php echo $stats['pendaftar_pending']; ?> pending →</a>
                         </div>
                     </div>
-                    <div class="activity-item" style="border-left-color: #9B59B6;">
+                    <div class="activity-item activity-item-purple">
                         <div class="activity-name">
                             <i class="lni lni-briefcase mr-2"></i> Kelola Jabatan
                         </div>
                         <div class="activity-meta">
-                            <a href="../../module/jabatan/index.php" style="color: #9B59B6; text-decoration: none;">Klik untuk mengelola →</a>
+                            <a href="../../module/jabatan/index.php" class="activity-link activity-link-purple">Klik untuk mengelola →</a>
                         </div>
                     </div>
                 </div>
@@ -265,7 +269,7 @@ $chart_json = json_encode($chart_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_AP
 </section>
 
 <!-- Chart Section -->
-<section class="pt-50 pb-50" style="background: transparent; padding-top: 20px !important;">
+<section class="pt-50 pb-50 admin-section-bg" style="background: transparent; padding-top: 20px !important;">
     <div class="container">
         <div class="row">
             <div class="col-lg-12 mb-30">
@@ -287,183 +291,99 @@ $chart_json = json_encode($chart_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_AP
 <?php include __DIR__ . '/../../template/admin_footer.php'; ?>
 
 <script>
-// Chart.js Configuration - Tunggu semua resource dimuat
+// Chart data dari PHP
+const chartData = <?php echo $chart_json; ?> || { labels: [], data: [] };
+</script>
+<script src="../../assets/js/classes/ChartManager.js"></script>
+<script>
+// Initialize ChartManager after all scripts are loaded
 (function() {
-    // Validasi data chart dari PHP
-    const chartData = <?php echo $chart_json; ?> || { labels: [], data: [] };
-    
-    // Validasi struktur data
-    if (!chartData.labels || !chartData.data) {
-        console.error('Invalid chart data structure');
-        return;
-    }
-    
-    let initAttempts = 0;
-    const maxAttempts = 50;
-    
-    function initChart() {
-        initAttempts++;
-        
-        // Cek apakah Chart.js sudah dimuat
+    function initChartManager() {
+        // Check if both Chart.js and ChartManager are loaded
         if (typeof Chart === 'undefined') {
-            if (initAttempts < maxAttempts) {
-                setTimeout(initChart, 100);
-            } else {
-                console.error('Chart.js failed to load after maximum attempts');
-            }
+            console.log('Waiting for Chart.js...');
+            setTimeout(initChartManager, 100);
             return;
         }
         
-        // Cek apakah canvas sudah ada
+        if (typeof ChartManager === 'undefined') {
+            console.log('Waiting for ChartManager...');
+            setTimeout(initChartManager, 100);
+            return;
+        }
+        
+        // Check if chart data is valid
+        if (!chartData || !chartData.labels || !chartData.data) {
+            console.warn('Chart data is invalid:', chartData);
+            return;
+        }
+        
+        // Check if canvas exists
         const canvas = document.getElementById('pendaftaranChart');
         if (!canvas) {
-            if (initAttempts < maxAttempts) {
-                setTimeout(initChart, 100);
-            } else {
-                console.error('Chart canvas not found after maximum attempts');
-            }
+            console.log('Waiting for canvas element...');
+            setTimeout(initChartManager, 100);
             return;
         }
         
-        // Pastikan chart belum diinisialisasi
-        if (canvas.chartInstance) {
-            return;
-        }
-        
+        // Initialize ChartManager
         try {
-            const ctx = canvas.getContext('2d');
-            
-            // Destroy chart jika sudah ada
-            if (canvas.chartInstance) {
-                canvas.chartInstance.destroy();
-            }
-            
-            // Buat chart baru
-            canvas.chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: chartData.labels || [],
-                    datasets: [{
-                        label: 'Jumlah Pendaftar',
-                        data: chartData.data || [],
-                        borderColor: '#2F80ED',
-                        backgroundColor: 'rgba(47, 128, 237, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#2F80ED',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        pointHoverBackgroundColor: '#1E5FCC',
-                        pointHoverBorderColor: '#ffffff',
-                        pointHoverBorderWidth: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    aspectRatio: 2.5,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20,
-                                font: {
-                                    size: 14,
-                                    weight: '500'
-                                },
-                                color: '#2c3e50'
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12,
-                            titleFont: {
-                                size: 14,
-                                weight: 'bold'
-                            },
-                            bodyFont: {
-                                size: 13
-                            },
-                            borderColor: '#2F80ED',
-                            borderWidth: 1,
-                            cornerRadius: 8,
-                            displayColors: true,
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Pendaftar: ' + context.parsed.y + ' siswa';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1,
-                                font: {
-                                    size: 12
-                                },
-                                color: '#6c757d'
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)',
-                                drawBorder: false
-                            }
-                        },
-                        x: {
-                            ticks: {
-                                font: {
-                                    size: 12
-                                },
-                                color: '#6c757d'
-                            },
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
-                    },
-                    animation: {
-                        duration: 2000,
-                        easing: 'easeInOutQuart'
-                    }
-                }
-            });
-            
-            console.log('Chart initialized successfully with data:', chartData);
+            window.chartManager = new ChartManager('pendaftaranChart', chartData);
+            console.log('ChartManager initialized successfully');
         } catch (error) {
-            console.error('Error initializing chart:', error);
-            console.error('Chart data:', chartData);
+            console.error('Error initializing ChartManager:', error);
         }
     }
     
-    // Inisialisasi chart setelah semua resource dimuat
-    function startInit() {
-        // Tunggu sedikit untuk memastikan semua script sudah dimuat
-        setTimeout(function() {
-            initChart();
-        }, 200);
-    }
-    
-    // Cek apakah document sudah ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', startInit);
+    // Start initialization after window load
+    if (document.readyState === 'complete') {
+        // Already loaded, start immediately
+        setTimeout(initChartManager, 100);
     } else {
-        // Document sudah ready, tunggu window load
-        if (document.readyState === 'complete') {
-            startInit();
+        // Wait for window load
+        window.addEventListener('load', function() {
+            setTimeout(initChartManager, 100);
+        });
+    }
+})();
+
+// Initialize WOW.js for animations
+(function() {
+    function initWOW() {
+        if (typeof WOW !== 'undefined') {
+            // Destroy existing WOW instance if any
+            if (window.wowInstance) {
+                window.wowInstance = null;
+            }
+            // Initialize WOW
+            window.wowInstance = new WOW({
+                boxClass: 'wow',
+                animateClass: 'animated',
+                offset: 0,
+                mobile: true,
+                live: true
+            });
+            window.wowInstance.init();
+            console.log('WOW.js initialized for animations');
         } else {
-            window.addEventListener('load', startInit);
+            // Retry if WOW.js not loaded yet
+            setTimeout(initWOW, 100);
         }
     }
+    
+    // Initialize WOW after scripts are loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initWOW, 200);
+        });
+    } else {
+        setTimeout(initWOW, 200);
+    }
+    
+    // Also try on window load as backup
+    window.addEventListener('load', function() {
+        setTimeout(initWOW, 100);
+    });
 })();
 </script>
 

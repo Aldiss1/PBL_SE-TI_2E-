@@ -85,7 +85,7 @@ include __DIR__ . '/../../template/admin_header.php';
 
 <!-- Main Content -->
 <main class="admin-main-content">
-<section class="pt-50 pb-50" style="background: #f8f9fa; padding-top: 30px !important;">
+<section class="pt-50 pb-50 admin-section-bg">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
@@ -100,16 +100,16 @@ include __DIR__ . '/../../template/admin_header.php';
 
         <div class="row">
             <div class="col-lg-12">
-                <div class="card wow fadeInUp" data-wow-delay=".3s" style="background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.08);">
+                <div class="card wow fadeInUp form-card" data-wow-delay=".3s">
                     <form method="POST" action="">
                         <div class="mb-3">
-                            <label for="nama_jabatan" class="form-label" style="font-weight: 600; color: #2c3e50;">Nama Jabatan *</label>
-                            <input type="text" class="form-control" id="nama_jabatan" name="nama_jabatan" placeholder="Contoh: Ketua Lab" required style="padding: 12px; border-radius: 5px; border: 1px solid #dee2e6;">
+                            <label for="nama_jabatan" class="form-label form-label-custom">Nama Jabatan *</label>
+                            <input type="text" class="form-control form-input-custom" id="nama_jabatan" name="nama_jabatan" placeholder="Contoh: Ketua Lab" required>
                         </div>
-                        <button type="submit" class="button radius-10" style="background: #27AE60; color: white; padding: 12px 30px;">
+                        <button type="submit" class="button radius-10 btn-save">
                             <i class="lni lni-save"></i> Simpan
                         </button>
-                        <a href="index.php" class="button radius-10 border-button" style="padding: 12px 30px; margin-left: 10px;">
+                        <a href="index.php" class="button radius-10 border-button btn-cancel">
                             <i class="lni lni-arrow-left"></i> Batal
                         </a>
                     </form>
