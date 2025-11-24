@@ -7,64 +7,141 @@ session_start();
 
 // Proses pendaftaran
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nama = clean_input($_POST['name']);
-    $nim = clean_input($_POST['nim']);
-    $email = isset($_POST['email']) ? clean_input($_POST['email']) : '';
-    $jurusan = clean_input($_POST['jurusan']);
+    try {
+        // Pastikan koneksi database tersedia
+        if (!isset($koneksi) || !$koneksi) {
+            throw new Exception('Koneksi database tidak tersedia. Silakan hubungi administrator.');
+        }
 
-    // Validasi sederhana sisi server
-    if ($nama === '' || $nim === '' || $jurusan === '' || $email === '') {
-        pesan_kilat('Semua field wajib diisi.', 'error');
-    } else {
-        // Validasi format email sederhana
+        $nama = clean_input($_POST['name'] ?? '');
+        $nim = clean_input($_POST['nim'] ?? '');
+        $email = isset($_POST['email']) ? clean_input($_POST['email']) : '';
+
+        // Validasi input
+        if (empty($nama)) {
+            throw new Exception('Nama lengkap wajib diisi.');
+        }
+        if (empty($nim)) {
+            throw new Exception('NIM wajib diisi.');
+        }
+        if (empty($email)) {
+            throw new Exception('Email wajib diisi.');
+        }
+
+        // Validasi format email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            pesan_kilat('Format email tidak valid.', 'error');
-            header('Location: daftar.php');
-            exit;
+            throw new Exception('Format email tidak valid.');
         }
 
         // Handle upload foto (opsional)
-        $foto_path = '';
-        if (isset($_FILES['foto']) && is_uploaded_file($_FILES['foto']['tmp_name'])) {
+        $foto_path = null;
+        if (isset($_FILES['foto']) && is_uploaded_file($_FILES['foto']['tmp_name']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
             $allowed_ext = ['jpg','jpeg','png','webp'];
             $max_size = 2 * 1024 * 1024; // 2MB
             $original_name = $_FILES['foto']['name'];
             $tmp_path = $_FILES['foto']['tmp_name'];
             $size = (int)$_FILES['foto']['size'];
+            $error_code = $_FILES['foto']['error'];
+
+            if ($error_code !== UPLOAD_ERR_OK) {
+                throw new Exception('Error upload foto. Kode error: ' . $error_code);
+            }
 
             $ext = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
             if (!in_array($ext, $allowed_ext)) {
-                pesan_kilat('Format foto tidak didukung. Gunakan JPG, JPEG, PNG, atau WEBP.', 'error');
-                header('Location: daftar.php');
-                exit;
+                throw new Exception('Format foto tidak didukung. Gunakan JPG, JPEG, PNG, atau WEBP.');
             }
             if ($size > $max_size) {
-                pesan_kilat('Ukuran foto maksimal 2MB.', 'error');
-                header('Location: daftar.php');
-                exit;
+                throw new Exception('Ukuran foto maksimal 2MB.');
             }
 
             $uploadDir = __DIR__ . '/../../uploads/pendaftar/';
             if (!is_dir($uploadDir)) {
-                @mkdir($uploadDir, 0775, true);
+                if (!@mkdir($uploadDir, 0775, true)) {
+                    throw new Exception('Gagal membuat folder upload.');
+                }
             }
+            
             $safeBase = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower(pathinfo($original_name, PATHINFO_FILENAME)));
             $newName = $safeBase . '_' . time() . '_' . mt_rand(1000,9999) . '.' . $ext;
             $destPath = $uploadDir . $newName;
-            if (@move_uploaded_file($tmp_path, $destPath)) {
-                // Path relatif untuk disimpan di DB
-                $foto_path = 'uploads/pendaftar/' . $newName;
+            
+            if (!@move_uploaded_file($tmp_path, $destPath)) {
+                throw new Exception('Gagal mengupload foto. Silakan coba lagi.');
             }
+            
+            $foto_path = 'uploads/pendaftar/' . $newName;
         }
-    
-        require_once __DIR__ . '/../../fungsi/tambah.php';
-        if (tambah_data('pendaftaran', ['nama' => $nama, 'nim' => $nim, 'email' => $email, 'jurusan' => $jurusan, 'foto' => $foto_path, 'tanggal_daftar' => date('Y-m-d H:i:s')])) {
-            pesan_kilat('Pendaftaran berhasil dikirim!', 'success');
-            header('Location: daftar.php');
-            exit;
-        } else {
-            pesan_kilat('Gagal mengirim pendaftaran. Silakan coba lagi.', 'error');
+
+        // Escape input untuk keamanan
+        $nama_escaped = pg_escape_string($koneksi, $nama);
+        $nim_escaped = pg_escape_string($koneksi, $nim);
+        $email_escaped = pg_escape_string($koneksi, $email);
+        
+        // Cek apakah kolom jurusan ada di tabel (untuk kompatibilitas)
+        $check_jurusan = pg_query($koneksi, "
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_schema = 'public' 
+            AND table_name = 'pendaftaran' 
+            AND column_name = 'jurusan'
+        ");
+        $has_jurusan_column = $check_jurusan && pg_num_rows($check_jurusan) > 0;
+        
+        // Build query
+        $columns = "nama, nim, email";
+        $values = "'$nama_escaped', '$nim_escaped', '$email_escaped'";
+        
+        // Jika kolom jurusan masih ada, tambahkan dengan nilai NULL
+        if ($has_jurusan_column) {
+            $columns .= ", jurusan";
+            $values .= ", NULL";
         }
+        
+        // Tambahkan foto jika ada
+        if ($foto_path !== null) {
+            $foto_escaped = pg_escape_string($koneksi, $foto_path);
+            $columns .= ", foto";
+            $values .= ", '$foto_escaped'";
+        }
+        
+        $query = "INSERT INTO pendaftaran ($columns) VALUES ($values)";
+        
+        // Execute query
+        $result = pg_query($koneksi, $query);
+        
+        if (!$result) {
+            $error_detail = pg_last_error($koneksi);
+            error_log("Database error: " . $error_detail . " | Query: " . $query);
+            
+            // Jika error karena NOT NULL constraint pada jurusan, coba perbaiki otomatis
+            if (strpos($error_detail, 'null value in column "jurusan"') !== false) {
+                // Coba hapus NOT NULL constraint
+                $fix_query = "ALTER TABLE pendaftaran ALTER COLUMN jurusan DROP NOT NULL";
+                $fix_result = pg_query($koneksi, $fix_query);
+                
+                if ($fix_result) {
+                    // Coba insert lagi
+                    $result = pg_query($koneksi, $query);
+                    if ($result) {
+                        pesan_kilat('Pendaftaran berhasil dikirim! (Database telah diperbaiki otomatis)', 'success');
+                        header('Location: daftar.php');
+                        exit;
+                    }
+                }
+            }
+            
+            throw new Exception('Gagal menyimpan data ke database. ' . ($error_detail ? 'Error: ' . $error_detail : ''));
+        }
+        
+        // Success
+        pesan_kilat('Pendaftaran berhasil dikirim!', 'success');
+        header('Location: daftar.php');
+        exit;
+        
+    } catch (Exception $e) {
+        error_log("Registration error: " . $e->getMessage());
+        pesan_kilat($e->getMessage(), 'error');
     }
 }
 ?>
@@ -106,13 +183,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <label for="nim" style="color: #22243e; font-weight: 600; margin-bottom: 8px; display: block;">NIM</label>
                         <input type="text" id="nim" name="nim" class="form-input" placeholder="Masukkan NIM Anda" required style="width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: all 0.3s;">
                         <i class="lni lni-graduation"></i> 
-                      </div>
-                    </div>
-                    <div class="col-md-12">
-                      <div class="single-input">
-                        <label for="jurusan" style="color: #22243e; font-weight: 600; margin-bottom: 8px; display: block;">Jurusan</label>
-                        <input type="text" id="jurusan" name="jurusan" class="form-input" placeholder="cth: JTI, Teknik Elektro, dll." required style="width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 1rem; transition: all 0.3s;">
-                        <i class="lni lni-apartment"></i>
                       </div>
                     </div>
                     <div class="col-md-12">

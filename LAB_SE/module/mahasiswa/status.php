@@ -60,7 +60,6 @@ function status_badge($status) {
               <div class="detail-grid status-grid">
                 <div class="detail-label">Nama Lengkap</div><div class="detail-value"><strong><?php echo htmlspecialchars($pendaftaran['nama'] ?? '-'); ?></strong></div>
                 <div class="detail-label">NIM</div><div class="detail-value"><strong><?php echo htmlspecialchars($pendaftaran['nim'] ?? '-'); ?></strong></div>
-                <div class="detail-label">Jurusan</div><div class="detail-value"><strong><?php echo htmlspecialchars($pendaftaran['jurusan'] ?? '-'); ?></strong></div>
                 <div class="detail-label">Email</div><div class="detail-value"><?php echo htmlspecialchars($pendaftaran['email'] ?? '-'); ?></div>
                 <div class="detail-label">Minat</div><div class="detail-value"><?php echo htmlspecialchars($pendaftaran['minat'] ?? '-'); ?></div>
                 <div class="detail-label">Tanggal Review</div><div class="detail-value"><?php echo !empty($pendaftaran['tanggal_review']) ? htmlspecialchars($pendaftaran['tanggal_review']) : '-'; ?></div>
