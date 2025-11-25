@@ -387,4 +387,3 @@ const chartData = <?php echo $chart_json; ?> || { labels: [], data: [] };
 })();
 </script>
 
-

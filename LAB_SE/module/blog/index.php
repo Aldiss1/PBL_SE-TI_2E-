@@ -270,8 +270,7 @@ include __DIR__ . '/../../template/admin_header.php';
                             <div class="row mb-3">
                                 <div class="col-lg-12">
                                     <label for="featured_image" class="form-label form-label-custom">URL Gambar Featured</label>
-                                    <input type="text" class="form-control" id="featured_image" name="featured_image" placeholder="Contoh: assets/img/blog/blog-1.jpg">
-                                    <small class="form-text text-muted">Masukkan path/URL gambar featured untuk blog ini</small>
+                                    <input type="file" class="form-control" id="featured_image" name="featured_image" accept="image/*">
                                 </div>
                             </div>
 

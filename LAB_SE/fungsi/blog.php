@@ -248,4 +248,3 @@ function getAllBlogs() {
     return $blogs;
 }
 ?>
-
