@@ -1,419 +1,250 @@
 <?php
-$page_title = "Kelola Blog - Admin";
-require_once _DIR_ . '/../../config/koneksi.php';
-require_once _DIR_ . '/../auth/cek_login.php';
-require_once _DIR_ . '/../../config/anti_injection.php';
-require_once _DIR_ . '/../../fungsi/pesan_kilat.php';
-require_once _DIR_ . '/../../fungsi/blog.php';
+// Fungsi-fungsi untuk operasi blog
+require_once __DIR__ . '/../config/koneksi.php';
+require_once __DIR__ . '/../config/anti_injection.php';
 
-// Set active menu
-$current_page = 'blog';
-$menu_items = [
-    'dashboard.php' => [
-        'title' => 'Dashboard',
-        'icon' => 'lni lni-home',
-        'link' => '../../module/admin/dashboard.php',
-        'active' => false
-    ],
-    'anggota' => [
-        'title' => 'Kelola Anggota',
-        'icon' => 'lni lni-users',
-        'link' => '../../module/anggota/index.php',
-        'active' => false
-    ],
-    'jabatan' => [
-        'title' => 'Kelola Jabatan',
-        'icon' => 'lni lni-briefcase',
-        'link' => '../../module/jabatan/index.php',
-        'active' => false
-    ],
-    'user' => [
-        'title' => 'Kelola User',
-        'icon' => 'lni lni-user',
-        'link' => '../../module/user/index.php',
-        'active' => false
-    ],
-    'pendaftar' => [
-        'title' => 'Kelola Pendaftar',
-        'icon' => 'lni lni-list',
-        'link' => '../../module/pendaftar/index.php',
-        'active' => false
-    ],
-    'blog' => [
-        'title' => 'Kelola Blog',
-        'icon' => 'lni lni-text-format',
-        'link' => '../../module/blog/index.php',
-        'active' => true
-    ],
-    'profil' => [ 
-        'title' => 'Kelola Profil', 
-        'icon'  => 'lni lni-cog', 
-        'link'  => '../../module/profil/index.php',
-        'active' => false
-    ]
-];
+// Pastikan session sudah dimulai jika diperlukan
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Ambil action dari URL
-$action = isset($_GET['action']) ? clean_input($_GET['action']) : 'list';
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+// Fungsi untuk generate slug
+function generateBlogSlug($text) {
+    // Convert to lowercase
+    $text = strtolower($text);
+    // Replace spaces with hyphens
+    $text = preg_replace('/[^a-z0-9]+/', '-', $text);
+    // Remove leading/trailing hyphens
+    $text = trim($text, '-');
+    return $text;
+}
 
-// Proses form submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $post_action = isset($_POST['action']) ? clean_input($_POST['action']) : '';
+// Fungsi untuk menambahkan blog
+function tambahBlog($data) {
+    global $koneksi;
     
-    if ($post_action === 'tambah') {
-        $data = [
-            'title' => clean_input($_POST['title']),
-            'content' => $_POST['content'], // Jangan clean untuk content
-            'excerpt' => clean_input($_POST['excerpt']),
-            'category' => clean_input($_POST['category']),
-            'tags' => clean_input($_POST['tags']),
-            'featured_image' => clean_input($_POST['featured_image']),
-            'is_published' => isset($_POST['is_published']) ? '1' : '0'
-        ];
-        
-        $result = tambahBlog($data);
-        if ($result['success']) {
-            pesan_kilat($result['message'], 'success');
-            header('Location: index.php');
-            exit;
-        } else {
-            pesan_kilat($result['message'], 'error');
-        }
-    } elseif ($post_action === 'edit') {
-        $post_id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-        $data = [
-            'title' => clean_input($_POST['title']),
-            'content' => $_POST['content'], // Jangan clean untuk content
-            'excerpt' => clean_input($_POST['excerpt']),
-            'category' => clean_input($_POST['category']),
-            'tags' => clean_input($_POST['tags']),
-            'featured_image' => clean_input($_POST['featured_image']),
-            'is_published' => isset($_POST['is_published']) ? '1' : '0'
-        ];
-        
-        $result = updateBlog($post_id, $data);
-        if ($result['success']) {
-            pesan_kilat($result['message'], 'success');
-            header('Location: index.php');
-            exit;
-        } else {
-            pesan_kilat($result['message'], 'error');
+    $title = isset($data['title']) ? $data['title'] : '';
+    $content = isset($data['content']) ? $data['content'] : '';
+    $excerpt = isset($data['excerpt']) ? $data['excerpt'] : '';
+    $category = isset($data['category']) ? $data['category'] : '';
+    $tags = isset($data['tags']) ? $data['tags'] : '';
+    $featured_image = isset($data['featured_image']) ? $data['featured_image'] : '';
+    $is_published = isset($data['is_published']) ? ($data['is_published'] === true || $data['is_published'] === 'true' || $data['is_published'] === '1') : false;
+    
+    // Escape untuk PostgreSQL
+    $title_escaped = pg_escape_string($koneksi, $title);
+    $content_escaped = pg_escape_string($koneksi, $content);
+    $excerpt_escaped = pg_escape_string($koneksi, $excerpt);
+    $category_escaped = pg_escape_string($koneksi, $category);
+    $featured_image_escaped = pg_escape_string($koneksi, $featured_image);
+    
+    // Generate slug
+    $slug = generateBlogSlug($title);
+    $slug_escaped = pg_escape_string($koneksi, $slug);
+    
+    // Cek apakah slug sudah ada
+    $check_slug = "SELECT COUNT(*) as count FROM blog WHERE slug = '$slug_escaped'";
+    $result_check = pg_query($koneksi, $check_slug);
+    if ($result_check) {
+        $row_check = pg_fetch_assoc($result_check);
+        if ($row_check['count'] > 0) {
+            $slug = $slug . '-' . time();
+            $slug_escaped = pg_escape_string($koneksi, $slug);
         }
     }
-}
-
-// Proses hapus
-if ($action === 'hapus' && $id > 0) {
-    $result = hapusBlog($id);
-    if ($result['success']) {
-        pesan_kilat($result['message'], 'success');
+    
+    // Get author_id from session
+    $author_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 1;
+    
+    // Convert tags to array format for PostgreSQL
+    $tags_array = [];
+    if (!empty($tags)) {
+        $tags_list = explode(',', $tags);
+        foreach ($tags_list as $tag) {
+            $tags_array[] = trim($tag);
+        }
+    }
+    $tags_json = json_encode($tags_array);
+    $tags_json_escaped = pg_escape_string($koneksi, $tags_json);
+    
+    // Set published_at
+    $published_at_str = $is_published ? "'" . date('Y-m-d H:i:s') . "'" : "NULL";
+    $is_published_bool = $is_published ? 'true' : 'false';
+    
+    // Insert blog
+    $query = "INSERT INTO blog (title, slug, content, excerpt, featured_image, author_id, category, tags, is_published, published_at, created_at, updated_at) 
+              VALUES ('$title_escaped', '$slug_escaped', '$content_escaped', '$excerpt_escaped', '$featured_image_escaped', $author_id, '$category_escaped', '$tags_json_escaped'::jsonb, $is_published_bool, $published_at_str, NOW(), NOW())";
+    
+    $result = pg_query($koneksi, $query);
+    
+    if ($result) {
+        return ['success' => true, 'message' => 'Blog berhasil ditambahkan!'];
     } else {
-        pesan_kilat($result['message'], 'error');
-    }
-    header('Location: index.php');
-    exit;
-}
-
-// Ambil data blog untuk edit
-$blog = null;
-if ($action === 'edit' && $id > 0) {
-    $blog = getBlogById($id);
-    if (!$blog) {
-        pesan_kilat('Blog tidak ditemukan!', 'error');
-        header('Location: index.php');
-        exit;
+        return ['success' => false, 'message' => 'Gagal menambahkan blog. Error: ' . pg_last_error($koneksi)];
     }
 }
 
-// Ambil semua blog untuk list
-$blogs = getAllBlogs();
+// Fungsi untuk mengupdate blog
+function updateBlog($id, $data) {
+    global $koneksi;
+    
+    $id = (int)$id;
+    $title = isset($data['title']) ? $data['title'] : '';
+    $content = isset($data['content']) ? $data['content'] : '';
+    $excerpt = isset($data['excerpt']) ? $data['excerpt'] : '';
+    $category = isset($data['category']) ? $data['category'] : '';
+    $tags = isset($data['tags']) ? $data['tags'] : '';
+    $featured_image = isset($data['featured_image']) ? $data['featured_image'] : '';
+    $is_published = isset($data['is_published']) ? ($data['is_published'] === true || $data['is_published'] === 'true' || $data['is_published'] === '1') : false;
+    
+    // Ambil data blog lama untuk cek slug dan published_at
+    $query_old = "SELECT slug, is_published FROM blog WHERE id = $id";
+    $result_old = pg_query($koneksi, $query_old);
+    $blog_old = null;
+    if ($result_old && pg_num_rows($result_old) > 0) {
+        $blog_old = pg_fetch_assoc($result_old);
+    } else {
+        return ['success' => false, 'message' => 'Blog tidak ditemukan!'];
+    }
+    
+    // Escape untuk PostgreSQL
+    $title_escaped = pg_escape_string($koneksi, $title);
+    $content_escaped = pg_escape_string($koneksi, $content);
+    $excerpt_escaped = pg_escape_string($koneksi, $excerpt);
+    $category_escaped = pg_escape_string($koneksi, $category);
+    $featured_image_escaped = pg_escape_string($koneksi, $featured_image);
+    
+    // Generate slug baru jika title berubah
+    $new_slug = generateBlogSlug($title);
+    $slug_update = '';
+    if ($new_slug !== $blog_old['slug']) {
+        $new_slug_escaped = pg_escape_string($koneksi, $new_slug);
+        // Cek apakah slug baru sudah ada
+        $check_slug = "SELECT COUNT(*) as count FROM blog WHERE slug = '$new_slug_escaped' AND id != $id";
+        $result_check = pg_query($koneksi, $check_slug);
+        if ($result_check) {
+            $row_check = pg_fetch_assoc($result_check);
+            if ($row_check['count'] > 0) {
+                $new_slug = $new_slug . '-' . time();
+                $new_slug_escaped = pg_escape_string($koneksi, $new_slug);
+            }
+        }
+        $slug_update = ", slug = '$new_slug_escaped'";
+    }
+    
+    // Set published_at jika baru dipublish
+    $published_at_update = '';
+    if ($is_published === true && !$blog_old['is_published']) {
+        $published_at = date('Y-m-d H:i:s');
+        $published_at_update = ", published_at = '$published_at'";
+    }
+    
+    // Convert tags to array format for PostgreSQL
+    $tags_array = [];
+    if (!empty($tags)) {
+        $tags_list = explode(',', $tags);
+        foreach ($tags_list as $tag) {
+            $tags_array[] = trim($tag);
+        }
+    }
+    $tags_json = json_encode($tags_array);
+    $tags_json_escaped = pg_escape_string($koneksi, $tags_json);
+    
+    $is_published_bool = $is_published ? 'true' : 'false';
+    
+    // Update blog
+    $query = "UPDATE blog SET 
+              title = '$title_escaped',
+              content = '$content_escaped',
+              excerpt = '$excerpt_escaped',
+              featured_image = '$featured_image_escaped',
+              category = '$category_escaped',
+              tags = '$tags_json_escaped'::jsonb,
+              is_published = $is_published_bool
+              $slug_update
+              $published_at_update,
+              updated_at = NOW()
+              WHERE id = $id";
+    
+    $result = pg_query($koneksi, $query);
+    
+    if ($result) {
+        return ['success' => true, 'message' => 'Blog berhasil diperbarui!'];
+    } else {
+        return ['success' => false, 'message' => 'Gagal memperbarui blog. Error: ' . pg_last_error($koneksi)];
+    }
+}
 
-include _DIR_ . '/../../template/admin_header.php';
+// Fungsi untuk menghapus blog
+function hapusBlog($id) {
+    global $koneksi;
+    
+    $id = (int)$id;
+    
+    // Cek apakah blog ada
+    $check_query = "SELECT id FROM blog WHERE id = $id";
+    $check_result = pg_query($koneksi, $check_query);
+    
+    if (!$check_result || pg_num_rows($check_result) == 0) {
+        return ['success' => false, 'message' => 'Blog tidak ditemukan!'];
+    }
+    
+    // Hapus blog
+    $query = "DELETE FROM blog WHERE id = $id";
+    $result = pg_query($koneksi, $query);
+    
+    if ($result) {
+        return ['success' => true, 'message' => 'Blog berhasil dihapus!'];
+    } else {
+        return ['success' => false, 'message' => 'Gagal menghapus blog. Error: ' . pg_last_error($koneksi)];
+    }
+}
+
+// Fungsi untuk mengambil blog berdasarkan ID
+function getBlogById($id) {
+    global $koneksi;
+    
+    $id = (int)$id;
+    $query = "SELECT * FROM blog WHERE id = $id";
+    $result = pg_query($koneksi, $query);
+    
+    if ($result && pg_num_rows($result) > 0) {
+        $blog = pg_fetch_assoc($result);
+        
+        // Parse tags from JSON
+        if (!empty($blog['tags'])) {
+            $tags_array = json_decode($blog['tags'], true);
+            if (is_array($tags_array)) {
+                $blog['tags_string'] = implode(', ', $tags_array);
+            } else {
+                $blog['tags_string'] = '';
+            }
+        } else {
+            $blog['tags_string'] = '';
+        }
+        
+        return $blog;
+    }
+    
+    return null;
+}
+
+// Fungsi untuk mengambil semua blog
+function getAllBlogs() {
+    global $koneksi;
+    
+    $blogs = [];
+    $query = "SELECT b.*, u.username as author_name 
+              FROM blog b 
+              LEFT JOIN users u ON b.author_id = u.id 
+              ORDER BY b.created_at DESC";
+    $result = pg_query($koneksi, $query);
+    if ($result && pg_num_rows($result) > 0) {
+        while ($row = pg_fetch_assoc($result)) {
+            $blogs[] = $row;
+        }
+    }
+    
+    return $blogs;
+}
 ?>
-
-<!-- Sidebar -->
-<?php include _DIR_ . '/../../template/admin_sidebar.php'; ?>
-
-<!-- Main Content -->
-<main class="admin-main-content">
-<section class="pt-50 pb-50 admin-section-bg">
-    <div class="container">
-        <?php if ($action === 'list'): ?>
-            <!-- List Blog -->
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section-title mb-50">
-                        <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Kelola Blog</h2>
-                        <p class="wow fadeInUp" data-wow-delay=".4s">Kelola artikel blog laboratorium. Blog dengan status <strong>Published</strong> akan tampil di landing page (index.php), sedangkan blog dengan status <strong>Draft</strong> hanya dapat dilihat melalui admin panel.</p>
-                    </div>
-                </div>
-            </div>
-
-            <?php tampilkan_pesan(); ?>
-
-            <div class="row mb-30">
-                <div class="col-lg-12">
-                    <a href="?action=tambah" class="button button-sm radius-10 wow fadeInUp" data-wow-delay=".2s">
-                        <i class="lni lni-plus"></i> Tambah Blog Baru
-                    </a>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="table-responsive wow fadeInUp" data-wow-delay=".3s">
-                        <table class="table table-striped table-hover admin-table">
-                            <thead>
-                                <tr>
-                                    <th>NO</th>
-                                    <th>Judul</th>
-                                    <th>Kategori</th>
-                                    <th>Status</th>
-                                    <th>Tanggal</th>
-                                    <th>Views</th>
-                                    <th class="text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (count($blogs) > 0): ?>
-                                    <?php $no = 1; foreach ($blogs as $blog_item): ?>
-                                    <tr>
-                                        <td><?php echo $no++; ?></td>
-                                        <td>
-                                            <strong><?php echo htmlspecialchars($blog_item['title']); ?></strong>
-                                            <?php if ($blog_item['excerpt']): ?>
-                                                <br><small class="text-muted"><?php echo htmlspecialchars(substr($blog_item['excerpt'], 0, 50)); ?>...</small>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php echo $blog_item['category'] ? htmlspecialchars($blog_item['category']) : '-'; ?>
-                                        </td>
-                                        <td>
-                                            <?php if ($blog_item['is_published']): ?>
-                                                <span class="status-badge status-badge-published">Published</span>
-                                            <?php else: ?>
-                                                <span class="status-badge status-badge-draft">Draft</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php echo date('d/m/Y', strtotime($blog_item['created_at'])); ?>
-                                        </td>
-                                        <td>
-                                            <?php echo (int)$blog_item['views']; ?>
-                                        </td>
-                                        <td class="text-center">
-                                            <?php if ($blog_item['is_published']): ?>
-                                            <a href="../../pages/blog/blog-detail.php?id=<?php echo $blog_item['id']; ?>" target="_blank" class="button button-sm radius-10 btn-accept" title="Lihat di Website">
-                                                <i class="lni lni-eye"></i> Preview
-                                            </a>
-                                            <?php endif; ?>
-                                            <a href="?action=edit&id=<?php echo $blog_item['id']; ?>" class="button button-sm radius-10 btn-edit">
-                                                <i class="lni lni-pencil"></i> Edit
-                                            </a>
-                                            <a href="?action=hapus&id=<?php echo $blog_item['id']; ?>" class="button button-sm radius-10 btn-delete" onclick="return confirm('Yakin ingin menghapus blog ini?')">
-                                                <i class="lni lni-trash"></i> Hapus
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="7" class="text-center admin-table-empty">
-                                            <i class="lni lni-inbox admin-table-empty-icon"></i>
-                                            <p class="mt-3 text-muted">Belum ada data blog. <a href="?action=tambah">Tambah blog baru</a></p>
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-        <?php elseif ($action === 'tambah'): ?>
-            <!-- Form Tambah Blog -->
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section-title mb-50">
-                        <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Tambah Blog Baru</h2>
-                        <p class="wow fadeInUp" data-wow-delay=".4s">Buat artikel blog baru untuk laboratorium</p>
-                    </div>
-                </div>
-            </div>
-
-            <?php tampilkan_pesan(); ?>
-
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card wow fadeInUp form-card" data-wow-delay=".3s">
-                        <form method="POST" action="">
-                            <input type="hidden" name="action" value="tambah">
-                            <div class="row mb-3">
-                                <div class="col-lg-12">
-                                    <label for="title" class="form-label form-label-custom">Judul Blog *</label>
-                                    <input type="text" class="form-control" id="title" name="title" required>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-lg-6">
-                                    <label for="category" class="form-label form-label-custom">Kategori</label>
-                                    <input type="text" class="form-control" id="category" name="category" placeholder="Contoh: Teknologi, Research, dll">
-                                </div>
-                                <div class="col-lg-6">
-                                    <label for="tags" class="form-label form-label-custom">Tags</label>
-                                    <input type="text" class="form-control" id="tags" name="tags" placeholder="Pisahkan dengan koma (contoh: php, javascript, web)">
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-lg-12">
-                                    <label for="featured_image" class="form-label form-label-custom">URL Gambar Featured</label>
-                                    <input type="file" class="form-control" id="featured_image" name="featured_image" accept="image/*">
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-lg-12">
-                                    <label for="excerpt" class="form-label form-label-custom">Excerpt / Ringkasan</label>
-                                    <textarea class="form-control" id="excerpt" name="excerpt" rows="3" placeholder="Ringkasan singkat tentang artikel ini..."></textarea>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-lg-12">
-                                    <label for="content" class="form-label form-label-custom">Konten Blog *</label>
-                                    <textarea class="form-control" id="content" name="content" rows="15" required></textarea>
-                                    <small class="form-text text-muted">Gunakan baris baru untuk paragraf baru</small>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-lg-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="is_published" name="is_published" value="1">
-                                        <label class="form-check-label form-label-custom" for="is_published">
-                                            Publikasikan sekarang
-                                        </label>
-                                        <small class="form-text text-muted d-block mt-5">
-                                            <i class="lni lni-info"></i> Blog yang dipublikasikan akan tampil di landing page (index.php). Blog dengan status Draft hanya dapat dilihat melalui admin panel.
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <button type="submit" class="button radius-10 btn-edit btn-save">
-                                        <i class="lni lni-save"></i> Simpan Blog
-                                    </button>
-                                    <a href="index.php" class="button radius-10 border-button btn-cancel">
-                                        <i class="lni lni-arrow-left"></i> Kembali
-                                    </a>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-        <?php elseif ($action === 'edit' && $blog): ?>
-            <!-- Form Edit Blog -->
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section-title mb-50">
-                        <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Edit Blog</h2>
-                        <p class="wow fadeInUp" data-wow-delay=".4s">Edit artikel blog</p>
-                    </div>
-                </div>
-            </div>
-
-            <?php tampilkan_pesan(); ?>
-
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card wow fadeInUp form-card" data-wow-delay=".3s">
-                        <form method="POST" action="">
-                            <input type="hidden" name="action" value="edit">
-                            <input type="hidden" name="id" value="<?php echo $blog['id']; ?>">
-                            <div class="row mb-3">
-                                <div class="col-lg-12">
-                                    <label for="title" class="form-label form-label-custom">Judul Blog *</label>
-                                    <input type="text" class="form-control" id="title" name="title" value="<?php echo htmlspecialchars($blog['title']); ?>" required>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-lg-6">
-                                    <label for="category" class="form-label form-label-custom">Kategori</label>
-                                    <input type="text" class="form-control" id="category" name="category" value="<?php echo htmlspecialchars($blog['category']); ?>" placeholder="Contoh: Teknologi, Research, dll">
-                                </div>
-                                <div class="col-lg-6">
-                                    <label for="tags" class="form-label form-label-custom">Tags</label>
-                                    <input type="text" class="form-control" id="tags" name="tags" value="<?php echo htmlspecialchars($blog['tags_string']); ?>" placeholder="Pisahkan dengan koma (contoh: php, javascript, web)">
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-lg-12">
-                                    <label for="featured_image" class="form-label form-label-custom">URL Gambar Featured</label>
-                                    <input type="text" class="form-control" id="featured_image" name="featured_image" value="<?php echo htmlspecialchars($blog['featured_image']); ?>" placeholder="Contoh: assets/img/blog/blog-1.jpg">
-                                    <small class="form-text text-muted">Masukkan path/URL gambar featured untuk blog ini</small>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-lg-12">
-                                    <label for="excerpt" class="form-label form-label-custom">Excerpt / Ringkasan</label>
-                                    <textarea class="form-control" id="excerpt" name="excerpt" rows="3" placeholder="Ringkasan singkat tentang artikel ini..."><?php echo htmlspecialchars($blog['excerpt']); ?></textarea>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-lg-12">
-                                    <label for="content" class="form-label form-label-custom">Konten Blog *</label>
-                                    <textarea class="form-control" id="content" name="content" rows="15" required style="font-family: inherit;"><?php echo htmlspecialchars($blog['content']); ?></textarea>
-                                    <small class="form-text text-muted">Gunakan baris baru untuk paragraf baru</small>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-lg-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="is_published" name="is_published" value="1" <?php echo $blog['is_published'] ? 'checked' : ''; ?>>
-                                        <label class="form-check-label form-label-custom" for="is_published">
-                                            Publikasikan sekarang
-                                        </label>
-                                        <small class="form-text text-muted d-block mt-5">
-                                            <i class="lni lni-info"></i> Blog yang dipublikasikan akan tampil di landing page (index.php). Blog dengan status Draft hanya dapat dilihat melalui admin panel.
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <button type="submit" class="button radius-10 btn-update">
-                                        <i class="lni lni-save"></i> Update Blog
-                                    </button>
-                                    <a href="index.php" class="button radius-10 border-button btn-cancel">
-                                        <i class="lni lni-arrow-left"></i> Kembali
-                                    </a>
-                                    <?php if ($blog['is_published']): ?>
-                                    <a href="../../pages/blog/blog-detail.php?id=<?php echo $blog['id']; ?>" target="_blank" class="button radius-10 btn-accept btn-cancel">
-                                        <i class="lni lni-eye"></i> Preview
-                                    </a>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
-    </div>
-</section>
-</main>
-
-<?php include _DIR_ . '/../../template/admin_footer.php'; ?>
