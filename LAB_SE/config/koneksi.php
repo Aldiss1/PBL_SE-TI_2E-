@@ -6,7 +6,7 @@ require_once __DIR__ . '/check_pgsql.php';
 $host = "localhost";
 $port = "5432";
 $username = "postgres";
-$password = "123456";
+$password = "12345678";
 $database = "lab_se";
 
 // Membuat connection string
