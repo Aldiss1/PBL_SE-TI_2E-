@@ -6,27 +6,67 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $per_page = 9;
 $offset = ($page - 1) * $per_page;
 
-// Ambil total blog yang published
-$count_query = "SELECT COUNT(*) as total FROM blog WHERE is_published = true";
-$count_result = pg_query($koneksi, $count_query);
-$total_blogs = 0;
-if ($count_result) {
-    $count_row = pg_fetch_assoc($count_result);
-    $total_blogs = (int)$count_row['total'];
-}
+// Ambil blog dari materialized view (lebih cepat!)
+// Fallback ke query biasa jika materialized view belum dibuat
+require_once __DIR__ . '/../../fungsi/materialized_views_simple.php';
+
+// Ambil total blog yang published dari materialized view
+$stats_mv = get_stats_simple();
+$total_blogs = (int)($stats_mv['total_blog'] ?? 0);
 $total_pages = ceil($total_blogs / $per_page);
 
-// Ambil blog yang published
+// Fallback: Query langsung jika materialized view tidak tersedia
+if ($total_blogs === 0 && $koneksi) {
+    $count_query = "SELECT COUNT(*) as total FROM blog WHERE is_published = true";
+    $count_result = pg_query($koneksi, $count_query);
+    if ($count_result) {
+        $count_row = pg_fetch_assoc($count_result);
+        $total_blogs = (int)$count_row['total'];
+        $total_pages = ceil($total_blogs / $per_page);
+    }
+}
+
+// Ambil blog yang published dari materialized view dengan pagination
+$blogs_all = get_blog_published_simple(1000); // Ambil banyak, lalu paginate manual
 $blogs = [];
-$query = "SELECT id, title, excerpt, featured_image, category, published_at, created_at, slug, views 
-          FROM blog 
-          WHERE is_published = true 
-          ORDER BY published_at DESC, created_at DESC 
-          LIMIT $per_page OFFSET $offset";
-$result = pg_query($koneksi, $query);
-if ($result && pg_num_rows($result) > 0) {
-    while ($row = pg_fetch_assoc($result)) {
-        $blogs[] = $row;
+$count = 0;
+foreach ($blogs_all as $blog) {
+    if ($count >= $offset && $count < ($offset + $per_page)) {
+        // Ambil data lengkap dari tabel blog untuk featured_image dan views
+        $blog_id = (int)($blog['id'] ?? 0);
+        $blog_detail_query = "SELECT featured_image, views FROM blog WHERE id = $blog_id LIMIT 1";
+        $blog_detail_result = pg_query($koneksi, $blog_detail_query);
+        $blog_detail = $blog_detail_result && pg_num_rows($blog_detail_result) > 0 
+            ? pg_fetch_assoc($blog_detail_result) 
+            : ['featured_image' => '', 'views' => 0];
+        
+        $blogs[] = [
+            'id' => $blog_id,
+            'title' => $blog['title'] ?? '',
+            'excerpt' => $blog['excerpt'] ?? '',
+            'featured_image' => $blog_detail['featured_image'] ?? '',
+            'category' => $blog['category'] ?? '',
+            'published_at' => $blog['published_at'] ?? null,
+            'created_at' => $blog['created_at'] ?? null,
+            'slug' => $blog['slug'] ?? '',
+            'views' => (int)($blog_detail['views'] ?? 0)
+        ];
+    }
+    $count++;
+}
+
+// Fallback: Query langsung jika materialized view tidak tersedia
+if (empty($blogs) && $koneksi) {
+    $query = "SELECT id, title, excerpt, featured_image, category, published_at, created_at, slug, views 
+              FROM blog 
+              WHERE is_published = true 
+              ORDER BY published_at DESC, created_at DESC 
+              LIMIT $per_page OFFSET $offset";
+    $result = pg_query($koneksi, $query);
+    if ($result && pg_num_rows($result) > 0) {
+        while ($row = pg_fetch_assoc($result)) {
+            $blogs[] = $row;
+        }
     }
 }
 ?>
