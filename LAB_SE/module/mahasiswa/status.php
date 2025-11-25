@@ -30,16 +30,16 @@ function status_badge($status) {
 <?php include __DIR__ . '/../../template/mahasiswa_sidebar.php'; ?>
 
 <main class="admin-main-content">
-  <section class="pt-50 pb-50" style="background: #f8f9fa; min-height: calc(100vh - 80px); padding-top: 40px !important;">
+  <section class="pt-50 pb-50 admin-section-bg-full">
     <div class="container">
       <div class="row mb-40">
         <div class="col-lg-12">
           <div class="section-title mb-30">
-            <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s" style="color:#2c3e50; font-size:28px; font-weight:700;">
-              <i class="lni lni-clipboard" style="color:#2F80ED; margin-right:10px;"></i>
+            <h2 class="mb-15 wow fadeInUp section-title-h2" data-wow-delay=".2s">
+              <i class="lni lni-clipboard section-title-icon"></i>
               Status Pendaftaran
             </h2>
-            <p class="wow fadeInUp" data-wow-delay=".4s" style="color:#6c757d; font-size:14px; margin:0;">
+            <p class="wow fadeInUp section-title-p" data-wow-delay=".4s">
               Lihat status pendaftaran Anda di laboratorium.
             </p>
           </div>
@@ -67,7 +67,7 @@ function status_badge($status) {
               </div>
             <?php else: ?>
               <div class="text-center py-4">
-                <i class="lni lni-inbox" style="font-size: 48px; color: #dee2e6;"></i>
+                <i class="lni lni-inbox admin-table-empty-icon"></i>
                 <p class="mt-3 text-muted">Data pendaftaran tidak ditemukan untuk NIM Anda.</p>
               </div>
             <?php endif; ?>
@@ -78,23 +78,6 @@ function status_badge($status) {
     </div>
   </section>
 </main>
-
-<style>
-.status-card { border: 1px solid #e9ecef; border-radius: 14px; padding: 22px; }
-.status-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.status-meta { color: #6c757d; font-size: 13px; }
-.status-chip { padding: 6px 12px; border-radius: 16px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
-.status-chip.status-accepted { background: rgba(39, 174, 96, 0.12); color: #1e8e4f; }
-.status-chip.status-rejected { background: rgba(231, 76, 60, 0.12); color: #c0392b; }
-.status-chip.status-pending { background: rgba(242, 153, 74, 0.12); color: #d9822b; }
-.status-grid { display: grid; grid-template-columns: 180px 1fr; gap: 10px 16px; color: #2c3e50; }
-.status-grid .detail-label { color: #6c757d; font-size: 13px; }
-.status-grid .detail-value { font-size: 14px; }
-@media (max-width: 575px) {
-  .status-grid { grid-template-columns: 1fr; }
-  .status-grid .detail-label { margin-top: 8px; }
-}
-</style>
 
 <?php include __DIR__ . '/../../template/admin_footer.php'; ?>
 

@@ -407,9 +407,9 @@ window.addEventListener('resize', function() {
                         value="<?php echo $data_edit ? htmlspecialchars($data_edit['page_key']) : ''; ?>" 
                         placeholder="contoh: visi_misi, sejarah, sambutan"
                         required 
-                        <?php echo $data_edit ? 'readonly style="background-color: #e9ecef;"' : ''; ?>>
+                        <?php echo $data_edit ? 'readonly class="form-control-readonly"' : ''; ?>>
                 <?php if (!$data_edit): ?>
-                <small style="color: gray;">Gunakan huruf kecil tanpa spasi (gunakan underscore _).</small>
+                <small class="text-muted-small">Gunakan huruf kecil tanpa spasi (gunakan underscore _).</small>
                 <?php endif; ?>
             </div>
 

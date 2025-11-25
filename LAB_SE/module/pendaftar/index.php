@@ -208,7 +208,7 @@ include __DIR__ . '/../../template/admin_header.php';
 
 <!-- Main Content -->
 <main class="admin-main-content">
-<section class="pt-50 pb-50" style="background: #f8f9fa; padding-top: 30px !important;">
+<section class="pt-50 pb-50 admin-section-bg">
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-12">
@@ -224,7 +224,7 @@ include __DIR__ . '/../../template/admin_header.php';
 		<!-- Statistics Cards -->
 		<div class="row mb-50">
 			<div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-				<div class="stat-card blue wow fadeInUp" data-wow-delay=".2s" style="text-align: center;">
+				<div class="stat-card blue wow fadeInUp" data-wow-delay=".2s">
 					<div class="stat-icon">
 						<i class="lni lni-graduation"></i>
 					</div>
@@ -233,7 +233,7 @@ include __DIR__ . '/../../template/admin_header.php';
 				</div>
 			</div>
 			<div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-				<div class="stat-card orange wow fadeInUp" data-wow-delay=".3s" style="text-align: center;">
+				<div class="stat-card orange wow fadeInUp" data-wow-delay=".3s">
 					<div class="stat-icon">
 						<i class="lni lni-hourglass"></i>
 					</div>
@@ -242,7 +242,7 @@ include __DIR__ . '/../../template/admin_header.php';
 				</div>
 			</div>
 			<div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-				<div class="stat-card green wow fadeInUp" data-wow-delay=".4s" style="text-align: center;">
+				<div class="stat-card green wow fadeInUp" data-wow-delay=".4s">
 					<div class="stat-icon">
 						<i class="lni lni-checkmark-circle"></i>
 					</div>
@@ -251,7 +251,7 @@ include __DIR__ . '/../../template/admin_header.php';
 				</div>
 			</div>
 			<div class="col-xl-3 col-lg-6 col-md-6 mb-30">
-				<div class="stat-card purple wow fadeInUp" data-wow-delay=".5s" style="text-align: center;">
+				<div class="stat-card purple wow fadeInUp" data-wow-delay=".5s">
 					<div class="stat-icon">
 						<i class="lni lni-close"></i>
 					</div>
@@ -264,21 +264,21 @@ include __DIR__ . '/../../template/admin_header.php';
 		<!-- Filter Status -->
 		<div class="row mb-30">
 			<div class="col-lg-12">
-				<div class="wow fadeInUp" data-wow-delay=".2s" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-					<div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
-						<span style="font-weight: 600; color: #2c3e50; font-size: 14px; margin-right: 5px;">
-							<i class="lni lni-filter" style="margin-right: 5px;"></i>Filter Status:
+				<div class="wow fadeInUp filter-card-wrapper" data-wow-delay=".2s">
+					<div class="filter-buttons">
+						<span class="filter-label">
+							<i class="lni lni-filter"></i>Filter Status:
 						</span>
-						<a href="?status=all" class="button button-sm radius-10 <?php echo $status_filter === 'all' ? '' : 'border-button'; ?>" style="margin-right: 8px; <?php echo $status_filter === 'all' ? 'background: #2F80ED; color: white; border: none;' : ''; ?>">
+						<a href="?status=all" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'all' ? 'filter-button-active' : 'border-button'; ?>">
 							<i class="lni lni-list"></i> Semua
 						</a>
-						<a href="?status=pending" class="button button-sm radius-10 <?php echo $status_filter === 'pending' ? '' : 'border-button'; ?>" style="margin-right: 8px; <?php echo $status_filter === 'pending' ? 'background: #F2994A; color: white; border: none;' : ''; ?>">
+						<a href="?status=pending" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'pending' ? 'filter-button-pending' : 'border-button'; ?>">
 							<i class="lni lni-hourglass"></i> Pending
 						</a>
-						<a href="?status=accepted" class="button button-sm radius-10 <?php echo $status_filter === 'accepted' ? '' : 'border-button'; ?>" style="margin-right: 8px; <?php echo $status_filter === 'accepted' ? 'background: #27AE60; color: white; border: none;' : ''; ?>">
+						<a href="?status=accepted" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'accepted' ? 'filter-button-accepted' : 'border-button'; ?>">
 							<i class="lni lni-checkmark-circle"></i> Diterima
 						</a>
-						<a href="?status=rejected" class="button button-sm radius-10 <?php echo $status_filter === 'rejected' ? '' : 'border-button'; ?>" style="<?php echo $status_filter === 'rejected' ? 'background: #e74c3c; color: white; border: none;' : ''; ?>">
+						<a href="?status=rejected" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'rejected' ? 'filter-button-rejected' : 'border-button'; ?>">
 							<i class="lni lni-close"></i> Ditolak
 						</a>
 					</div>
@@ -290,17 +290,17 @@ include __DIR__ . '/../../template/admin_header.php';
 		<div class="row">
 			<div class="col-lg-12">
 				<div class="table-responsive wow fadeInUp" data-wow-delay=".3s">
-					<table class="table table-striped table-hover" style="background: white; border-radius: 10px; overflow: hidden;">
-						<thead style="background: #2c3e50; color: white;">
+					<table class="table table-striped table-hover admin-table">
+						<thead>
 							<tr>
-								<th style="padding: 15px;">NO</th>
-								<th style="padding: 15px;">Nama Lengkap</th>
-								<th style="padding: 15px;">Email</th>
-								<th style="padding: 15px;">NIM</th>
-								<th style="padding: 15px;">Minat</th>
-								<th style="padding: 15px;">Status</th>
-								<th style="padding: 15px;">Tanggal Daftar</th>
-								<th style="padding: 15px; text-align: center;">Aksi</th>
+								<th>NO</th>
+								<th>Nama Lengkap</th>
+								<th>Email</th>
+								<th>NIM</th>
+								<th>Minat</th>
+								<th>Status</th>
+								<th>Tanggal Daftar</th>
+								<th class="text-center">Aksi</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -310,64 +310,64 @@ include __DIR__ . '/../../template/admin_header.php';
 								foreach ($pendaftar as $p): 
 								?>
 								<tr>
-									<td style="padding: 15px;"><?php echo $no++; ?></td>
-									<td style="padding: 15px;">
-										<div style="display:flex; align-items:center; gap:10px;">
+									<td><?php echo $no++; ?></td>
+									<td>
+										<div class="flex-center">
 											<?php if (!empty($p['foto'])): ?>
-												<img src="<?php echo htmlspecialchars($p['foto']); ?>" alt="<?php echo htmlspecialchars($p['nama']); ?>" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:1px solid #eee;">
+												<img src="<?php echo htmlspecialchars($p['foto']); ?>" alt="<?php echo htmlspecialchars($p['nama']); ?>" class="avatar-circle">
 											<?php else: ?>
 												<?php $initial = strtoupper(substr($p['nama'], 0, 1)); ?>
-												<div style="width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; background: linear-gradient(135deg, #2F80ED 0%, #6C63FF 100%);">
+												<div class="initial-circle">
 													<?php echo $initial; ?>
 												</div>
 											<?php endif; ?>
 											<strong><?php echo htmlspecialchars($p['nama']); ?></strong>
 										</div>
 									</td>
-									<td style="padding: 15px;">
+									<td>
 										<?php if (isset($p['email']) && !empty($p['email'])): ?>
-											<a href="mailto:<?php echo htmlspecialchars($p['email']); ?>" style="color: #2F80ED; text-decoration: none;">
-												<i class="lni lni-envelope" style="margin-right: 5px;"></i><?php echo htmlspecialchars($p['email']); ?>
+											<a href="mailto:<?php echo htmlspecialchars($p['email']); ?>" class="email-link">
+												<i class="lni lni-envelope"></i><?php echo htmlspecialchars($p['email']); ?>
 											</a>
 										<?php else: ?>
-											<span style="color: #95a5a6;">-</span>
+											<span class="text-muted-small">-</span>
 										<?php endif; ?>
 									</td>
-									<td style="padding: 15px;">
-										<span style="background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+									<td>
+										<span class="nim-badge">
 											<?php echo htmlspecialchars($p['nim']); ?>
 										</span>
 									</td>
-									<td style="padding: 15px;">
+									<td>
 										<?php if (!empty($p['minat'])): ?>
-											<span style="color: #495057; font-size: 13px;" title="<?php echo htmlspecialchars($p['minat']); ?>">
+											<span class="text-color-primary text-size-13" title="<?php echo htmlspecialchars($p['minat']); ?>">
 												<?php echo htmlspecialchars(substr($p['minat'], 0, 50)); ?>
 												<?php echo strlen($p['minat']) > 50 ? '...' : ''; ?>
 											</span>
 										<?php else: ?>
-											<span style="color: #95a5a6;">-</span>
+											<span class="text-muted-small">-</span>
 										<?php endif; ?>
 									</td>
-									<td style="padding: 15px;">
+									<td>
 										<?php
 										$status = $p['status'] ?? 'pending';
 										$status_badge = '';
 										switch ($status) {
 											case 'accepted':
-												$status_badge = '<span style="background: #27AE60; color: white; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Diterima</span>';
+												$status_badge = '<span class="status-badge status-badge-accepted">Diterima</span>';
 												break;
 											case 'rejected':
-												$status_badge = '<span style="background: #e74c3c; color: white; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Ditolak</span>';
+												$status_badge = '<span class="status-badge status-badge-rejected">Ditolak</span>';
 												break;
 											case 'pending':
 											default:
-												$status_badge = '<span style="background: #F2994A; color: white; padding: 5px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Pending</span>';
+												$status_badge = '<span class="status-badge status-badge-pending">Pending</span>';
 												break;
 										}
 										echo $status_badge;
 										?>
 									</td>
-									<td style="padding: 15px;">
+									<td>
 										<?php 
 										if (!empty($p['tanggal_daftar'])) {
 											try {
@@ -391,16 +391,16 @@ include __DIR__ . '/../../template/admin_header.php';
 										}
 										?>
 									</td>
-									<td style="padding: 15px; text-align: center;">
-										<div style="display: flex; align-items: center; justify-content: center; gap: 5px; flex-wrap: wrap;">
-											<button type="button" class="button button-sm radius-10 border-button" style="padding: 5px 12px; margin-right: 5px;" onclick="viewDetail(<?php echo $p['id']; ?>)" title="Lihat Detail">
+									<td class="text-center">
+										<div class="flex-center-wrap">
+											<button type="button" class="button button-sm radius-10 border-button btn-preview" onclick="viewDetail(<?php echo $p['id']; ?>)" title="Lihat Detail">
 												<i class="lni lni-eye"></i> Detail
 											</button>
 											<?php if ($status === 'pending'): ?>
-											<button type="button" class="button button-sm radius-10" style="background: #27AE60; color: white; padding: 5px 12px; margin-right: 5px; border: none;" onclick="updateStatus(<?php echo $p['id']; ?>, 'accepted')" title="Terima Pendaftar">
+											<button type="button" class="button button-sm radius-10 btn-accept" onclick="updateStatus(<?php echo $p['id']; ?>, 'accepted')" title="Terima Pendaftar">
 												<i class="lni lni-checkmark-circle"></i> Terima
 											</button>
-											<button type="button" class="button button-sm radius-10" style="background: #e74c3c; color: white; padding: 5px 12px; border: none;" onclick="updateStatus(<?php echo $p['id']; ?>, 'rejected')" title="Tolak Pendaftar">
+											<button type="button" class="button button-sm radius-10 btn-reject" onclick="updateStatus(<?php echo $p['id']; ?>, 'rejected')" title="Tolak Pendaftar">
 												<i class="lni lni-close"></i> Tolak
 											</button>
 											<?php else: ?>
@@ -411,16 +411,16 @@ include __DIR__ . '/../../template/admin_header.php';
 											$hasUser = $existsRes && pg_num_rows($existsRes) > 0;
 											
 											if ($hasUser): ?>
-												<span style="background: #d4edda; color: #155724; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;" title="Akun sudah dibuat (Username: <?php echo htmlspecialchars($p['nim']); ?>)">
+												<span class="account-active-badge" title="Akun sudah dibuat (Username: <?php echo htmlspecialchars($p['nim']); ?>)">
 													<i class="lni lni-checkmark-circle"></i> Akun Aktif
 												</span>
 											<?php else: ?>
 												<?php if ($status === 'accepted'): ?>
-												<button type="button" class="button button-sm radius-10" style="background: #2F80ED; color: white; padding: 5px 12px; border: none;" onclick="showCreateAccountModal(<?php echo (int)$p['id']; ?>, '<?php echo htmlspecialchars($p['nim'], ENT_QUOTES); ?>')" title="Buat akun login dengan username dan password = NIM">
+												<button type="button" class="button button-sm radius-10 btn-create-account" onclick="showCreateAccountModal(<?php echo (int)$p['id']; ?>, '<?php echo htmlspecialchars($p['nim'], ENT_QUOTES); ?>')" title="Buat akun login dengan username dan password = NIM">
 													<i class="lni lni-user"></i> Buat Akun
 												</button>
 												<?php else: ?>
-												<span style="color: #95a5a6; font-size: 12px;">-</span>
+												<span class="text-muted-small">-</span>
 												<?php endif; ?>
 											<?php endif; ?>
 											<?php endif; ?>
@@ -430,8 +430,8 @@ include __DIR__ . '/../../template/admin_header.php';
 								<?php endforeach; ?>
 							<?php else: ?>
 								<tr>
-									<td colspan="8" class="text-center" style="padding: 40px;">
-										<i class="lni lni-inbox" style="font-size: 48px; color: #dee2e6;"></i>
+									<td colspan="8" class="text-center admin-table-empty">
+										<i class="lni lni-inbox admin-table-empty-icon"></i>
 										<p class="mt-3 text-muted">
 											<?php if ($status_filter !== 'all'): ?>
 												Tidak ada pendaftar dengan status "<?php echo htmlspecialchars(ucfirst($status_filter)); ?>".
@@ -452,89 +452,49 @@ include __DIR__ . '/../../template/admin_header.php';
 </main>
 
 <!-- Confirm Modal for Status Update -->
-<div id="confirmStatusOverlay" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px;">
-	<div style="background: #fff; border-radius: 12px; max-width: 460px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden;">
-		<div style="padding: 16px 20px; border-bottom: 1px solid #f1f1f1; display: flex; align-items: center; gap: 10px;">
-			<i id="confirmStatusIcon" class="lni lni-hourglass" style="font-size: 20px; color: #2F80ED;"></i>
-			<h4 id="confirmStatusTitle" style="margin: 0; color: #2c3e50; font-weight: 600; font-size: 16px;">Konfirmasi</h4>
+<div id="confirmStatusOverlay">
+	<div class="confirm-status-modal">
+		<div class="confirm-status-header">
+			<i id="confirmStatusIcon" class="lni lni-hourglass"></i>
+			<h4 id="confirmStatusTitle">Konfirmasi</h4>
 		</div>
-		<div id="confirmStatusText" style="padding: 16px 20px; color: #6c757d; font-size: 14px;">
+		<div id="confirmStatusText" class="confirm-status-body">
 			Apakah Anda yakin?
 		</div>
-		<div style="padding: 12px 20px; display: flex; justify-content: flex-end; gap: 8px; background: #fafafa;">
-			<button id="btnCancelStatus" class="button radius-10 border-button" style="padding: 8px 14px; font-size: 14px;">Batal</button>
-			<button id="btnConfirmStatus" class="button radius-10" style="background: #2F80ED; color: #fff; padding: 8px 14px; font-size: 14px;">Konfirmasi</button>
+		<div class="confirm-status-footer">
+			<button id="btnCancelStatus" class="button radius-10 border-button">Batal</button>
+			<button id="btnConfirmStatus" class="button radius-10 btn-edit">Konfirmasi</button>
 		</div>
 	</div>
 </div>
 
 <!-- Confirm Modal for Create Account -->
-<div id="createAccountOverlay" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px;">
-	<div style="background: #fff; border-radius: 12px; max-width: 480px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden;">
-		<div style="padding: 16px 20px; border-bottom: 1px solid #f1f1f1; display: flex; align-items: center; gap: 10px;">
-			<i class="lni lni-user" style="font-size: 20px; color: #2F80ED;"></i>
-			<h4 style="margin: 0; color: #2c3e50; font-weight: 600; font-size: 16px;">localhost says</h4>
+<div id="createAccountOverlay">
+	<div class="create-account-modal">
+		<div class="create-account-header">
+			<i class="lni lni-user"></i>
+			<h4>localhost says</h4>
 		</div>
-		<div style="padding: 20px;">
-			<p style="margin: 0 0 16px 0; color: #2c3e50; font-size: 14px; font-weight: 500;">
-				Buat akun login untuk mahasiswa ini?
-			</p>
-			<div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
-				<div style="margin-bottom: 8px;">
-					<span style="color: #6c757d; font-size: 13px;">Username: </span>
-					<span id="createAccountUsername" style="color: #2c3e50; font-weight: 600; font-size: 14px;">-</span>
+		<div class="create-account-body">
+			<p>Buat akun login untuk mahasiswa ini?</p>
+			<div class="create-account-info">
+				<div class="create-account-info-item">
+					<span class="create-account-info-label">Username: </span>
+					<span id="createAccountUsername" class="create-account-info-value">-</span>
 				</div>
-				<div>
-					<span style="color: #6c757d; font-size: 13px;">Password: </span>
-					<span id="createAccountPassword" style="color: #2c3e50; font-weight: 600; font-size: 14px;">-</span>
+				<div class="create-account-info-item">
+					<span class="create-account-info-label">Password: </span>
+					<span id="createAccountPassword" class="create-account-info-value">-</span>
 				</div>
 			</div>
-			<p style="margin: 0; color: #6c757d; font-size: 13px; line-height: 1.5;">
-				Mahasiswa bisa login ke halaman mahasiswa dengan NIM sebagai username dan password.
-			</p>
+			<p>Mahasiswa bisa login ke halaman mahasiswa dengan NIM sebagai username dan password.</p>
 		</div>
-		<div style="padding: 12px 20px; display: flex; justify-content: flex-end; gap: 8px; background: #fafafa;">
-			<button id="btnCancelCreateAccount" class="button radius-10" style="background: #6c757d; color: #fff; padding: 8px 16px; font-size: 14px; border: none;">Cancel</button>
-			<button id="btnConfirmCreateAccount" class="button radius-10" style="background: #9b59b6; color: #fff; padding: 8px 16px; font-size: 14px; border: none;">OK</button>
+		<div class="create-account-footer">
+			<button id="btnCancelCreateAccount" class="button radius-10 btn-cancel-account">Cancel</button>
+			<button id="btnConfirmCreateAccount" class="button radius-10 btn-confirm-account">OK</button>
 		</div>
 	</div>
 </div>
-
-<style>
-/* Detail Modal */
-#detailOverlay { display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px; }
-.detail-modal { background: #fff; border-radius: 12px; max-width: 640px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; }
-.detail-header { padding: 16px 20px; border-bottom: 1px solid #f1f1f1; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.detail-header h4 { margin: 0; color: #2c3e50; font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 10px; }
-.detail-close { background: transparent; border: none; font-size: 20px; cursor: pointer; color: #6c757d; }
-.detail-body { padding: 18px 20px; }
-.detail-grid { display: grid; grid-template-columns: 150px 1fr; gap: 10px 16px; }
-.detail-label { color: #6c757d; font-size: 13px; }
-.detail-value { color: #2c3e50; font-size: 14px; font-weight: 600; }
-.detail-footer { padding: 12px 20px; background: #fafafa; border-top: 1px solid #f1f1f1; display: flex; justify-content: flex-end; }
-.detail-status-badge { padding: 6px 12px; border-radius: 16px; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; }
-.status-pending { background: #fff3cd; color: #856404; }
-.status-accepted { background: #d4edda; color: #155724; }
-.status-rejected { background: #f8d7da; color: #721c24; }
-
-/* Table Styling Improvements */
-.table-striped tbody tr:nth-of-type(odd) { background-color: rgba(0,0,0,0.02); }
-.table-striped tbody tr:hover { background-color: rgba(47, 128, 237, 0.05); transition: background-color 0.2s ease; }
-.table thead th { font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
-
-/* Button Hover Effects */
-.button:hover { transform: translateY(-1px); transition: all 0.2s ease; }
-.button:active { transform: translateY(0); }
-
-/* Filter Card Styling */
-.filter-card-wrapper { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-
-/* Responsive Table */
-@media (max-width: 768px) {
-	.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-	.table thead th, .table tbody td { white-space: nowrap; }
-}
-</style>
 
 <?php
 $pendaftar_map = [];
@@ -592,195 +552,12 @@ foreach ($pendaftar as $pp) {
 <script>
 window.pendaftarData = <?php echo json_encode($pendaftar_map); ?>;
 </script>
-
+<script src="../../assets/js/classes/PendaftarModals.js"></script>
 <script>
-function viewDetail(id) {
-	var data = (window.pendaftarData && window.pendaftarData[id]) ? window.pendaftarData[id] : null;
-	if (!data) {
-		alert('Data pendaftar tidak ditemukan.');
-		return;
-	}
-
-	var overlay = document.getElementById('detailOverlay');
-	// Populate
-	document.getElementById('detailNama').textContent = data.nama || '-';
-	document.getElementById('detailNim').textContent = data.nim || '-';
-	document.getElementById('detailMinat').textContent = data.minat ? data.minat : '-';
-	document.getElementById('detailEmail').textContent = data.email || '-';
-	document.getElementById('detailEmail').href = data.email ? ('mailto:' + data.email) : 'javascript:void(0)';
-	document.getElementById('detailTanggalDaftar').textContent = data.tanggal_daftar || '-';
-	document.getElementById('detailTanggalReview').textContent = data.tanggal_review ? data.tanggal_review : '-';
-	document.getElementById('detailCatatan').textContent = data.catatan_admin ? data.catatan_admin : '-';
-
-	// Foto
-	var fotoEl = document.getElementById('detailFoto');
-	if (data.foto) {
-		fotoEl.innerHTML = '<img src="'+ data.foto +'" alt="Foto '+ (data.nama || "") +'" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 1px solid #eee;">';
-	} else {
-		fotoEl.textContent = '-';
-	}
-
-	// Status badge
-	var statusBadge = document.getElementById('detailStatus');
-	var statusText = 'Pending';
-	var statusClass = 'status-pending';
-	var statusIcon = 'lni-hourglass';
-	if (data.status === 'accepted') { statusText = 'Diterima'; statusClass = 'status-accepted'; statusIcon = 'lni-checkmark-circle'; }
-	else if (data.status === 'rejected') { statusText = 'Ditolak'; statusClass = 'status-rejected'; statusIcon = 'lni-close'; }
-	statusBadge.className = 'detail-status-badge ' + statusClass;
-	statusBadge.innerHTML = '<i class="lni ' + statusIcon + '"></i> ' + statusText;
-
-	overlay.style.display = 'flex';
+// Initialize PendaftarModals
+if (typeof PendaftarModals !== 'undefined' && window.pendaftarData) {
+    window.pendaftarModals = new PendaftarModals(window.pendaftarData);
 }
-
-(function() {
-	let pending = { id: null, status: null };
-	const overlay = document.getElementById('confirmStatusOverlay');
-	const title = document.getElementById('confirmStatusTitle');
-	const text = document.getElementById('confirmStatusText');
-	const icon = document.getElementById('confirmStatusIcon');
-	const btnConfirm = document.getElementById('btnConfirmStatus');
-	const btnCancel = document.getElementById('btnCancelStatus');
-
-	function openConfirm(id, status) {
-		pending.id = id;
-		pending.status = status;
-		btnConfirm.classList.remove('accept', 'reject');
-		if (status === 'accepted') {
-			title.textContent = 'Terima Pendaftar?';
-			text.textContent = 'Apakah Anda yakin ingin menerima pendaftar ini?';
-			icon.className = 'lni lni-checkmark-circle';
-			icon.style.color = '#27AE60';
-			btnConfirm.textContent = 'Terima';
-			btnConfirm.classList.add('accept');
-		} else if (status === 'rejected') {
-			title.textContent = 'Tolak Pendaftar?';
-			text.textContent = 'Apakah Anda yakin ingin menolak pendaftar ini?';
-			icon.className = 'lni lni-close';
-			icon.style.color = '#e74c3c';
-			btnConfirm.textContent = 'Tolak';
-			btnConfirm.classList.add('reject');
-		} else {
-			title.textContent = 'Konfirmasi';
-			text.textContent = 'Apakah Anda yakin?';
-			icon.className = 'lni lni-hourglass';
-			icon.style.color = '#2F80ED';
-			btnConfirm.textContent = 'Konfirmasi';
-		}
-		overlay.style.display = 'flex';
-	}
-	function closeConfirm() {
-		pending.id = null;
-		pending.status = null;
-		overlay.style.display = 'none';
-	}
-
-	btnCancel.addEventListener('click', function() { closeConfirm(); });
-	btnConfirm.addEventListener('click', function() {
-		if (!pending.id || !pending.status) return;
-		// submit hidden form
-		var form = document.createElement('form');
-		form.method = 'POST';
-		form.action = '';
-		
-		var actionInput = document.createElement('input');
-		actionInput.type = 'hidden';
-		actionInput.name = 'action';
-		actionInput.value = 'update_status';
-		form.appendChild(actionInput);
-		
-		var idInput = document.createElement('input');
-		idInput.type = 'hidden';
-		idInput.name = 'id';
-		idInput.value = pending.id;
-		form.appendChild(idInput);
-		
-		var statusInput = document.createElement('input');
-		statusInput.type = 'hidden';
-		statusInput.name = 'status';
-		statusInput.value = pending.status;
-		form.appendChild(statusInput);
-		
-		var urlParams = new URLSearchParams(window.location.search);
-		var currentFilter = urlParams.get('status') || 'all';
-		var filterInput = document.createElement('input');
-		filterInput.type = 'hidden';
-		filterInput.name = 'current_filter';
-		filterInput.value = currentFilter;
-		form.appendChild(filterInput);
-		
-		document.body.appendChild(form);
-		form.submit();
-	});
-	
-	overlay.addEventListener('click', function(e) {
-		if (e.target === overlay) { closeConfirm(); }
-	});
-
-	// expose function
-	window.updateStatus = function(id, status) { openConfirm(id, status); }
-})();
-
-// Create Account Modal
-(function() {
-	let pendingAccount = { id: null, nim: null };
-	const overlay = document.getElementById('createAccountOverlay');
-	const usernameEl = document.getElementById('createAccountUsername');
-	const passwordEl = document.getElementById('createAccountPassword');
-	const btnConfirm = document.getElementById('btnConfirmCreateAccount');
-	const btnCancel = document.getElementById('btnCancelCreateAccount');
-
-	window.showCreateAccountModal = function(id, nim) {
-		pendingAccount.id = id;
-		pendingAccount.nim = nim;
-		usernameEl.textContent = nim;
-		passwordEl.textContent = nim;
-		overlay.style.display = 'flex';
-	};
-
-	function closeModal() {
-		pendingAccount.id = null;
-		pendingAccount.nim = null;
-		overlay.style.display = 'none';
-	}
-
-	btnCancel.addEventListener('click', function() { closeModal(); });
-	btnConfirm.addEventListener('click', function() {
-		if (!pendingAccount.id) return;
-		
-		// Submit form
-		var form = document.createElement('form');
-		form.method = 'POST';
-		form.action = '';
-		
-		var actionInput = document.createElement('input');
-		actionInput.type = 'hidden';
-		actionInput.name = 'action';
-		actionInput.value = 'create_account';
-		form.appendChild(actionInput);
-		
-		var idInput = document.createElement('input');
-		idInput.type = 'hidden';
-		idInput.name = 'id';
-		idInput.value = pendingAccount.id;
-		form.appendChild(idInput);
-		
-		var urlParams = new URLSearchParams(window.location.search);
-		var currentFilter = urlParams.get('status') || 'all';
-		var filterInput = document.createElement('input');
-		filterInput.type = 'hidden';
-		filterInput.name = 'current_filter';
-		filterInput.value = currentFilter;
-		form.appendChild(filterInput);
-		
-		document.body.appendChild(form);
-		form.submit();
-	});
-	
-	overlay.addEventListener('click', function(e) {
-		if (e.target === overlay) { closeModal(); }
-	});
-})();
 </script>
 
 <!-- Detail Modal -->
@@ -788,7 +565,7 @@ function viewDetail(id) {
 	<div class="detail-modal">
 		<div class="detail-header">
 			<h4>
-				<i class="lni lni-eye" style="color:#2F80ED;"></i>
+				<i class="lni lni-eye icon-blue"></i>
 				Detail Pendaftar
 			</h4>
 			<button class="detail-close" title="Tutup" onclick="document.getElementById('detailOverlay').style.display='none'">&times;</button>

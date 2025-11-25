@@ -1,0 +1,1504 @@
+/* ============================================
+   ADMIN MODULES CSS
+   Semua style untuk modul admin dan mahasiswa
+   ============================================ */
+
+/* ============================================
+   COMMON STYLES
+   ============================================ */
+
+/* Section Background */
+.admin-section-bg {
+    background: #f8f9fa;
+    padding-top: 30px !important;
+}
+
+.admin-section-bg-full {
+    background: #f8f9fa;
+    min-height: calc(100vh - 80px);
+    padding-top: 40px !important;
+}
+
+/* Table Styles */
+.admin-table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.admin-table thead {
+    background: #2c3e50;
+    color: white;
+}
+
+.admin-table th {
+    padding: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+.admin-table th.text-center {
+    text-align: center;
+}
+
+.admin-table td {
+    padding: 15px;
+}
+
+.admin-table td.text-center {
+    text-align: center;
+}
+
+.admin-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,0.02);
+}
+
+.admin-table tbody tr:hover {
+    background-color: rgba(47, 128, 237, 0.05);
+    transition: background-color 0.2s ease;
+}
+
+.admin-table-empty {
+    padding: 40px;
+    text-align: center;
+}
+
+.admin-table-empty-icon {
+    font-size: 48px;
+    color: #dee2e6;
+}
+
+/* Button Styles */
+.btn-edit {
+    background: #2F80ED;
+    color: white;
+    padding: 5px 15px;
+    margin-right: 5px;
+}
+
+.btn-delete {
+    background: #e74c3c;
+    color: white;
+    padding: 5px 15px;
+}
+
+.btn-preview {
+    padding: 5px 15px;
+    margin-right: 5px;
+}
+
+.btn-accept {
+    background: #27AE60;
+    color: white;
+    padding: 5px 12px;
+    margin-right: 5px;
+    border: none;
+}
+
+.btn-reject {
+    background: #e74c3c;
+    color: white;
+    padding: 5px 12px;
+    border: none;
+}
+
+.btn-create-account {
+    background: #2F80ED;
+    color: white;
+    padding: 5px 12px;
+    border: none;
+}
+
+/* Avatar & Initial Circle */
+.avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.initial-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    background: linear-gradient(135deg, #2F80ED 0%, #6C63FF 100%);
+}
+
+/* Flex Container */
+.flex-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.flex-center-gap-12 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.flex-center-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-badge-pending {
+    background: #F2994A;
+    color: white;
+}
+
+.status-badge-accepted {
+    background: #27AE60;
+    color: white;
+}
+
+.status-badge-rejected {
+    background: #e74c3c;
+    color: white;
+}
+
+.status-badge-published {
+    background: #27AE60;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.status-badge-draft {
+    background: #F2994A;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.detail-status-badge {
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.detail-status-badge.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.detail-status-badge.status-accepted {
+    background: #d4edda;
+    color: #155724;
+}
+
+.detail-status-badge.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Role Badges */
+.role-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.role-badge-admin {
+    background: #e74c3c;
+    color: white;
+}
+
+.role-badge-mahasiswa {
+    background: #2F80ED;
+    color: white;
+}
+
+.role-badge-default {
+    background: #95a5a6;
+    color: white;
+}
+
+/* Text Styles */
+.text-muted-small {
+    color: #95a5a6;
+    font-size: 12px;
+}
+
+.text-muted-medium {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.text-color-primary {
+    color: #2c3e50;
+}
+
+.text-color-secondary {
+    color: #6c757d;
+}
+
+/* NIM Badge */
+.nim-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* Account Active Badge */
+.account-active-badge {
+    background: #d4edda;
+    color: #155724;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ============================================
+   MODAL STYLES
+   ============================================ */
+
+/* Preview Modal - Anggota */
+#anggotaPreviewOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 1100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.anggota-modal {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+    overflow: hidden;
+}
+
+.anggota-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.anggota-header h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.anggota-close {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #6c757d;
+    cursor: pointer;
+}
+
+.anggota-body {
+    padding: 18px;
+}
+
+.anggota-body .row {
+    display: flex;
+    gap: 16px;
+}
+
+.anggota-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid #eee;
+    background: #fafafa;
+}
+
+.anggota-name {
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #2c3e50;
+}
+
+.anggota-role {
+    margin: 0 0 12px 0;
+    color: #6c757d;
+    font-weight: 700;
+}
+
+.anggota-social a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 10px;
+    color: #2F80ED;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.anggota-footer {
+    padding: 12px 18px;
+    border-top: 1px solid #f1f1f1;
+    background: #fafafa;
+    text-align: right;
+}
+
+/* Confirm Delete Modal */
+#confirmDeleteOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.confirm-modal {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.confirm-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.confirm-modal-header i {
+    color: #e74c3c;
+    font-size: 22px;
+}
+
+.confirm-modal-header h4 {
+    margin: 0;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.confirm-modal-body {
+    padding: 20px 24px;
+    color: #6c757d;
+}
+
+.confirm-modal-footer {
+    padding: 16px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background: #fafafa;
+}
+
+/* Detail Modal - Pendaftar */
+#detailOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.detail-modal {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 640px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.detail-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.detail-header h4 {
+    margin: 0;
+    color: #2c3e50;
+    font-weight: 700;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.detail-close {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #6c757d;
+}
+
+.detail-body {
+    padding: 18px 20px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 10px 16px;
+}
+
+.detail-label {
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.detail-value {
+    color: #2c3e50;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.detail-footer {
+    padding: 12px 20px;
+    background: #fafafa;
+    border-top: 1px solid #f1f1f1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Confirm Status Modal */
+#confirmStatusOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.confirm-status-modal {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.confirm-status-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.confirm-status-header i {
+    font-size: 20px;
+    color: #2F80ED;
+}
+
+.confirm-status-header h4 {
+    margin: 0;
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.confirm-status-body {
+    padding: 16px 20px;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.confirm-status-footer {
+    padding: 12px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    background: #fafafa;
+}
+
+/* Create Account Modal */
+#createAccountOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.create-account-modal {
+    background: #fff;
+    border-radius: 12px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.create-account-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.create-account-header i {
+    font-size: 20px;
+    color: #2F80ED;
+}
+
+.create-account-header h4 {
+    margin: 0;
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.create-account-body {
+    padding: 20px;
+}
+
+.create-account-info {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.create-account-info-item {
+    margin-bottom: 8px;
+}
+
+.create-account-info-label {
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.create-account-info-value {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.create-account-footer {
+    padding: 12px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    background: #fafafa;
+}
+
+.create-account-body p {
+    margin: 0 0 16px 0;
+    color: #2c3e50;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.create-account-body p:last-of-type {
+    margin: 0;
+    color: #6c757d;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.btn-cancel-account {
+    background: #6c757d;
+    color: #fff;
+    border: none;
+}
+
+.btn-confirm-account {
+    background: #9b59b6;
+    color: #fff;
+    border: none;
+}
+
+/* Email Link */
+.email-link {
+    color: #2F80ED;
+    text-decoration: none;
+}
+
+.email-link i {
+    margin-right: 5px;
+}
+
+.email-link:hover {
+    text-decoration: underline;
+}
+
+/* Icon Color */
+.icon-blue {
+    color: #2F80ED;
+}
+
+/* Text Size */
+.text-size-13 {
+    font-size: 13px;
+}
+
+/* Detail Image */
+.detail-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+/* Spacing Utilities */
+.mt-5 {
+    margin-top: 5px;
+}
+
+.mt-10 {
+    margin-top: 10px;
+}
+
+.mt-12 {
+    margin-top: 12px;
+}
+
+.mb-0 {
+    margin-bottom: 0;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.pt-12 {
+    padding-top: 12px;
+}
+
+.mr-6 {
+    margin-right: 6px;
+}
+
+/* Badge Small */
+.status-badge-small {
+    padding: 3px 8px;
+    font-size: 11px;
+}
+
+/* Section Transparent */
+.section-transparent {
+    background: transparent;
+}
+
+/* Textarea Font */
+textarea.form-control {
+    font-family: inherit;
+}
+
+/* ============================================
+   STATISTICS CARDS - Pendaftar
+   ============================================ */
+
+.stat-card {
+    text-align: center;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.stat-card.blue {
+    background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%);
+    color: white;
+}
+
+.stat-card.orange {
+    background: linear-gradient(135deg, #F2994A 0%, #E67E22 100%);
+    color: white;
+}
+
+.stat-card.green {
+    background: linear-gradient(135deg, #27AE60 0%, #1E8E4F 100%);
+    color: white;
+}
+
+.stat-card.purple {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    color: white;
+}
+
+.stat-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+    opacity: 0.95;
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.stat-label {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.95;
+}
+
+/* ============================================
+   FILTER CARD - Pendaftar
+   ============================================ */
+
+.filter-card-wrapper {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.filter-buttons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+.filter-label i {
+    margin-right: 5px;
+}
+
+.filter-button {
+    margin-right: 8px;
+}
+
+.filter-button-active {
+    background: #2F80ED !important;
+    color: white !important;
+    border: none !important;
+}
+
+.filter-button-pending {
+    background: #F2994A !important;
+    color: white !important;
+    border: none !important;
+}
+
+.filter-button-accepted {
+    background: #27AE60 !important;
+    color: white !important;
+    border: none !important;
+}
+
+.filter-button-rejected {
+    background: #e74c3c !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* ============================================
+   PROFILE MODULE STYLES
+   ============================================ */
+
+.profil-container {
+    padding: 20px;
+}
+
+.header-content h1 {
+    font-weight: 800;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 32px;
+}
+
+.header-content p {
+    color: #6c757d;
+    margin-bottom: 20px;
+    font-size: 15px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.card-title-profile {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.card-divider {
+    border: 0;
+    height: 1px;
+    background: #f1f1f1;
+    margin: 15px 0;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.form-control-readonly {
+    background-color: #e9ecef;
+}
+
+textarea.form-control {
+    height: 150px;
+    resize: vertical;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.btn-info {
+    background-color: #2980b9;
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+table.custom-table th,
+table.custom-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+table.custom-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+table.custom-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* ============================================
+   MAHASISWA DASHBOARD STYLES
+   ============================================ */
+
+/* Stat Cards */
+.stat-card-mh {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 22px;
+    color: white;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+    height: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card-mh::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 70%);
+    animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+.stat-card-mh:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.12);
+}
+
+.stat-card-blue {
+    background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%);
+}
+
+.stat-card-orange {
+    background: linear-gradient(135deg, #F2994A 0%, #E67E22 100%);
+}
+
+.stat-card-green {
+    background: linear-gradient(135deg, #27AE60 0%, #1E8E4F 100%);
+}
+
+.stat-card-mh .stat-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+    opacity: 0.95;
+    position: relative;
+    z-index: 1;
+}
+
+.stat-card-mh .stat-number {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.2);
+}
+
+.stat-card-mh .stat-label {
+    font-size: 12px;
+    opacity: 0.95;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Info Card */
+.filter-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+}
+
+.filter-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f8f9fa;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.filter-header i {
+    font-size: 18px;
+    color: #2F80ED;
+}
+
+/* Hero Greeting */
+.hero-greeting {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%);
+    border-radius: 14px;
+    padding: 18px 20px;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.hero-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.hero-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-avatar-fallback {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #2F80ED;
+    background: #fff;
+}
+
+.hero-text .hero-title {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.hero-text .hero-subtitle {
+    font-size: 13px;
+    opacity: 0.95;
+}
+
+.hero-actions .button {
+    margin-left: 8px;
+}
+
+.hero-actions .border-button {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.hero-actions .border-button:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+/* Top Banner */
+.top-banner {
+    background: #fff7e6;
+    border: 1px solid #ffe8bf;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+
+.top-banner .top-banner-text {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #a35d00;
+    font-weight: 600;
+}
+
+.top-banner .top-banner-text a {
+    color: #a35d00;
+    text-decoration: underline;
+}
+
+.top-banner .top-banner-text i {
+    color: #ff9900;
+}
+
+.top-banner .top-banner-close {
+    background: transparent;
+    border: none;
+    color: #a35d00;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+/* List Item Styles */
+.list-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.list-item-link {
+    text-decoration: none;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.list-item-date {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* Section Title Styles */
+.section-title-h2 {
+    color: #2c3e50;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.section-title-icon {
+    color: #2F80ED;
+    margin-right: 10px;
+}
+
+.section-title-p {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 0;
+}
+
+.section-title-p-small {
+    color: #6c757d;
+    font-size: 12px;
+    margin: 0;
+}
+
+/* ============================================
+   STATUS CARD - Mahasiswa Status
+   ============================================ */
+
+.status-card {
+    border: 1px solid #e9ecef;
+    border-radius: 14px;
+    padding: 22px;
+}
+
+.status-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.status-meta {
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.status-chip {
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-chip.status-accepted {
+    background: rgba(39, 174, 96, 0.12);
+    color: #1e8e4f;
+}
+
+.status-chip.status-rejected {
+    background: rgba(231, 76, 60, 0.12);
+    color: #c0392b;
+}
+
+.status-chip.status-pending {
+    background: rgba(242, 153, 74, 0.12);
+    color: #d9822b;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 10px 16px;
+    color: #2c3e50;
+}
+
+.status-grid .detail-label {
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.status-grid .detail-value {
+    font-size: 14px;
+}
+
+/* Content Text */
+.content-text {
+    color: #2c3e50;
+    font-size: 15px;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .stat-card-mh {
+        padding: 18px;
+    }
+    
+    .stat-card-mh .stat-icon {
+        font-size: 28px;
+    }
+    
+    .stat-card-mh .stat-number {
+        font-size: 18px;
+    }
+    
+    .hero-greeting {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .hero-actions .button {
+        margin-left: 0;
+        margin-right: 8px;
+        margin-top: 8px;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        white-space: nowrap;
+    }
+}
+
+/* ============================================
+   ACTIVITY ITEMS - Admin Dashboard
+   ============================================ */
+
+.activity-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f1f1;
+    border-left: 3px solid transparent;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-item-green {
+    border-left-color: #27AE60;
+}
+
+.activity-item-orange {
+    border-left-color: #F2994A;
+}
+
+.activity-item-purple {
+    border-left-color: #9B59B6;
+}
+
+.activity-name {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 4px;
+}
+
+.activity-meta {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.activity-link {
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.activity-link-green {
+    color: #27AE60;
+}
+
+.activity-link-orange {
+    color: #F2994A;
+}
+
+.activity-link-purple {
+    color: #9B59B6;
+}
+
+.activity-link:hover {
+    text-decoration: underline;
+}
+
+/* ============================================
+   FORM CARD STYLES
+   ============================================ */
+
+.form-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.form-label-custom {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-input-custom {
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.form-select-custom {
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.form-file-custom {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+}
+
+/* Preview Image */
+.preview-container {
+    margin-top: 10px;
+    display: none;
+}
+
+.preview-image {
+    height: 100px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.preview-image-small {
+    height: 60px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+/* Form Buttons */
+.btn-save {
+    background: #27AE60;
+    color: white;
+    padding: 12px 30px;
+}
+
+.btn-update {
+    background: #2F80ED;
+    color: white;
+    padding: 12px 30px;
+}
+
+.btn-cancel {
+    padding: 12px 30px;
+    margin-left: 10px;
+}
+
+.btn-save.btn-edit {
+    background: #2F80ED;
+}
+
+@media (max-width: 575px) {
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .status-grid .detail-label {
+        margin-top: 8px;
+    }
+}
+
+/* Button Hover Effects */
+.button:hover {
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+.button:active {
+    transform: translateY(0);
+}
+

@@ -1,0 +1,86 @@
+/**
+ * AdminSidebar - Kelas untuk mengelola sidebar admin (toggle, overlay)
+ */
+class AdminSidebar {
+    constructor() {
+        this.sidebar = null;
+        this.overlay = null;
+        this.toggleButton = null;
+        this.init();
+    }
+
+    init() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.setupElements());
+        } else {
+            this.setupElements();
+        }
+    }
+
+    setupElements() {
+        this.sidebar = document.getElementById('adminSidebar');
+        this.overlay = document.getElementById('sidebarOverlay');
+        this.toggleButton = document.getElementById('sidebarToggle');
+        
+        if (this.toggleButton) {
+            this.toggleButton.addEventListener('click', () => this.toggle());
+        }
+        
+        if (this.overlay) {
+            this.overlay.addEventListener('click', () => this.close());
+        }
+        
+        // Close sidebar on window resize if desktop
+        window.addEventListener('resize', () => this.handleResize());
+        
+        // Expose global function for backward compatibility
+        if (typeof window !== 'undefined') {
+            window.toggleSidebar = () => this.toggle();
+        }
+    }
+
+    toggle() {
+        if (window.innerWidth <= 991) {
+            if (this.sidebar) {
+                this.sidebar.classList.toggle('active');
+            }
+            if (this.overlay) {
+                this.overlay.classList.toggle('active');
+            }
+        }
+    }
+
+    open() {
+        if (window.innerWidth <= 991) {
+            if (this.sidebar) {
+                this.sidebar.classList.add('active');
+            }
+            if (this.overlay) {
+                this.overlay.classList.add('active');
+            }
+        }
+    }
+
+    close() {
+        if (window.innerWidth <= 991) {
+            if (this.sidebar) {
+                this.sidebar.classList.remove('active');
+            }
+            if (this.overlay) {
+                this.overlay.classList.remove('active');
+            }
+        }
+    }
+
+    handleResize() {
+        if (window.innerWidth > 991) {
+            this.close();
+        }
+    }
+}
+
+// Initialize AdminSidebar
+if (typeof window !== 'undefined') {
+    window.adminSidebar = new AdminSidebar();
+}
+

@@ -96,7 +96,7 @@ include __DIR__ . '/../../template/admin_header.php';
 
 <!-- Main Content -->
 <main class="admin-main-content">
-<section class="pt-50 pb-50" style="background: #f8f9fa; padding-top: 30px !important;">
+<section class="pt-50 pb-50 admin-section-bg">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
@@ -111,25 +111,25 @@ include __DIR__ . '/../../template/admin_header.php';
 
         <div class="row">
             <div class="col-lg-12">
-                <div class="card wow fadeInUp" data-wow-delay=".3s" style="background: white; border-radius: 15px; padding: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.08);">
+                <div class="card wow fadeInUp form-card" data-wow-delay=".3s">
                     <form method="POST" action="">
                         <div class="row mb-3">
                             <div class="col-lg-6">
-                                <label for="username" class="form-label" style="font-weight: 600; color: #2c3e50;">Username *</label>
-                                <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username" required style="padding: 12px; border-radius: 5px; border: 1px solid #dee2e6;" minlength="3">
+                                <label for="username" class="form-label form-label-custom">Username *</label>
+                                <input type="text" class="form-control form-input-custom" id="username" name="username" placeholder="Masukkan username" required minlength="3">
                                 <small class="text-muted">Minimal 3 karakter</small>
                             </div>
                             <div class="col-lg-6">
-                                <label for="password" class="form-label" style="font-weight: 600; color: #2c3e50;">Password *</label>
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan password" required style="padding: 12px; border-radius: 5px; border: 1px solid #dee2e6;" minlength="5">
+                                <label for="password" class="form-label form-label-custom">Password *</label>
+                                <input type="password" class="form-control form-input-custom" id="password" name="password" placeholder="Masukkan password" required minlength="5">
                                 <small class="text-muted">Minimal 5 karakter</small>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-lg-6">
-                                <label for="role" class="form-label" style="font-weight: 600; color: #2c3e50;">Role *</label>
-                                <select class="form-select" id="role" name="role" required style="padding: 12px; border-radius: 5px; border: 1px solid #dee2e6;">
+                                <label for="role" class="form-label form-label-custom">Role *</label>
+                                <select class="form-select form-select-custom" id="role" name="role" required>
                                     <option value="admin" selected>Admin</option>
                                     <option value="mahasiswa">Mahasiswa</option>
                                 </select>
@@ -138,10 +138,10 @@ include __DIR__ . '/../../template/admin_header.php';
 
                         <div class="row">
                             <div class="col-lg-12">
-                                <button type="submit" class="button radius-10" style="background: #27AE60; color: white; padding: 12px 30px;">
+                                <button type="submit" class="button radius-10 btn-save">
                                     <i class="lni lni-save"></i> Simpan
                                 </button>
-                                <a href="index.php" class="button radius-10 border-button" style="padding: 12px 30px; margin-left: 10px;">
+                                <a href="index.php" class="button radius-10 border-button btn-cancel">
                                     <i class="lni lni-arrow-left"></i> Batal
                                 </a>
                             </div>

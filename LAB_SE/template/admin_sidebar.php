@@ -126,36 +126,5 @@ foreach ($menu_items as $key => $item) {
     </ul>
 </aside>
 
-<script>
-function toggleSidebar() {
-    const sidebar = document.getElementById('adminSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    
-    if (window.innerWidth <= 991) {
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-    }
-}
-
-// Close sidebar when clicking overlay on mobile
-document.getElementById('sidebarOverlay').addEventListener('click', function() {
-    if (window.innerWidth <= 991) {
-        const sidebar = document.getElementById('adminSidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-    }
-});
-
-// Close sidebar on window resize if desktop
-window.addEventListener('resize', function() {
-    const sidebar = document.getElementById('adminSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    
-    if (window.innerWidth > 991) {
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-    }
-});
-</script>
+<script src="<?php echo isset($base_path) ? $base_path : '../../'; ?>assets/js/classes/AdminSidebar.js"></script>
 
