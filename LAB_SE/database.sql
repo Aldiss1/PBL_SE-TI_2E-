@@ -149,3 +149,17 @@ INSERT INTO konten_page (page_key, title, content) VALUES
 -- PENTING: Jika pakai DBeaver/pgAdmin, jangan lupa klik tombol COMMIT (ikon Disket/Centang Hijau) setelah menjalankan ini!
 -- Data ini masih dummy
 
+CREATE TABLE roadmap_periode (
+    id SERIAL PRIMARY KEY,
+    tahun_periode VARCHAR(50) NOT NULL,    -- Contoh: '2024 Q1 - Q4'
+    judul_fase VARCHAR(150) NOT NULL,      -- Contoh: 'Fase Pendirian & Setup'
+    urutan INTEGER NOT NULL DEFAULT 0       -- Untuk sorting
+);
+
+CREATE TABLE roadmap_item (
+    id SERIAL PRIMARY KEY,
+    id_periode INTEGER REFERENCES roadmap_periode(id) ON DELETE CASCADE, -- Foreign Key
+    deskripsi_tugas TEXT NOT NULL,         -- Contoh: 'Pembentukan struktur organisasi laboratorium'
+    urutan INTEGER NOT NULL DEFAULT 0       -- Untuk sorting item di dalam fase
+);
+

@@ -156,6 +156,8 @@ if (!isset($base_path)) {
 if (!isset($current_page)) {
     $current_page = 'dashboard';
 }
+
+
 ?>
 
 <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
@@ -269,7 +271,7 @@ if (!isset($current_page)) {
     .admin-main-content { margin-left: 0; }
 }
 
-.admin-main-content { margin-left: 260px; transition: margin-left .2s ease; }
+.admin-main-content { margin-left: 260px; transition: margin-left .2s ease; padding: 20px; }
 .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; display: none; }
 .sidebar-overlay.active { display: block; }
 
@@ -283,7 +285,7 @@ if (!isset($current_page)) {
 .btn-sm { padding: 5px 10px; font-size: 14px; }
 .btn-info { background-color: #2980b9; color: white; text-decoration: none; display: inline-block; }
 .btn-danger { background-color: #e74c3c; color: white; text-decoration: none; display: inline-block; }
-.profil-container { padding: 20px; }
+.profil-container { padding: 20px; padding-right: 40px;}
 .card { background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px; }
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
@@ -476,6 +478,50 @@ window.addEventListener('resize', function() {
             <?php endif; ?>
         </div>
     </div>
+
+
+    <div class="container-fluid">
+    
+    <div class="row align-items-center mb-4">
+        <div class="col-6">
+            </div>
+        <div class="col-6 d-flex justify-content-end"> 
+            <a href="kelola_roadmap.php" class="btn btn-secondary" style="white-space: nowrap;">
+                <i class="lni lni-map-marker mr-2"></i> Kelola Roadmap
+            </a>
+        </div>
+    </div>
+    
+    <div class="card p-4">
+        <table class="table table-striped">
+            
+            <tbody>
+                <?php foreach ($data_list as $d): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($d['id']); ?></td>
+                    <td><?php echo htmlspecialchars($d['judul_konten']); ?></td>
+                    
+                    <td class="text-end"> 
+                        <a href="kelola_teks_umum.php?id=<?php echo $d['id']; ?>" class="btn btn-sm btn-primary">Kelola Konten</a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        </div>
+    
 </div>
-</div> </body>
+
+</div>
+</div>
+
+</body>
 </html>
+
+
+
+<?php 
+// Tambahkan footer di akhir file
+include __DIR__ . '/../../template/admin_footer.php'; 
+?>
