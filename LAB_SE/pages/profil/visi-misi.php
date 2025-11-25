@@ -22,12 +22,20 @@ function ambil_konten($koneksi, $key) {
     return ['title' => 'TBA', 'content' => 'Konten ' . htmlspecialchars($key) . ' belum diatur di Admin Panel.'];
 }
 
-// Ambil data yang dibutuhkan (Asumsi Page Key Anda adalah 'visi_kami' dan 'misi_kami')
-$visi_data = ambil_konten($koneksi, 'visi_kami');
-$misi_data = ambil_konten($koneksi, 'misi_kami');
+// Ambil data Visi
+$visi_data = ambil_konten($koneksi, 'visi_deskripsi');
 
-// Tutup koneksi setelah selesai mengambil data (Opsional: bisa juga ditutup di akhir file)
-// pg_close($koneksi); 
+// AMBIL SEMUA ITEM MISI (sebagai daftar/list, karena menggunakan misi_item_%)
+$misi_items = [];
+// Mengambil semua key yang diawali 'misi_item_' dan mengurutkannya
+$query_misi = "SELECT title, content FROM konten_page WHERE page_key LIKE 'misi_item_%' ORDER BY page_key ASC";
+$result_misi = pg_query($koneksi, $query_misi);
+
+if ($result_misi) {
+    while ($row = pg_fetch_assoc($result_misi)) {
+        $misi_items[] = $row;
+    }
+}
 ?>
 
 <?php include __DIR__ . '/../../template/header.php'; ?>
@@ -35,57 +43,58 @@ $misi_data = ambil_konten($koneksi, 'misi_kami');
 <link rel="stylesheet" href="../../assets/css/visi-misi.css" />
 
 <section class="visi-misi-hero">
-  <div class="container">
-    <h2 class="wow fadeInUp" data-wow-delay=".2s">Visi &amp; Misi</h2>
-    <p class="wow fadeInUp" data-wow-delay=".3s">Arah dan komitmen Laboratorium Software Engineering</p>
-  </div>
+    <div class="container">
+        <h2 class="wow fadeInUp" data-wow-delay=".2s">Visi &amp; Misi</h2>
+        <p class="wow fadeInUp" data-wow-delay=".3s">Arah dan komitmen Laboratorium Software Engineering</p>
+    </div>
 </section>
 
 <section class="visi-misi-content">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
-        
-                <div class="vision-card wow fadeInUp" data-wow-delay=".2s">
-          <div class="card-header-custom">
-            <div class="card-icon">
-              <i class="lni lni-bullseye"></i>
-            </div>
-                        <h3 class="card-title-custom"><?php echo empty($visi_data['title']) ? 'Visi' : htmlspecialchars($visi_data['title']); ?></h3>
-          </div>
-          <p class="vision-text">
-            <?php 
-                // Mengganti teks statis dengan konten dari database
-                // nl2br() digunakan agar baris baru/enter dari admin panel tampil sebagai <br> di HTML
-                echo nl2br(htmlspecialchars($visi_data['content'])); 
-            ?>
-          </p>
-        </div>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                
+                <div class="vision-card wow fadeInUp" data-wow-delay=".2s">
+                    <div class="card-header-custom">
+                        <div class="card-icon">
+                            <i class="lni lni-bullseye"></i>
+                        </div>
+                        <h3 class="card-title-custom"><?php echo empty($visi_data['title']) ? 'Visi' : htmlspecialchars($visi_data['title']); ?></h3>
+                    </div>
+                    <p class="vision-text">
+                        <?php 
+                            echo nl2br(htmlspecialchars($visi_data['content'])); 
+                        ?>
+                    </p>
+                </div>
 
-                <div class="mission-card wow fadeInUp" data-wow-delay=".4s">
-          <div class="card-header-custom">
-            <div class="card-icon">
-              <i class="lni lni-target"></i>
-            </div>
-                        <h3 class="card-title-custom"><?php echo empty($misi_data['title']) ? 'Misi' : htmlspecialchars($misi_data['title']); ?></h3>
-          </div>
-          
-                      <p class="mission-text">
-            <?php 
-                // Mengganti teks statis dengan konten dari database
-                echo nl2br(htmlspecialchars($misi_data['content'])); 
-            ?>
-          </p>
-            
-                    </div>
-
-      </div>
-    </div>
-  </div>
-</section>
+                <div class="mission-card wow fadeInUp" data-wow-delay=".4s">
+                    <div class="card-header-custom">
+                        <div class="card-icon">
+                            <i class="lni lni-target"></i>
+                        </div>
+                        <h3 class="card-title-custom">Misi Kami</h3>
+                    </div>
+                    
+                    <?php if (!empty($misi_items)): ?>
+                        <ul class="mission-list">
+                            <?php foreach ($misi_items as $item): ?>
+                                <li>
+                                    <p class="mission-text">
+                                        <?php echo nl2br(htmlspecialchars($item['content'])); ?>
+                                    </p>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php else: ?>
+                        <p>Konten misi belum diatur di Admin Panel.</p>
+                    <?php endif; ?>
+                </div>
+                
+            </div> </div> </div> </section>
 
 <?php 
-// Tutup koneksi database di akhir file (opsional tapi disarankan)
+// Tutup koneksi database di akhir file (disarankan)
 if (isset($koneksi) && $koneksi) {
     pg_close($koneksi);
 }
