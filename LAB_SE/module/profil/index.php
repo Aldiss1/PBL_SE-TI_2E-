@@ -14,6 +14,8 @@ if (!isset($base_path)) {
 $pesan = '';
 $data_edit = null;
 $semua_konten = [];
+// Pastikan $data_list didefinisikan sebagai array kosong jika tidak ada data yang diambil
+$data_list = [];
 // --- END DEFINISI ---
 
 // --- 2. KONFIGURASI MENU SIDEBAR ---
