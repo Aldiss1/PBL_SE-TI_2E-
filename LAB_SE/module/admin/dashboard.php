@@ -52,53 +52,54 @@ $menu_items = [
 
 include __DIR__ . '/../../template/admin_header.php';
 
-// Ambil statistik dari database
+// Ambil statistik dari materialized view (lebih cepat!)
+// Fallback ke query biasa jika materialized view belum dibuat
 $stats = [
     'anggota' => 0,
     'pendaftar' => 0,
     'pendaftar_pending' => 0,
     'jabatan' => 0
 ];
+$recent_pendaftar = [];
 
-// Hitung total anggota
-$query_anggota = "SELECT COUNT(*) as total FROM anggota";
-$result_anggota = pg_query($koneksi, $query_anggota);
-if ($result_anggota) {
-    $row = pg_fetch_assoc($result_anggota);
-    $stats['anggota'] = (int)$row['total'];
-}
-
-// Hitung total pendaftar
-$query_pendaftar = "SELECT COUNT(*) as total FROM pendaftaran";
-$result_pendaftar = pg_query($koneksi, $query_pendaftar);
-if ($result_pendaftar) {
-    $row = pg_fetch_assoc($result_pendaftar);
-    $stats['pendaftar'] = (int)$row['total'];
-    
-    // Hitung pendaftar pending
-    $query_pending = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'pending'";
-    $result_pending = pg_query($koneksi, $query_pending);
-    if ($result_pending) {
-        $row = pg_fetch_assoc($result_pending);
-        $stats['pendaftar_pending'] = (int)$row['total'];
+if (file_exists(__DIR__ . '/../../fungsi/materialized_views_simple.php')) {
+    require_once __DIR__ . '/../../fungsi/materialized_views_simple.php';
+    $stats_mv = get_stats_simple();
+    if ($stats_mv) {
+        $stats = [
+            'anggota' => (int)($stats_mv['total_anggota'] ?? 0),
+            'pendaftar' => (int)($stats_mv['total_pendaftar'] ?? 0),
+            'pendaftar_pending' => (int)($stats_mv['pendaftar_pending'] ?? 0),
+            'jabatan' => (int)($stats_mv['total_jabatan'] ?? 0)
+        ];
+        $recent_pendaftar = get_pendaftar_terbaru(5);
     }
 }
 
-// Hitung total jabatan
-$query_jabatan = "SELECT COUNT(*) as total FROM jabatan";
-$result_jabatan = pg_query($koneksi, $query_jabatan);
-if ($result_jabatan) {
-    $row = pg_fetch_assoc($result_jabatan);
-    $stats['jabatan'] = (int)$row['total'];
-}
-
-// Ambil pendaftar terbaru (5 terakhir)
-$recent_pendaftar = [];
-$query_recent = "SELECT nama, nim, tanggal_daftar, status FROM pendaftaran ORDER BY tanggal_daftar DESC LIMIT 5";
-$result_recent = pg_query($koneksi, $query_recent);
-if ($result_recent && pg_num_rows($result_recent) > 0) {
-    while ($row = pg_fetch_assoc($result_recent)) {
-        $recent_pendaftar[] = $row;
+// Fallback: Query langsung jika materialized view tidak tersedia
+if (empty($recent_pendaftar) && $koneksi) {
+    // Hitung statistik (sederhanakan dengan satu query)
+    $query_stats = "SELECT 
+        (SELECT COUNT(*) FROM anggota) as anggota,
+        (SELECT COUNT(*) FROM pendaftaran) as pendaftar,
+        (SELECT COUNT(*) FROM pendaftaran WHERE status = 'pending') as pendaftar_pending,
+        (SELECT COUNT(*) FROM jabatan) as jabatan";
+    $result_stats = pg_query($koneksi, $query_stats);
+    if ($result_stats && pg_num_rows($result_stats) > 0) {
+        $row = pg_fetch_assoc($result_stats);
+        $stats['anggota'] = (int)$row['anggota'];
+        $stats['pendaftar'] = (int)$row['pendaftar'];
+        $stats['pendaftar_pending'] = (int)$row['pendaftar_pending'];
+        $stats['jabatan'] = (int)$row['jabatan'];
+    }
+    
+    // Ambil pendaftar terbaru (5 terakhir)
+    $query_recent = "SELECT nama, nim, tanggal_daftar, status FROM pendaftaran ORDER BY tanggal_daftar DESC LIMIT 5";
+    $result_recent = pg_query($koneksi, $query_recent);
+    if ($result_recent && pg_num_rows($result_recent) > 0) {
+        while ($row = pg_fetch_assoc($result_recent)) {
+            $recent_pendaftar[] = $row;
+        }
     }
 }
 
