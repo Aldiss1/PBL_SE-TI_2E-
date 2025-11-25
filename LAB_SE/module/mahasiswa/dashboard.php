@@ -26,25 +26,86 @@ if ($koneksi && isset($_SESSION['username'])) {
 }
 
 if ($koneksi) {
-  // 3 pengumuman terbaru
-  $rp = pg_query($koneksi, "SELECT title, slug, published_at FROM blog WHERE is_published = TRUE ORDER BY COALESCE(published_at, created_at) DESC LIMIT 3");
-  if ($rp && pg_num_rows($rp) > 0) {
-    while ($row = pg_fetch_assoc($rp)) { $recent_posts[] = $row; }
+  // Coba gunakan materialized view, fallback ke query biasa
+  if (file_exists(__DIR__ . '/../../fungsi/materialized_views_simple.php')) {
+    require_once __DIR__ . '/../../fungsi/materialized_views_simple.php';
+    
+    // 3 pengumuman terbaru dari materialized view
+    $recent_posts_raw = get_blog_published_simple(3);
+    if (!empty($recent_posts_raw)) {
+      foreach ($recent_posts_raw as $blog) {
+        $recent_posts[] = [
+          'title' => $blog['title'] ?? '',
+          'slug' => $blog['slug'] ?? '',
+          'published_at' => $blog['published_at'] ?? $blog['created_at'] ?? null
+        ];
+      }
+    }
+    
+    // 3 event terbaru dari materialized view
+    $recent_events_raw = get_blog_published_simple(3, 'event');
+    if (!empty($recent_events_raw)) {
+      foreach ($recent_events_raw as $blog) {
+        $recent_events[] = [
+          'title' => $blog['title'] ?? '',
+          'slug' => $blog['slug'] ?? '',
+          'published_at' => $blog['published_at'] ?? $blog['created_at'] ?? null
+        ];
+      }
+    }
+    
+    // 3 resource/materi terbaru dari materialized view
+    $recent_resources_raw = get_blog_published_simple(10);
+    if (!empty($recent_resources_raw)) {
+      foreach ($recent_resources_raw as $blog) {
+        $cat = strtolower($blog['category'] ?? '');
+        if (in_array($cat, ['materi', 'resource', 'resources']) && count($recent_resources) < 3) {
+          $recent_resources[] = [
+            'title' => $blog['title'] ?? '',
+            'slug' => $blog['slug'] ?? '',
+            'published_at' => $blog['published_at'] ?? $blog['created_at'] ?? null
+          ];
+        }
+      }
+    }
+    
+    // Banner pengumuman paling baru dari materialized view
+    $latest = get_blog_published_simple(1);
+    if (!empty($latest)) {
+      $latest_announcement = [
+        'title' => $latest[0]['title'] ?? '',
+        'slug' => $latest[0]['slug'] ?? ''
+      ];
+    }
   }
-  // 3 event terbaru (berdasarkan category)
-  $ev = pg_query($koneksi, "SELECT title, slug, published_at FROM blog WHERE is_published = TRUE AND lower(category) = 'event' ORDER BY COALESCE(published_at, created_at) DESC LIMIT 3");
-  if ($ev && pg_num_rows($ev) > 0) {
-    while ($row = pg_fetch_assoc($ev)) { $recent_events[] = $row; }
+  
+  // Fallback: Query langsung jika materialized view tidak tersedia
+  if (empty($recent_posts)) {
+    $rp = pg_query($koneksi, "SELECT title, slug, published_at FROM blog WHERE is_published = TRUE ORDER BY COALESCE(published_at, created_at) DESC LIMIT 3");
+    if ($rp && pg_num_rows($rp) > 0) {
+      while ($row = pg_fetch_assoc($rp)) { $recent_posts[] = $row; }
+    }
   }
-  // 3 resource/materi terbaru (berdasarkan category)
-  $rs = pg_query($koneksi, "SELECT title, slug, published_at FROM blog WHERE is_published = TRUE AND lower(category) IN ('materi','resource','resources') ORDER BY COALESCE(published_at, created_at) DESC LIMIT 3");
-  if ($rs && pg_num_rows($rs) > 0) {
-    while ($row = pg_fetch_assoc($rs)) { $recent_resources[] = $row; }
+  
+  if (empty($recent_events)) {
+    $ev = pg_query($koneksi, "SELECT title, slug, published_at FROM blog WHERE is_published = TRUE AND lower(category) = 'event' ORDER BY COALESCE(published_at, created_at) DESC LIMIT 3");
+    if ($ev && pg_num_rows($ev) > 0) {
+      while ($row = pg_fetch_assoc($ev)) { $recent_events[] = $row; }
+    }
   }
-  // Banner pengumuman paling baru
-  $ba = pg_query($koneksi, "SELECT title, slug FROM blog WHERE is_published = TRUE ORDER BY COALESCE(published_at, created_at) DESC LIMIT 1");
-  if ($ba && pg_num_rows($ba) === 1) {
-    $latest_announcement = pg_fetch_assoc($ba);
+  
+  if (empty($recent_resources)) {
+    $rs = pg_query($koneksi, "SELECT title, slug, published_at FROM blog WHERE is_published = TRUE AND lower(category) IN ('materi','resource','resources') ORDER BY COALESCE(published_at, created_at) DESC LIMIT 3");
+    if ($rs && pg_num_rows($rs) > 0) {
+      while ($row = pg_fetch_assoc($rs)) { $recent_resources[] = $row; }
+    }
+  }
+  
+  if (!$latest_announcement) {
+    $ba = pg_query($koneksi, "SELECT title, slug FROM blog WHERE is_published = TRUE ORDER BY COALESCE(published_at, created_at) DESC LIMIT 1");
+    if ($ba && pg_num_rows($ba) === 1) {
+      $latest_announcement = pg_fetch_assoc($ba);
+    }
   }
 }
 ?>

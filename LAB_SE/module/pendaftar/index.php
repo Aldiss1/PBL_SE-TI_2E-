@@ -52,44 +52,29 @@ $menu_items = [
     ]
 ];
 
-// Ambil statistik pendaftar
-$stats = [
-	'total' => 0,
-	'pending' => 0,
-	'accepted' => 0,
-	'rejected' => 0
-];
+// Ambil statistik pendaftar dari materialized view (lebih cepat!)
+// Fallback ke query biasa jika materialized view belum dibuat
+$stats = ['total' => 0, 'pending' => 0, 'accepted' => 0, 'rejected' => 0];
 
-// Hitung total pendaftar
-$query_total = "SELECT COUNT(*) as total FROM pendaftaran";
-$result_total = pg_query($koneksi, $query_total);
-if ($result_total) {
-	$row_total = pg_fetch_assoc($result_total);
-	$stats['total'] = (int)$row_total['total'];
+if (file_exists(__DIR__ . '/../../fungsi/materialized_views_simple.php')) {
+    require_once __DIR__ . '/../../fungsi/materialized_views_simple.php';
+    $stats_mv = get_pendaftar_per_status();
+    if ($stats_mv) {
+        $stats = $stats_mv;
+        $stats['total'] = $stats['pending'] + $stats['accepted'] + $stats['rejected'];
+    }
 }
 
-// Hitung pending
-$query_pending = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'pending'";
-$result_pending = pg_query($koneksi, $query_pending);
-if ($result_pending) {
-	$row_pending = pg_fetch_assoc($result_pending);
-	$stats['pending'] = (int)$row_pending['total'];
-}
-
-// Hitung accepted
-$query_accepted = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'accepted'";
-$result_accepted = pg_query($koneksi, $query_accepted);
-if ($result_accepted) {
-	$row_accepted = pg_fetch_assoc($result_accepted);
-	$stats['accepted'] = (int)$row_accepted['total'];
-}
-
-// Hitung rejected
-$query_rejected = "SELECT COUNT(*) as total FROM pendaftaran WHERE status = 'rejected'";
-$result_rejected = pg_query($koneksi, $query_rejected);
-if ($result_rejected) {
-	$row_rejected = pg_fetch_assoc($result_rejected);
-	$stats['rejected'] = (int)$row_rejected['total'];
+// Fallback: Query langsung jika materialized view tidak tersedia
+if ($stats['total'] === 0 && $koneksi) {
+    $query_stats = "SELECT status, COUNT(*) as total FROM pendaftaran GROUP BY status";
+    $result_stats = pg_query($koneksi, $query_stats);
+    if ($result_stats) {
+        while ($row = pg_fetch_assoc($result_stats)) {
+            $stats[$row['status']] = (int)$row['total'];
+            $stats['total'] += (int)$row['total'];
+        }
+    }
 }
 
 // Filter berdasarkan status (ambil dulu sebelum proses update)
