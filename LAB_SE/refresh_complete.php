@@ -1,14 +1,14 @@
 <?php
 /**
- * Script Sederhana untuk Refresh Materialized Views
+ * Script untuk Refresh Materialized Views Lengkap
  * Cocok untuk pemula
  * 
  * Cara pakai:
- * 1. Via web: http://localhost/LAB_SE/refresh_simple.php
- * 2. Via command: php refresh_simple.php
+ * 1. Via web: http://localhost/LAB_SE/refresh_complete.php
+ * 2. Via command: php refresh_complete.php
  */
 
-require_once __DIR__ . '/fungsi/materialized_views_simple.php';
+require_once __DIR__ . '/fungsi/materialized_views_complete.php';
 
 // Cek apakah dijalankan via CLI atau web
 $is_cli = php_sapi_name() === 'cli';
@@ -16,20 +16,20 @@ $is_cli = php_sapi_name() === 'cli';
 if (!$is_cli) {
     header('Content-Type: text/html; charset=utf-8');
     echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Refresh Materialized Views</title></head><body>";
-    echo "<h1>Refresh Materialized Views</h1>";
+    echo "<h1>Refresh Materialized Views (Lengkap)</h1>";
     echo "<pre>";
 }
 
 echo "========================================\n";
-echo "Refresh Materialized Views (Simple)\n";
+echo "Refresh Materialized Views (Lengkap)\n";
 echo "Waktu: " . date('Y-m-d H:i:s') . "\n";
 echo "========================================\n\n";
 
-if (refresh_views_simple()) {
+if (refresh_views_complete()) {
     echo "✓ Berhasil refresh semua materialized views!\n\n";
     
     // Tampilkan statistik untuk verifikasi
-    $stats = get_stats_simple();
+    $stats = get_stats_complete();
     if ($stats) {
         echo "Statistik Terbaru:\n";
         echo "  - Total Anggota: " . $stats['total_anggota'] . "\n";
@@ -37,11 +37,13 @@ if (refresh_views_simple()) {
         echo "  - Pending: " . $stats['pendaftar_pending'] . "\n";
         echo "  - Accepted: " . $stats['pendaftar_accepted'] . "\n";
         echo "  - Rejected: " . $stats['pendaftar_rejected'] . "\n";
+        echo "  - Total Blog Published: " . $stats['total_blog_published'] . "\n";
+        echo "  - Total Blog Views: " . $stats['total_blog_views'] . "\n";
     }
 } else {
     echo "❌ Error: Gagal refresh materialized views!\n";
     echo "Pastikan materialized views sudah dibuat di database.\n";
-    echo "Jalankan: psql -d lab_se -f materialized_views.sql\n";
+    echo "Jalankan: psql -d lab_se -f materialized_views_complete.sql\n";
     if (!$is_cli) echo "</pre></body></html>";
     exit(1);
 }

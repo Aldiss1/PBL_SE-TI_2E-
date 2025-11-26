@@ -27,11 +27,11 @@ if ($koneksi && isset($_SESSION['username'])) {
 
 if ($koneksi) {
   // Coba gunakan materialized view, fallback ke query biasa
-  if (file_exists(__DIR__ . '/../../fungsi/materialized_views_simple.php')) {
-    require_once __DIR__ . '/../../fungsi/materialized_views_simple.php';
+  if (file_exists(__DIR__ . '/../../fungsi/materialized_views_complete.php')) {
+    require_once __DIR__ . '/../../fungsi/materialized_views_complete.php';
     
     // 3 pengumuman terbaru dari materialized view
-    $recent_posts_raw = get_blog_published_simple(3);
+    $recent_posts_raw = get_blog_published_complete(3);
     if (!empty($recent_posts_raw)) {
       foreach ($recent_posts_raw as $blog) {
         $recent_posts[] = [
@@ -43,7 +43,7 @@ if ($koneksi) {
     }
     
     // 3 event terbaru dari materialized view
-    $recent_events_raw = get_blog_published_simple(3, 'event');
+    $recent_events_raw = get_blog_published_complete(3, 'event');
     if (!empty($recent_events_raw)) {
       foreach ($recent_events_raw as $blog) {
         $recent_events[] = [
@@ -55,7 +55,7 @@ if ($koneksi) {
     }
     
     // 3 resource/materi terbaru dari materialized view
-    $recent_resources_raw = get_blog_published_simple(10);
+    $recent_resources_raw = get_blog_published_complete(10);
     if (!empty($recent_resources_raw)) {
       foreach ($recent_resources_raw as $blog) {
         $cat = strtolower($blog['category'] ?? '');
@@ -70,7 +70,7 @@ if ($koneksi) {
     }
     
     // Banner pengumuman paling baru dari materialized view
-    $latest = get_blog_published_simple(1);
+    $latest = get_blog_published_complete(1);
     if (!empty($latest)) {
       $latest_announcement = [
         'title' => $latest[0]['title'] ?? '',

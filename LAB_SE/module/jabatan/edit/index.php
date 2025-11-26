@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../../config/anti_injection.php';
 require_once __DIR__ . '/../../../fungsi/pesan_kilat.php';
 require_once __DIR__ . '/../../auth/cek_login.php';
 
-$id = isset($_GET['id']) ? clean_input($_GET['id']) : '';
+$id = clean_input($_GET['id'] ?? '');
 
 // Ambil data jabatan berdasarkan ID
 $query = "SELECT * FROM jabatan WHERE id = '$id'";
@@ -18,15 +18,24 @@ if (!$data) {
 
 // Proses update
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-	$nama_jabatan = clean_input($_POST['nama_jabatan']);
+	$nama_jabatan = clean_input($_POST['nama_jabatan'] ?? '');
 	
-	require_once __DIR__ . '/../../../fungsi/edit.php';
-	if (edit_data('jabatan', ['nama_jabatan' => $nama_jabatan], $id)) {
-		pesan_kilat('Data jabatan berhasil diupdate', 'success');
-		header('Location: ../index.php');
-		exit;
+	if (empty($nama_jabatan)) {
+		pesan_kilat('Nama jabatan wajib diisi.', 'error');
 	} else {
-		pesan_kilat('Gagal mengupdate data', 'error');
+		$id_escaped = pg_escape_string($koneksi, $id);
+		$nama_jabatan_escaped = pg_escape_string($koneksi, $nama_jabatan);
+		
+		$query = "UPDATE jabatan SET nama_jabatan = '$nama_jabatan_escaped', updated_at = NOW() WHERE id = $id_escaped";
+		$result = pg_query($koneksi, $query);
+		
+		if ($result) {
+			pesan_kilat('Data jabatan berhasil diupdate', 'success');
+			header('Location: ../index.php');
+			exit;
+		} else {
+			pesan_kilat('Gagal mengupdate data. Error: ' . pg_last_error($koneksi), 'error');
+		}
 	}
 }
 

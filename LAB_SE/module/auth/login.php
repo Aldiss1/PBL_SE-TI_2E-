@@ -6,22 +6,18 @@ require_once __DIR__ . '/../../fungsi/pesan_kilat.php';
 
 // Jika sudah login, redirect ke dashboard
 if (isset($_SESSION['login'])) {
-    if (isset($_SESSION['role']) && $_SESSION['role'] === 'mahasiswa') {
-        header('Location: ../mahasiswa/dashboard.php');
-    } else {
-        header('Location: ../admin/dashboard.php');
-    }
+    $redirect = ($_SESSION['role'] ?? '') === 'mahasiswa' ? '../mahasiswa/dashboard.php' : '../admin/dashboard.php';
+    header("Location: $redirect");
     exit;
 }
 
 // Proses login
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = clean_input($_POST['username']);
-    $password = clean_input($_POST['password']);
-    
     if (!$koneksi) {
         pesan_kilat('Koneksi database gagal!', 'error');
     } else {
+        $username = clean_input($_POST['username'] ?? '');
+        $password = clean_input($_POST['password'] ?? '');
         $query = "SELECT * FROM users WHERE username = '$username' AND password = MD5('$password')";
         $result = pg_query($koneksi, $query);
         
@@ -35,14 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } elseif (pg_num_rows($result) > 0) {
             $user = pg_fetch_assoc($result);
             $_SESSION['login'] = true;
-            $_SESSION['user_id'] = isset($user['id']) ? (int)$user['id'] : 0;
+            $_SESSION['user_id'] = (int)($user['id'] ?? 0);
             $_SESSION['username'] = $username;
-            $_SESSION['role'] = isset($user['role']) ? $user['role'] : 'admin';
-            if ($_SESSION['role'] === 'mahasiswa') {
-                header('Location: ../mahasiswa/dashboard.php');
-            } else {
-                header('Location: ../admin/dashboard.php');
-            }
+            $_SESSION['role'] = $user['role'] ?? 'admin';
+            $redirect = $_SESSION['role'] === 'mahasiswa' ? '../mahasiswa/dashboard.php' : '../admin/dashboard.php';
+            header("Location: $redirect");
             exit;
         } else {
             pesan_kilat('Username atau password salah', 'error');

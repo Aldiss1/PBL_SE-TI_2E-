@@ -67,8 +67,6 @@ BEGIN
     END IF;
 END $$;
 
-drop table pendaftaran;
-
 CREATE TABLE IF NOT EXISTS blog (
     id SERIAL PRIMARY KEY,
     title VARCHAR(500) NOT NULL,
@@ -97,9 +95,6 @@ INSERT INTO users (username, password, full_name, role)
 VALUES ('admin', MD5('admin123'), 'Administrator', 'admin')
 ON CONFLICT (username) DO NOTHING;
 
-
-
-x
 CREATE TABLE IF NOT EXISTS riwayat_pendaftaran (
     id SERIAL PRIMARY KEY,
     pendaftaran_id INTEGER NOT NULL REFERENCES pendaftaran(id) ON DELETE CASCADE,

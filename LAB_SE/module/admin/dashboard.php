@@ -62,9 +62,9 @@ $stats = [
 ];
 $recent_pendaftar = [];
 
-if (file_exists(__DIR__ . '/../../fungsi/materialized_views_simple.php')) {
-    require_once __DIR__ . '/../../fungsi/materialized_views_simple.php';
-    $stats_mv = get_stats_simple();
+if (file_exists(__DIR__ . '/../../fungsi/materialized_views_complete.php')) {
+    require_once __DIR__ . '/../../fungsi/materialized_views_complete.php';
+    $stats_mv = get_stats_complete();
     if ($stats_mv) {
         $stats = [
             'anggota' => (int)($stats_mv['total_anggota'] ?? 0),
@@ -72,7 +72,7 @@ if (file_exists(__DIR__ . '/../../fungsi/materialized_views_simple.php')) {
             'pendaftar_pending' => (int)($stats_mv['pendaftar_pending'] ?? 0),
             'jabatan' => (int)($stats_mv['total_jabatan'] ?? 0)
         ];
-        $recent_pendaftar = get_pendaftar_terbaru(5);
+        $recent_pendaftar = get_pendaftar_terbaru_complete(5);
     }
 }
 
@@ -103,38 +103,43 @@ if (empty($recent_pendaftar) && $koneksi) {
     }
 }
 
-// Ambil data pendaftaran per bulan (6 bulan terakhir)
-$chart_data = [
-    'labels' => [],
-    'data' => []
-];
+// Ambil data pendaftaran per bulan dari materialized view (lebih cepat!)
+$chart_data = ['labels' => [], 'data' => []];
 
-// Generate 6 bulan terakhir
-$months = [];
-for ($i = 5; $i >= 0; $i--) {
-    $date = date('Y-m', strtotime("-$i months"));
-    $month_name = date('M Y', strtotime("-$i months"));
-    $months[] = [
-        'period' => $date,
-        'label' => $month_name
-    ];
+if (function_exists('get_pendaftar_per_bulan')) {
+    $pendaftar_bulan = get_pendaftar_per_bulan();
+    if (!empty($pendaftar_bulan)) {
+        foreach ($pendaftar_bulan as $item) {
+            $chart_data['labels'][] = $item['label'];
+            $chart_data['data'][] = $item['jumlah'];
+        }
+    }
 }
 
-// Query untuk mendapatkan jumlah pendaftaran per bulan
-foreach ($months as $month) {
-    $chart_data['labels'][] = $month['label'];
+// Fallback: Query langsung jika materialized view tidak tersedia
+if (empty($chart_data['labels']) && $koneksi) {
+    // Generate 6 bulan terakhir
+    $months = [];
+    for ($i = 5; $i >= 0; $i--) {
+        $date = date('Y-m', strtotime("-$i months"));
+        $month_name = date('M Y', strtotime("-$i months"));
+        $months[] = ['period' => $date, 'label' => $month_name];
+    }
     
-    // Query dengan format date yang benar untuk PostgreSQL
-    $month_period = pg_escape_string($koneksi, $month['period']);
-    $query_chart = "SELECT COUNT(*) as total 
-                    FROM pendaftaran 
-                    WHERE DATE_TRUNC('month', tanggal_daftar) = DATE_TRUNC('month', DATE '{$month_period}-01')";
-    $result_chart = pg_query($koneksi, $query_chart);
-    if ($result_chart && pg_num_rows($result_chart) > 0) {
-        $row_chart = pg_fetch_assoc($result_chart);
-        $chart_data['data'][] = (int)$row_chart['total'];
-    } else {
-        $chart_data['data'][] = 0;
+    // Query untuk mendapatkan jumlah pendaftaran per bulan
+    foreach ($months as $month) {
+        $chart_data['labels'][] = $month['label'];
+        $month_period = pg_escape_string($koneksi, $month['period']);
+        $query_chart = "SELECT COUNT(*) as total 
+                        FROM pendaftaran 
+                        WHERE DATE_TRUNC('month', tanggal_daftar) = DATE_TRUNC('month', DATE '{$month_period}-01')";
+        $result_chart = pg_query($koneksi, $query_chart);
+        if ($result_chart && pg_num_rows($result_chart) > 0) {
+            $row_chart = pg_fetch_assoc($result_chart);
+            $chart_data['data'][] = (int)$row_chart['total'];
+        } else {
+            $chart_data['data'][] = 0;
+        }
     }
 }
 

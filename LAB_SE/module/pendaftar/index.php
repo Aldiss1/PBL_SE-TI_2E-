@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../config/koneksi.php';
 require_once __DIR__ . '/../auth/cek_login.php';
 require_once __DIR__ . '/../../config/anti_injection.php';
 require_once __DIR__ . '/../../fungsi/pesan_kilat.php';
+require_once __DIR__ . '/../../fungsi/pendaftar_log.php';
 
 // Set active menu
 $current_page = 'pendaftar';
@@ -56,8 +57,8 @@ $menu_items = [
 // Fallback ke query biasa jika materialized view belum dibuat
 $stats = ['total' => 0, 'pending' => 0, 'accepted' => 0, 'rejected' => 0];
 
-if (file_exists(__DIR__ . '/../../fungsi/materialized_views_simple.php')) {
-    require_once __DIR__ . '/../../fungsi/materialized_views_simple.php';
+if (file_exists(__DIR__ . '/../../fungsi/materialized_views_complete.php')) {
+    require_once __DIR__ . '/../../fungsi/materialized_views_complete.php';
     $stats_mv = get_pendaftar_per_status();
     if ($stats_mv) {
         $stats = $stats_mv;
@@ -77,8 +78,233 @@ if ($stats['total'] === 0 && $koneksi) {
     }
 }
 
+// ============================================
+// HANDLER: BULK ACTIONS
+// ============================================
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'bulk_action') {
+	$bulk_action = isset($_POST['bulk_action_type']) ? clean_input($_POST['bulk_action_type']) : '';
+	$selected_ids = isset($_POST['selected_ids']) ? $_POST['selected_ids'] : [];
+	$current_filter = isset($_POST['current_filter']) ? clean_input($_POST['current_filter']) : 'all';
+	
+	if (!empty($selected_ids) && in_array($bulk_action, ['accept', 'reject', 'delete'])) {
+		$success_count = 0;
+		$error_count = 0;
+		$user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+		$username = isset($_SESSION['username']) ? $_SESSION['username'] : 'System';
+		
+		foreach ($selected_ids as $id) {
+			$id = (int)$id;
+			if ($id <= 0) continue;
+			
+			$id_escaped = pg_escape_string($koneksi, $id);
+			
+			if ($bulk_action === 'accept') {
+				// Ambil status lama
+				$q_old = pg_query($koneksi, "SELECT status FROM pendaftaran WHERE id = $id_escaped LIMIT 1");
+				$old_status = 'pending';
+				if ($q_old && pg_num_rows($q_old) > 0) {
+					$old_data = pg_fetch_assoc($q_old);
+					$old_status = $old_data['status'] ?? 'pending';
+				}
+				
+				$update = pg_query($koneksi, "UPDATE pendaftaran SET status = 'accepted', tanggal_review = NOW(), updated_at = NOW() WHERE id = $id_escaped");
+				if ($update) {
+					// Simpan riwayat
+					pg_query($koneksi, "INSERT INTO riwayat_pendaftaran (pendaftaran_id, status_lama, status_baru, changed_by, catatan) VALUES ($id_escaped, '$old_status', 'accepted', $user_id, 'Bulk action: Terima pendaftar')");
+					$success_count++;
+				} else {
+					$error_count++;
+				}
+			} elseif ($bulk_action === 'reject') {
+				// Ambil status lama
+				$q_old = pg_query($koneksi, "SELECT status FROM pendaftaran WHERE id = $id_escaped LIMIT 1");
+				$old_status = 'pending';
+				if ($q_old && pg_num_rows($q_old) > 0) {
+					$old_data = pg_fetch_assoc($q_old);
+					$old_status = $old_data['status'] ?? 'pending';
+				}
+				
+				$update = pg_query($koneksi, "UPDATE pendaftaran SET status = 'rejected', tanggal_review = NOW(), updated_at = NOW() WHERE id = $id_escaped");
+				if ($update) {
+					// Simpan riwayat
+					pg_query($koneksi, "INSERT INTO riwayat_pendaftaran (pendaftaran_id, status_lama, status_baru, changed_by, catatan) VALUES ($id_escaped, '$old_status', 'rejected', $user_id, 'Bulk action: Tolak pendaftar')");
+					$success_count++;
+				} else {
+					$error_count++;
+				}
+			} elseif ($bulk_action === 'delete') {
+				// Hapus user jika ada
+				$q = pg_query($koneksi, "SELECT nim FROM pendaftaran WHERE id = $id_escaped LIMIT 1");
+				if ($q && pg_num_rows($q) > 0) {
+					$pd = pg_fetch_assoc($q);
+					$nim = trim($pd['nim'] ?? '');
+					if ($nim) {
+						$nim_escaped = pg_escape_string($koneksi, $nim);
+						pg_query($koneksi, "DELETE FROM users WHERE username = '$nim_escaped'");
+					}
+				}
+				$delete = pg_query($koneksi, "DELETE FROM pendaftaran WHERE id = $id_escaped");
+				if ($delete) {
+					$success_count++;
+				} else {
+					$error_count++;
+				}
+			}
+		}
+		
+		$action_text = $bulk_action === 'accept' ? 'diterima' : ($bulk_action === 'reject' ? 'ditolak' : 'dihapus');
+		if ($success_count > 0) {
+			pesan_kilat("$success_count pendaftar berhasil $action_text!", 'success');
+		}
+		if ($error_count > 0) {
+			pesan_kilat("$error_count pendaftar gagal diproses.", 'error');
+		}
+		
+		$redirect_url = build_redirect_url($current_filter, $search_query, $filter_tanggal_dari, $filter_tanggal_sampai, $filter_akun, $filter_minat, $per_page);
+		header('Location: ' . $redirect_url);
+		exit;
+	}
+}
+
+// ============================================
+// HANDLER: EXPORT DATA
+// ============================================
+if (isset($_GET['export']) && $_GET['export'] === 'excel') {
+	// Export akan dihandle di bagian bawah file
+	$export_mode = true;
+} else {
+	$export_mode = false;
+}
+
+// ============================================
+// HANDLER: GET RIWAYAT (AJAX)
+// ============================================
+if (isset($_GET['action']) && $_GET['action'] === 'get_riwayat' && isset($_GET['id'])) {
+	header('Content-Type: application/json');
+	$id = (int)$_GET['id'];
+	$id_escaped = pg_escape_string($koneksi, $id);
+	
+	// Ambil data pendaftar
+	$q_pendaftar = pg_query($koneksi, "SELECT * FROM pendaftaran WHERE id = $id_escaped LIMIT 1");
+	$pendaftar_data = null;
+	if ($q_pendaftar && pg_num_rows($q_pendaftar) > 0) {
+		$pendaftar_data = pg_fetch_assoc($q_pendaftar);
+	}
+	
+	// Ambil riwayat dari riwayat_pendaftaran
+	$q_riwayat = pg_query($koneksi, "
+		SELECT r.*, u.username as changed_by_username
+		FROM riwayat_pendaftaran r
+		LEFT JOIN users u ON r.changed_by = u.id
+		WHERE r.pendaftaran_id = $id_escaped
+		ORDER BY r.changed_at DESC
+	");
+	
+	$riwayat = [];
+	if ($q_riwayat && pg_num_rows($q_riwayat) > 0) {
+		while ($row = pg_fetch_assoc($q_riwayat)) {
+			// Format tanggal
+			$tanggal_formatted = '-';
+			if (!empty($row['changed_at'])) {
+				try {
+					$date = new DateTime($row['changed_at'], new DateTimeZone('UTC'));
+					$date->setTimezone(new DateTimeZone('Asia/Jakarta'));
+					$tanggal_formatted = $date->format('d/m/Y H:i') . ' WIB';
+				} catch (Exception $e) {
+					$tanggal = strtotime($row['changed_at']);
+					if ($tanggal !== false) {
+						$tanggal_wib = $tanggal + (7 * 3600);
+						$tanggal_formatted = date('d/m/Y H:i', $tanggal_wib) . ' WIB';
+					}
+				}
+			}
+			$row['tanggal'] = $tanggal_formatted;
+			$riwayat[] = $row;
+		}
+	}
+	
+	// Ambil juga log aktivitas
+	$q_logs = pg_query($koneksi, "
+		SELECT * FROM log_aktivitas_pendaftar
+		WHERE pendaftaran_id = $id_escaped
+		ORDER BY created_at DESC
+		LIMIT 20
+	");
+	
+	if ($q_logs && pg_num_rows($q_logs) > 0) {
+		while ($row = pg_fetch_assoc($q_logs)) {
+			// Format tanggal
+			$tanggal_formatted = '-';
+			if (!empty($row['created_at'])) {
+				try {
+					$date = new DateTime($row['created_at'], new DateTimeZone('UTC'));
+					$date->setTimezone(new DateTimeZone('Asia/Jakarta'));
+					$tanggal_formatted = $date->format('d/m/Y H:i') . ' WIB';
+				} catch (Exception $e) {
+					$tanggal = strtotime($row['created_at']);
+					if ($tanggal !== false) {
+						$tanggal_wib = $tanggal + (7 * 3600);
+						$tanggal_formatted = date('d/m/Y H:i', $tanggal_wib) . ' WIB';
+					}
+				}
+			}
+			$row['tanggal'] = $tanggal_formatted;
+			$row['status_baru'] = $row['action_type'];
+			$row['status_lama'] = '';
+			$riwayat[] = $row;
+		}
+	}
+	
+	// Sort by date descending
+	usort($riwayat, function($a, $b) {
+		$dateA = strtotime($a['changed_at'] ?? $a['created_at'] ?? '');
+		$dateB = strtotime($b['changed_at'] ?? $b['created_at'] ?? '');
+		return $dateB - $dateA;
+	});
+	
+	echo json_encode([
+		'success' => true,
+		'pendaftar' => $pendaftar_data ?: ['nama' => '-', 'nim' => '-'],
+		'riwayat' => $riwayat
+	]);
+	exit;
+}
+
+// Helper function untuk build redirect URL dengan semua filter
+function build_redirect_url($status_filter, $search_query = '', $filter_tanggal_dari = '', $filter_tanggal_sampai = '', $filter_akun = 'all', $filter_minat = '', $per_page = 25) {
+	$params = [];
+	if ($status_filter !== 'all') $params[] = 'status=' . urlencode($status_filter);
+	if (!empty($search_query)) $params[] = 'search=' . urlencode($search_query);
+	if (!empty($filter_tanggal_dari)) $params[] = 'tanggal_dari=' . urlencode($filter_tanggal_dari);
+	if (!empty($filter_tanggal_sampai)) $params[] = 'tanggal_sampai=' . urlencode($filter_tanggal_sampai);
+	if ($filter_akun !== 'all') $params[] = 'akun=' . urlencode($filter_akun);
+	if (!empty($filter_minat)) $params[] = 'minat=' . urlencode($filter_minat);
+	if ($per_page != 25) $params[] = 'per_page=' . $per_page;
+	
+	return 'index.php' . (!empty($params) ? '?' . implode('&', $params) : '');
+}
+
 // Filter berdasarkan status (ambil dulu sebelum proses update)
 $status_filter = isset($_GET['status']) ? clean_input($_GET['status']) : 'all';
+
+// ============================================
+// PENCARIAN DAN FILTER
+// ============================================
+$search_query = isset($_GET['search']) ? trim(clean_input($_GET['search'])) : '';
+$filter_tanggal_dari = isset($_GET['tanggal_dari']) ? clean_input($_GET['tanggal_dari']) : '';
+$filter_tanggal_sampai = isset($_GET['tanggal_sampai']) ? clean_input($_GET['tanggal_sampai']) : '';
+$filter_akun = isset($_GET['akun']) ? clean_input($_GET['akun']) : 'all'; // all, aktif, non-aktif
+$filter_minat = isset($_GET['minat']) ? trim(clean_input($_GET['minat'])) : '';
+
+// ============================================
+// PAGINATION
+// ============================================
+$per_page = isset($_GET['per_page']) ? (int)$_GET['per_page'] : 25;
+if (!in_array($per_page, [10, 25, 50, 100])) {
+	$per_page = 25;
+}
+$current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$offset = ($current_page - 1) * $per_page;
 
 // Proses update status
 // PENTING: Proses ini HANYA mengubah status pendaftaran, TIDAK membuat akun user secara otomatis
@@ -92,6 +318,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 		$id_escaped = pg_escape_string($koneksi, $id);
 		$status_escaped = pg_escape_string($koneksi, $new_status);
 		
+		// Ambil status lama untuk riwayat
+		$q_old = pg_query($koneksi, "SELECT status FROM pendaftaran WHERE id = $id_escaped LIMIT 1");
+		$old_status = 'pending';
+		if ($q_old && pg_num_rows($q_old) > 0) {
+			$old_data = pg_fetch_assoc($q_old);
+			$old_status = $old_data['status'] ?? 'pending';
+		}
+		
+		// Ambil user yang melakukan perubahan
+		$user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+		$catatan = isset($_POST['catatan']) ? clean_input($_POST['catatan']) : '';
+		$catatan_escaped = pg_escape_string($koneksi, $catatan);
+		
 		// Hanya update status, TIDAK membuat akun user
 		$update_query = "UPDATE pendaftaran SET status = '$status_escaped', updated_at = NOW()";
 		if ($new_status === 'accepted' || $new_status === 'rejected') {
@@ -101,16 +340,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 		
 		$update_result = pg_query($koneksi, $update_query);
 		if ($update_result) {
+			// Simpan riwayat perubahan status
+			if ($old_status !== $new_status) {
+				pg_query($koneksi, "INSERT INTO riwayat_pendaftaran (pendaftaran_id, status_lama, status_baru, changed_by, catatan) VALUES ($id_escaped, '$old_status', '$status_escaped', $user_id, '$catatan_escaped')");
+			}
+			
+			// Log aktivitas
+			log_pendaftar_activity($id, 'status_change', "Status diubah dari $old_status menjadi $new_status", ['status' => $old_status], ['status' => $new_status]);
+			
 			$status_text = $new_status === 'accepted' ? 'diterima' : ($new_status === 'rejected' ? 'ditolak' : 'diubah');
 			pesan_kilat('Status pendaftar berhasil ' . $status_text . '!', 'success');
 		} else {
 			pesan_kilat('Gagal mengupdate status. Error: ' . pg_last_error($koneksi), 'error');
 		}
 		
-		$redirect_url = 'index.php';
-		if ($current_filter !== 'all') {
-			$redirect_url .= '?status=' . $current_filter;
-		}
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
 		header('Location: ' . $redirect_url);
 		exit;
 	}
@@ -150,6 +394,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 						VALUES ('$nim_escaped', MD5('$nim_escaped'), 'mahasiswa')
 					");
 					if ($insert) {
+						// Log aktivitas
+						log_pendaftar_activity($id, 'account_create', 'Akun mahasiswa dibuat', ['has_account' => false], ['has_account' => true, 'username' => $nim]);
 						pesan_kilat('Akun mahasiswa berhasil dibuat. Username & password awal: NIM.', 'success');
 					} else {
 						pesan_kilat('Gagal membuat akun: ' . pg_last_error($koneksi), 'error');
@@ -160,30 +406,275 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 			pesan_kilat('Data pendaftar tidak ditemukan.', 'error');
 		}
 
-		$redirect_url = 'index.php';
-		if ($current_filter !== 'all') {
-			$redirect_url .= '?status=' . $current_filter;
-		}
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
 		header('Location: ' . $redirect_url);
 		exit;
 	}
 }
 
-// Query pendaftar
-$pendaftar = [];
-if ($status_filter === 'all') {
-	$query = "SELECT * FROM pendaftaran ORDER BY tanggal_daftar DESC";
-} else {
-	$status_filter_escaped = pg_escape_string($koneksi, $status_filter);
-	$query = "SELECT * FROM pendaftaran WHERE status = '$status_filter_escaped' ORDER BY tanggal_daftar DESC";
+// Proses update data pendaftar
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_pendaftar') {
+	$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+	$current_filter = isset($_POST['current_filter']) ? clean_input($_POST['current_filter']) : 'all';
+	
+	if ($id > 0) {
+		$id_escaped = pg_escape_string($koneksi, $id);
+		$nama = isset($_POST['nama']) ? clean_input($_POST['nama']) : '';
+		$nim = isset($_POST['nim']) ? clean_input($_POST['nim']) : '';
+		$email = isset($_POST['email']) ? clean_input($_POST['email']) : '';
+		$foto = isset($_POST['foto']) ? clean_input($_POST['foto']) : '';
+		$minat = isset($_POST['minat']) ? clean_input($_POST['minat']) : '';
+		$status = isset($_POST['status']) ? clean_input($_POST['status']) : 'pending';
+		$catatan_admin = isset($_POST['catatan_admin']) ? clean_input($_POST['catatan_admin']) : '';
+		
+		if ($nama === '' || $nim === '') {
+			pesan_kilat('Nama dan NIM wajib diisi.', 'error');
+		} else {
+			$nama_escaped = pg_escape_string($koneksi, $nama);
+			$nim_escaped = pg_escape_string($koneksi, $nim);
+			$email_escaped = pg_escape_string($koneksi, $email);
+			$foto_escaped = pg_escape_string($koneksi, $foto);
+			$minat_escaped = pg_escape_string($koneksi, $minat);
+			$status_escaped = pg_escape_string($koneksi, $status);
+			$catatan_admin_escaped = pg_escape_string($koneksi, $catatan_admin);
+			
+			$update_query = "UPDATE pendaftaran SET 
+				nama = '$nama_escaped',
+				nim = '$nim_escaped',
+				email = '$email_escaped',
+				foto = '$foto_escaped',
+				minat = '$minat_escaped',
+				status = '$status_escaped',
+				catatan_admin = '$catatan_admin_escaped',
+				updated_at = NOW()";
+			
+			if ($status === 'accepted' || $status === 'rejected') {
+				$update_query .= ", tanggal_review = NOW()";
+			}
+			
+			$update_query .= " WHERE id = $id_escaped";
+			
+			// Ambil data lama untuk log
+			$q_old = pg_query($koneksi, "SELECT * FROM pendaftaran WHERE id = $id_escaped LIMIT 1");
+			$old_data = null;
+			if ($q_old && pg_num_rows($q_old) > 0) {
+				$old_data = pg_fetch_assoc($q_old);
+			}
+			
+			$update_result = pg_query($koneksi, $update_query);
+			if ($update_result) {
+				// Ambil data baru
+				$q_new = pg_query($koneksi, "SELECT * FROM pendaftaran WHERE id = $id_escaped LIMIT 1");
+				$new_data = null;
+				if ($q_new && pg_num_rows($q_new) > 0) {
+					$new_data = pg_fetch_assoc($q_new);
+				}
+				
+				// Simpan riwayat jika status berubah
+				if ($old_data && $old_data['status'] !== $status) {
+					$user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+					pg_query($koneksi, "INSERT INTO riwayat_pendaftaran (pendaftaran_id, status_lama, status_baru, changed_by, catatan) VALUES ($id_escaped, '{$old_data['status']}', '$status_escaped', $user_id, 'Update data: Status diubah')");
+				}
+				
+				// Log aktivitas
+				log_pendaftar_activity($id, 'update', 'Data pendaftar diupdate', $old_data, $new_data);
+				
+				pesan_kilat('Data pendaftar berhasil diupdate!', 'success');
+			} else {
+				pesan_kilat('Gagal mengupdate data. Error: ' . pg_last_error($koneksi), 'error');
+			}
+		}
+		
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
+		header('Location: ' . $redirect_url);
+		exit;
+	}
 }
+
+// Proses reset password
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'reset_password') {
+	$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+	$current_filter = isset($_POST['current_filter']) ? clean_input($_POST['current_filter']) : 'all';
+	
+	if ($id > 0) {
+		$id_escaped = pg_escape_string($koneksi, $id);
+		$q = "SELECT nim FROM pendaftaran WHERE id = $id_escaped LIMIT 1";
+		$res = pg_query($koneksi, $q);
+		if ($res && pg_num_rows($res) === 1) {
+			$pd = pg_fetch_assoc($res);
+			$nim = trim($pd['nim'] ?? '');
+			if ($nim) {
+				$nim_escaped = pg_escape_string($koneksi, $nim);
+				$update = pg_query($koneksi, "UPDATE users SET password = MD5('$nim_escaped'), updated_at = NOW() WHERE username = '$nim_escaped'");
+				if ($update) {
+					// Log aktivitas
+					log_pendaftar_activity($id, 'account_reset_password', 'Password direset ke NIM', null, ['nim' => $nim]);
+					pesan_kilat('Password berhasil direset ke NIM.', 'success');
+				} else {
+					pesan_kilat('Gagal reset password: ' . pg_last_error($koneksi), 'error');
+				}
+			}
+		}
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
+		header('Location: ' . $redirect_url);
+		exit;
+	}
+}
+
+// Proses non aktifkan akun (hapus user)
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'deactivate_account') {
+	$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+	$current_filter = isset($_POST['current_filter']) ? clean_input($_POST['current_filter']) : 'all';
+	
+	if ($id > 0) {
+		$id_escaped = pg_escape_string($koneksi, $id);
+		$q = "SELECT nim FROM pendaftaran WHERE id = $id_escaped LIMIT 1";
+		$res = pg_query($koneksi, $q);
+		if ($res && pg_num_rows($res) === 1) {
+			$pd = pg_fetch_assoc($res);
+			$nim = trim($pd['nim'] ?? '');
+			if ($nim) {
+				$nim_escaped = pg_escape_string($koneksi, $nim);
+				$delete = pg_query($koneksi, "DELETE FROM users WHERE username = '$nim_escaped'");
+				if ($delete) {
+					// Log aktivitas
+					log_pendaftar_activity($id, 'account_deactivate', 'Akun dinonaktifkan', ['has_account' => true], ['has_account' => false]);
+					pesan_kilat('Akun berhasil dinonaktifkan.', 'success');
+				} else {
+					pesan_kilat('Gagal non aktifkan akun: ' . pg_last_error($koneksi), 'error');
+				}
+			}
+		}
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
+		header('Location: ' . $redirect_url);
+		exit;
+	}
+}
+
+// Proses hapus pendaftar
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_pendaftar') {
+	$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+	$current_filter = isset($_POST['current_filter']) ? clean_input($_POST['current_filter']) : 'all';
+	
+	if ($id > 0) {
+		$id_escaped = pg_escape_string($koneksi, $id);
+		// Hapus juga user jika ada
+		$q = "SELECT nim FROM pendaftaran WHERE id = $id_escaped LIMIT 1";
+		$res = pg_query($koneksi, $q);
+		if ($res && pg_num_rows($res) === 1) {
+			$pd = pg_fetch_assoc($res);
+			$nim = trim($pd['nim'] ?? '');
+			if ($nim) {
+				$nim_escaped = pg_escape_string($koneksi, $nim);
+				pg_query($koneksi, "DELETE FROM users WHERE username = '$nim_escaped'");
+			}
+		}
+		// Ambil data sebelum hapus untuk log
+		$q_before = pg_query($koneksi, "SELECT * FROM pendaftaran WHERE id = $id_escaped LIMIT 1");
+		$before_data = null;
+		if ($q_before && pg_num_rows($q_before) > 0) {
+			$before_data = pg_fetch_assoc($q_before);
+		}
+		
+		$delete = pg_query($koneksi, "DELETE FROM pendaftaran WHERE id = $id_escaped");
+		if ($delete) {
+			// Log aktivitas
+			log_pendaftar_activity($id, 'delete', 'Pendaftar dihapus', $before_data, null);
+			pesan_kilat('Pendaftar berhasil dihapus.', 'success');
+		} else {
+			pesan_kilat('Gagal menghapus pendaftar: ' . pg_last_error($koneksi), 'error');
+		}
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
+		header('Location: ' . $redirect_url);
+		exit;
+	}
+}
+
+// ============================================
+// QUERY PENDAFTAR DENGAN PENCARIAN, FILTER, DAN PAGINATION
+// ============================================
+$pendaftar = [];
+$total_records = 0;
+
+// Build WHERE conditions
+$where_conditions = [];
+$join_users = false;
+
+// Filter status
+if ($status_filter !== 'all') {
+	$status_filter_escaped = pg_escape_string($koneksi, $status_filter);
+	$where_conditions[] = "p.status = '$status_filter_escaped'";
+}
+
+// Pencarian (nama, NIM, email)
+if (!empty($search_query)) {
+	$search_escaped = pg_escape_string($koneksi, $search_query);
+	$where_conditions[] = "(p.nama ILIKE '%$search_escaped%' OR p.nim ILIKE '%$search_escaped%' OR p.email ILIKE '%$search_escaped%')";
+}
+
+// Filter tanggal
+if (!empty($filter_tanggal_dari)) {
+	$tanggal_dari_escaped = pg_escape_string($koneksi, $filter_tanggal_dari);
+	$where_conditions[] = "DATE(p.tanggal_daftar) >= '$tanggal_dari_escaped'";
+}
+if (!empty($filter_tanggal_sampai)) {
+	$tanggal_sampai_escaped = pg_escape_string($koneksi, $filter_tanggal_sampai);
+	$where_conditions[] = "DATE(p.tanggal_daftar) <= '$tanggal_sampai_escaped'";
+}
+
+// Filter minat
+if (!empty($filter_minat)) {
+	$minat_escaped = pg_escape_string($koneksi, $filter_minat);
+	$where_conditions[] = "p.minat ILIKE '%$minat_escaped%'";
+}
+
+// Filter akun (aktif/non-aktif)
+if ($filter_akun !== 'all') {
+	$join_users = true;
+	if ($filter_akun === 'aktif') {
+		$where_conditions[] = "u.id IS NOT NULL";
+	} elseif ($filter_akun === 'non-aktif') {
+		$where_conditions[] = "u.id IS NULL";
+	}
+}
+
+// Build query
+$where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+
+// Query untuk total records (untuk pagination)
+$count_query = "SELECT COUNT(*) as total FROM pendaftaran p";
+if ($join_users) {
+	$count_query .= " LEFT JOIN users u ON u.username = p.nim";
+}
+$count_query .= " $where_clause";
+
+$count_result = pg_query($koneksi, $count_query);
+if ($count_result) {
+	$count_row = pg_fetch_assoc($count_result);
+	$total_records = (int)$count_row['total'];
+}
+
+// Query untuk data dengan pagination
+$query = "SELECT p.* FROM pendaftaran p";
+if ($join_users) {
+	$query .= " LEFT JOIN users u ON u.username = p.nim";
+}
+$query .= " $where_clause ORDER BY p.tanggal_daftar DESC LIMIT $per_page OFFSET $offset";
 
 $result = pg_query($koneksi, $query);
 if ($result && pg_num_rows($result) > 0) {
 	while ($row = pg_fetch_assoc($result)) {
+		// Cek apakah user sudah ada
+		$nim_escaped = pg_escape_string($koneksi, $row['nim'] ?? '');
+		$user_check = pg_query($koneksi, "SELECT id, username FROM users WHERE username = '$nim_escaped' LIMIT 1");
+		$row['has_account'] = $user_check && pg_num_rows($user_check) > 0;
+		$row['user_id'] = $row['has_account'] ? (int)pg_fetch_assoc($user_check)['id'] : 0;
 		$pendaftar[] = $row;
 	}
 }
+
+// Hitung total pages untuk pagination
+$total_pages = $total_records > 0 ? ceil($total_records / $per_page) : 1;
 
 include __DIR__ . '/../../template/admin_header.php';
 ?>
@@ -198,8 +689,17 @@ include __DIR__ . '/../../template/admin_header.php';
 		<div class="row">
 			<div class="col-lg-12">
 				<div class="section-title mb-50">
-					<h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Kelola Pendaftar</h2>
-					<p class="wow fadeInUp" data-wow-delay=".4s">Daftar mahasiswa yang telah mendaftar ke Laboratorium Software Engineering</p>
+					<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+						<div>
+							<h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Kelola Pendaftar</h2>
+							<p class="wow fadeInUp" data-wow-delay=".4s">Daftar mahasiswa yang telah mendaftar ke Laboratorium Software Engineering</p>
+						</div>
+						<div class="wow fadeInUp" data-wow-delay=".3s">
+							<a href="history_log.php" class="button radius-10" style="background: #6c757d; color: white; border: none; padding: 10px 20px;">
+								<i class="lni lni-history"></i> History Log
+							</a>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -254,16 +754,16 @@ include __DIR__ . '/../../template/admin_header.php';
 						<span class="filter-label">
 							<i class="lni lni-filter"></i>Filter Status:
 						</span>
-						<a href="?status=all" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'all' ? 'filter-button-active' : 'border-button'; ?>">
+						<a href="?status=all<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo $filter_akun !== 'all' ? '&akun=' . urlencode($filter_akun) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'all' ? 'filter-button-active' : 'border-button'; ?>">
 							<i class="lni lni-list"></i> Semua
 						</a>
-						<a href="?status=pending" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'pending' ? 'filter-button-pending' : 'border-button'; ?>">
+						<a href="?status=pending<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo $filter_akun !== 'all' ? '&akun=' . urlencode($filter_akun) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'pending' ? 'filter-button-pending' : 'border-button'; ?>">
 							<i class="lni lni-hourglass"></i> Pending
 						</a>
-						<a href="?status=accepted" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'accepted' ? 'filter-button-accepted' : 'border-button'; ?>">
+						<a href="?status=accepted<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo $filter_akun !== 'all' ? '&akun=' . urlencode($filter_akun) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'accepted' ? 'filter-button-accepted' : 'border-button'; ?>">
 							<i class="lni lni-checkmark-circle"></i> Diterima
 						</a>
-						<a href="?status=rejected" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'rejected' ? 'filter-button-rejected' : 'border-button'; ?>">
+						<a href="?status=rejected<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo $filter_akun !== 'all' ? '&akun=' . urlencode($filter_akun) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'rejected' ? 'filter-button-rejected' : 'border-button'; ?>">
 							<i class="lni lni-close"></i> Ditolak
 						</a>
 					</div>
@@ -271,19 +771,127 @@ include __DIR__ . '/../../template/admin_header.php';
 			</div>
 		</div>
 
+		<!-- Pencarian dan Filter Lanjutan -->
+		<div class="row mb-30">
+			<div class="col-lg-12">
+				<div class="wow fadeInUp filter-advanced-card" data-wow-delay=".3s" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+					<form method="GET" action="index.php" id="filterForm">
+						<input type="hidden" name="status" value="<?php echo htmlspecialchars($status_filter); ?>">
+						
+						<div class="row">
+							<!-- Pencarian -->
+							<div class="col-md-3 mb-3">
+								<label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50; font-size: 13px;">
+									<i class="lni lni-search"></i> Pencarian
+								</label>
+								<input type="text" name="search" value="<?php echo htmlspecialchars($search_query); ?>" placeholder="Nama, NIM, atau Email..." style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
+							</div>
+							
+							<!-- Filter Tanggal Dari -->
+							<div class="col-md-2 mb-3">
+								<label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50; font-size: 13px;">
+									<i class="lni lni-calendar"></i> Tanggal Dari
+								</label>
+								<input type="date" name="tanggal_dari" value="<?php echo htmlspecialchars($filter_tanggal_dari); ?>" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
+							</div>
+							
+							<!-- Filter Tanggal Sampai -->
+							<div class="col-md-2 mb-3">
+								<label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50; font-size: 13px;">
+									<i class="lni lni-calendar"></i> Tanggal Sampai
+								</label>
+								<input type="date" name="tanggal_sampai" value="<?php echo htmlspecialchars($filter_tanggal_sampai); ?>" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
+							</div>
+							
+							<!-- Filter Akun -->
+							<div class="col-md-2 mb-3">
+								<label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50; font-size: 13px;">
+									<i class="lni lni-user"></i> Status Akun
+								</label>
+								<select name="akun" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
+									<option value="all" <?php echo $filter_akun === 'all' ? 'selected' : ''; ?>>Semua</option>
+									<option value="aktif" <?php echo $filter_akun === 'aktif' ? 'selected' : ''; ?>>Aktif</option>
+									<option value="non-aktif" <?php echo $filter_akun === 'non-aktif' ? 'selected' : ''; ?>>Non Aktif</option>
+								</select>
+							</div>
+							
+							<!-- Filter Minat -->
+							<div class="col-md-2 mb-3">
+								<label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50; font-size: 13px;">
+									<i class="lni lni-tag"></i> Minat
+								</label>
+								<input type="text" name="minat" value="<?php echo htmlspecialchars($filter_minat); ?>" placeholder="Kata kunci minat..." style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
+							</div>
+							
+							<!-- Tombol -->
+							<div class="col-md-1 mb-3" style="display: flex; align-items: flex-end;">
+								<button type="submit" class="button radius-10 btn-edit" style="width: 100%; padding: 10px;">
+									<i class="lni lni-search"></i> Cari
+								</button>
+							</div>
+						</div>
+						
+						<?php if (!empty($search_query) || !empty($filter_tanggal_dari) || !empty($filter_tanggal_sampai) || $filter_akun !== 'all' || !empty($filter_minat)): ?>
+						<div class="row mt-2">
+							<div class="col-md-12">
+								<a href="?status=<?php echo htmlspecialchars($status_filter); ?>" class="button button-sm radius-10 border-button">
+									<i class="lni lni-close"></i> Reset Filter
+								</a>
+							</div>
+						</div>
+						<?php endif; ?>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<!-- Bulk Actions Bar -->
+		<?php if (count($pendaftar) > 0): ?>
+		<div class="row mb-20" id="bulkActionsBar" style="display: none;">
+			<div class="col-lg-12">
+				<div class="wow fadeInUp bulk-actions-bar" data-wow-delay=".3s" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0;">
+					<div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+						<span style="font-weight: 600; color: #2c3e50;">
+							<i class="lni lni-checkmark-circle"></i> <span id="selectedCount">0</span> dipilih
+						</span>
+						<button type="button" onclick="bulkAction('accept')" class="button button-sm radius-10" style="background: #28a745; color: white; border: none;">
+							<i class="lni lni-checkmark-circle"></i> Terima
+						</button>
+						<button type="button" onclick="bulkAction('reject')" class="button button-sm radius-10" style="background: #dc3545; color: white; border: none;">
+							<i class="lni lni-close"></i> Tolak
+						</button>
+						<button type="button" onclick="bulkAction('delete')" class="button button-sm radius-10 border-button" style="color: #dc3545;">
+							<i class="lni lni-trash"></i> Hapus
+						</button>
+						<button type="button" onclick="exportSelected()" class="button button-sm radius-10 border-button">
+							<i class="lni lni-download"></i> Export
+						</button>
+						<button type="button" onclick="clearSelection()" class="button button-sm radius-10 border-button">
+							<i class="lni lni-close"></i> Batal
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<?php endif; ?>
+
 		<!-- Table Pendaftar -->
 		<div class="row">
 			<div class="col-lg-12">
-				<div class="table-responsive wow fadeInUp" data-wow-delay=".3s">
-					<table class="table table-striped table-hover admin-table">
+				<div class="table-responsive wow fadeInUp" data-wow-delay=".3s" style="overflow-x: auto; overflow-y: visible;">
+					<table class="table table-striped table-hover admin-table" style="position: relative;">
 						<thead>
 							<tr>
+								<th style="width: 40px;">
+									<input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" title="Pilih Semua">
+								</th>
 								<th>NO</th>
 								<th>Nama Lengkap</th>
 								<th>Email</th>
 								<th>NIM</th>
 								<th>Minat</th>
 								<th>Status</th>
+								<th>Akun</th>
 								<th>Tanggal Daftar</th>
 								<th class="text-center">Aksi</th>
 							</tr>
@@ -295,6 +903,9 @@ include __DIR__ . '/../../template/admin_header.php';
 								foreach ($pendaftar as $p): 
 								?>
 								<tr>
+									<td>
+										<input type="checkbox" class="row-checkbox" value="<?php echo $p['id']; ?>" onchange="updateBulkActionsBar()">
+									</td>
 									<td><?php echo $no++; ?></td>
 									<td>
 										<div class="flex-center">
@@ -352,6 +963,20 @@ include __DIR__ . '/../../template/admin_header.php';
 										echo $status_badge;
 										?>
 									</td>
+									<td class="text-center">
+										<?php
+										$has_account = $p['has_account'] ?? false;
+										if ($has_account):
+										?>
+											<span class="account-status-badge account-active" title="Akun Aktif">
+												<i class="lni lni-checkmark-circle"></i> Aktif
+											</span>
+										<?php else: ?>
+											<span class="account-status-badge account-inactive" title="Akun Non Aktif">
+												<i class="lni lni-close"></i> Non Aktif
+											</span>
+										<?php endif; ?>
+									</td>
 									<td>
 										<?php 
 										if (!empty($p['tanggal_daftar'])) {
@@ -377,45 +1002,55 @@ include __DIR__ . '/../../template/admin_header.php';
 										?>
 									</td>
 									<td class="text-center">
-										<div class="flex-center-wrap">
-											<button type="button" class="button button-sm radius-10 border-button btn-preview" onclick="viewDetail(<?php echo $p['id']; ?>)" title="Lihat Detail">
-												<i class="lni lni-eye"></i> Detail
+										<div class="dropdown-actions">
+											<button type="button" class="button button-sm radius-10 border-button dropdown-toggle" onclick="toggleDropdown(<?php echo $p['id']; ?>)" title="Menu Aksi">
+												<i class="lni lni-menu"></i> Aksi
 											</button>
-											<?php if ($status === 'pending'): ?>
-											<button type="button" class="button button-sm radius-10 btn-accept" onclick="updateStatus(<?php echo $p['id']; ?>, 'accepted')" title="Terima Pendaftar">
-												<i class="lni lni-checkmark-circle"></i> Terima
-											</button>
-											<button type="button" class="button button-sm radius-10 btn-reject" onclick="updateStatus(<?php echo $p['id']; ?>, 'rejected')" title="Tolak Pendaftar">
-												<i class="lni lni-close"></i> Tolak
-											</button>
-											<?php else: ?>
-											<?php
-											// Cek apakah user sudah ada dengan username = NIM
-											$nimTmp = pg_escape_string($koneksi, $p['nim']);
-											$existsRes = pg_query($koneksi, "SELECT id, username FROM users WHERE username = '$nimTmp' LIMIT 1");
-											$hasUser = $existsRes && pg_num_rows($existsRes) > 0;
-											
-											if ($hasUser): ?>
-												<span class="account-active-badge" title="Akun sudah dibuat (Username: <?php echo htmlspecialchars($p['nim']); ?>)">
-													<i class="lni lni-checkmark-circle"></i> Akun Aktif
-												</span>
-											<?php else: ?>
-												<?php if ($status === 'accepted'): ?>
-												<button type="button" class="button button-sm radius-10 btn-create-account" onclick="showCreateAccountModal(<?php echo (int)$p['id']; ?>, '<?php echo htmlspecialchars($p['nim'], ENT_QUOTES); ?>')" title="Buat akun login dengan username dan password = NIM">
-													<i class="lni lni-user"></i> Buat Akun
-												</button>
+											<div class="dropdown-menu" id="dropdown-<?php echo $p['id']; ?>">
+												<a href="javascript:void(0)" onclick="viewDetail(<?php echo $p['id']; ?>)" class="dropdown-item">
+													<i class="lni lni-eye"></i> Lihat Detail
+												</a>
+												<a href="javascript:void(0)" onclick="viewRiwayat(<?php echo $p['id']; ?>)" class="dropdown-item">
+													<i class="lni lni-history"></i> Riwayat
+												</a>
+												<?php if ($status === 'pending'): ?>
+													<a href="javascript:void(0)" onclick="updateStatus(<?php echo $p['id']; ?>, 'accepted')" class="dropdown-item text-success">
+														<i class="lni lni-checkmark-circle"></i> Terima Pendaftar
+													</a>
+													<a href="javascript:void(0)" onclick="updateStatus(<?php echo $p['id']; ?>, 'rejected')" class="dropdown-item text-danger">
+														<i class="lni lni-close"></i> Tolak Pendaftar
+													</a>
 												<?php else: ?>
-												<span class="text-muted-small">-</span>
+													<a href="javascript:void(0)" onclick="showEditModal(<?php echo $p['id']; ?>)" class="dropdown-item">
+														<i class="lni lni-pencil"></i> Update Data
+													</a>
+													<?php if ($has_account): ?>
+														<a href="javascript:void(0)" onclick="resetPassword(<?php echo $p['id']; ?>)" class="dropdown-item text-warning">
+															<i class="lni lni-key"></i> Reset Password
+														</a>
+														<a href="javascript:void(0)" onclick="deactivateAccount(<?php echo $p['id']; ?>)" class="dropdown-item text-danger">
+															<i class="lni lni-ban"></i> Non Aktifkan Akun
+														</a>
+													<?php else: ?>
+														<?php if ($status === 'accepted'): ?>
+															<a href="javascript:void(0)" onclick="event.stopPropagation(); event.preventDefault(); setTimeout(function(){ if(typeof showCreateAccountModal === 'function') { showCreateAccountModal(<?php echo (int)$p['id']; ?>, '<?php echo htmlspecialchars($p['nim'], ENT_QUOTES); ?>'); } else { console.error('showCreateAccountModal not found'); alert('Fungsi belum siap. Silakan refresh halaman.'); } }, 100);" class="dropdown-item text-success">
+																<i class="lni lni-user"></i> Aktifkan Akun
+															</a>
+														<?php endif; ?>
+													<?php endif; ?>
 												<?php endif; ?>
-											<?php endif; ?>
-											<?php endif; ?>
+												<div class="dropdown-divider"></div>
+												<a href="javascript:void(0)" onclick="deletePendaftar(<?php echo $p['id']; ?>)" class="dropdown-item text-danger">
+													<i class="lni lni-trash"></i> Hapus Pendaftar
+												</a>
+											</div>
 										</div>
 									</td>
 								</tr>
 								<?php endforeach; ?>
 							<?php else: ?>
 								<tr>
-									<td colspan="8" class="text-center admin-table-empty">
+									<td colspan="10" class="text-center admin-table-empty">
 										<i class="lni lni-inbox admin-table-empty-icon"></i>
 										<p class="mt-3 text-muted">
 											<?php if ($status_filter !== 'all'): ?>
@@ -432,6 +1067,97 @@ include __DIR__ . '/../../template/admin_header.php';
 				</div>
 			</div>
 		</div>
+
+		<!-- Pagination dan Info -->
+		<?php if ($total_records > 0): ?>
+		<div class="row mt-30">
+			<div class="col-lg-6">
+				<div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+					<span style="color: #666; font-size: 14px;">
+						Menampilkan <strong><?php echo $offset + 1; ?></strong> - <strong><?php echo min($offset + $per_page, $total_records); ?></strong> dari <strong><?php echo number_format($total_records); ?></strong> pendaftar
+					</span>
+					<select name="per_page" onchange="changePerPage(this.value)" style="padding: 8px 12px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
+						<option value="10" <?php echo $per_page == 10 ? 'selected' : ''; ?>>10 per halaman</option>
+						<option value="25" <?php echo $per_page == 25 ? 'selected' : ''; ?>>25 per halaman</option>
+						<option value="50" <?php echo $per_page == 50 ? 'selected' : ''; ?>>50 per halaman</option>
+						<option value="100" <?php echo $per_page == 100 ? 'selected' : ''; ?>>100 per halaman</option>
+					</select>
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+					<?php
+					// Build query string untuk pagination
+					$query_params = [];
+					if ($status_filter !== 'all') $query_params[] = 'status=' . urlencode($status_filter);
+					if (!empty($search_query)) $query_params[] = 'search=' . urlencode($search_query);
+					if (!empty($filter_tanggal_dari)) $query_params[] = 'tanggal_dari=' . urlencode($filter_tanggal_dari);
+					if (!empty($filter_tanggal_sampai)) $query_params[] = 'tanggal_sampai=' . urlencode($filter_tanggal_sampai);
+					if ($filter_akun !== 'all') $query_params[] = 'akun=' . urlencode($filter_akun);
+					if (!empty($filter_minat)) $query_params[] = 'minat=' . urlencode($filter_minat);
+					if ($per_page != 25) $query_params[] = 'per_page=' . $per_page;
+					$query_string = !empty($query_params) ? '?' . implode('&', $query_params) : '';
+					$page_separator = !empty($query_string) ? '&' : '?';
+					?>
+					
+					<!-- Previous Button -->
+					<?php if ($current_page > 1): ?>
+						<a href="<?php echo $query_string . $page_separator; ?>page=<?php echo ($current_page - 1); ?>" class="button button-sm radius-10 border-button">
+							<i class="lni lni-chevron-left"></i> Sebelumnya
+						</a>
+					<?php else: ?>
+						<button type="button" class="button button-sm radius-10 border-button" disabled>
+							<i class="lni lni-chevron-left"></i> Sebelumnya
+						</button>
+					<?php endif; ?>
+					
+					<!-- Page Numbers -->
+					<?php
+					$start_page = max(1, $current_page - 2);
+					$end_page = min($total_pages, $current_page + 2);
+					
+					if ($start_page > 1): ?>
+						<a href="<?php echo $query_string . $page_separator; ?>page=1" class="button button-sm radius-10 border-button">1</a>
+						<?php if ($start_page > 2): ?>
+							<span style="padding: 8px 12px;">...</span>
+						<?php endif; ?>
+					<?php endif; ?>
+					
+					<?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+						<?php if ($i == $current_page): ?>
+							<button type="button" class="button button-sm radius-10 btn-edit" style="min-width: 40px;">
+								<?php echo $i; ?>
+							</button>
+						<?php else: ?>
+							<a href="<?php echo $query_string . $page_separator; ?>page=<?php echo $i; ?>" class="button button-sm radius-10 border-button" style="min-width: 40px;">
+								<?php echo $i; ?>
+							</a>
+						<?php endif; ?>
+					<?php endfor; ?>
+					
+					<?php if ($end_page < $total_pages): ?>
+						<?php if ($end_page < $total_pages - 1): ?>
+							<span style="padding: 8px 12px;">...</span>
+						<?php endif; ?>
+						<a href="<?php echo $query_string . $page_separator; ?>page=<?php echo $total_pages; ?>" class="button button-sm radius-10 border-button">
+							<?php echo $total_pages; ?>
+						</a>
+					<?php endif; ?>
+					
+					<!-- Next Button -->
+					<?php if ($current_page < $total_pages): ?>
+						<a href="<?php echo $query_string . $page_separator; ?>page=<?php echo ($current_page + 1); ?>" class="button button-sm radius-10 border-button">
+							Selanjutnya <i class="lni lni-chevron-right"></i>
+						</a>
+					<?php else: ?>
+						<button type="button" class="button button-sm radius-10 border-button" disabled>
+							Selanjutnya <i class="lni lni-chevron-right"></i>
+						</button>
+					<?php endif; ?>
+				</div>
+			</div>
+		</div>
+		<?php endif; ?>
 	</div>
 </section>
 </main>
@@ -475,8 +1201,158 @@ include __DIR__ . '/../../template/admin_header.php';
 			<p>Mahasiswa bisa login ke halaman mahasiswa dengan NIM sebagai username dan password.</p>
 		</div>
 		<div class="create-account-footer">
-			<button id="btnCancelCreateAccount" class="button radius-10 btn-cancel-account">Cancel</button>
-			<button id="btnConfirmCreateAccount" class="button radius-10 btn-confirm-account">OK</button>
+			<button type="button" id="btnCancelCreateAccount" class="button radius-10 btn-cancel-account" onclick="document.getElementById('createAccountOverlay').style.display='none';">Cancel</button>
+			<button type="button" id="btnConfirmCreateAccount" class="button radius-10 btn-confirm-account" onclick="confirmCreateAccount();" style="pointer-events: auto !important; cursor: pointer !important; z-index: 10001; position: relative;">OK</button>
+		</div>
+	</div>
+</div>
+
+<!-- Confirm Modal for Reset Password -->
+<div id="confirmResetPasswordOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px;" onclick="if(event.target===this){ this.style.display='none'; }">
+	<div class="detail-modal">
+		<div class="detail-header">
+			<h4>
+				<i class="lni lni-key icon-blue"></i>
+				Reset Password
+			</h4>
+			<button class="detail-close" title="Tutup" onclick="closeConfirmResetPassword();">&times;</button>
+		</div>
+		<div class="detail-body">
+			<p style="margin: 0; color: #2c3e50; font-size: 14px; line-height: 1.6;">Yakin ingin reset password ke NIM?</p>
+		</div>
+		<div class="detail-footer">
+			<button type="button" class="button radius-10 border-button" onclick="closeConfirmResetPassword();">Tutup</button>
+			<button type="button" class="button radius-10 btn-edit" onclick="executeResetPassword();">OK</button>
+		</div>
+	</div>
+</div>
+
+<!-- Confirm Modal for Deactivate Account -->
+<div id="confirmDeactivateAccountOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px;" onclick="if(event.target===this){ this.style.display='none'; }">
+	<div class="detail-modal">
+		<div class="detail-header">
+			<h4>
+				<i class="lni lni-ban icon-blue"></i>
+				Non Aktifkan Akun
+			</h4>
+			<button class="detail-close" title="Tutup" onclick="closeConfirmDeactivateAccount();">&times;</button>
+		</div>
+		<div class="detail-body">
+			<p style="margin: 0; color: #2c3e50; font-size: 14px; line-height: 1.6;">Yakin ingin non aktifkan akun? User tidak bisa login lagi.</p>
+		</div>
+		<div class="detail-footer">
+			<button type="button" class="button radius-10 border-button" onclick="closeConfirmDeactivateAccount();">Tutup</button>
+			<button type="button" class="button radius-10 btn-edit" onclick="executeDeactivateAccount();">OK</button>
+		</div>
+	</div>
+</div>
+
+<!-- Update Modal for Pendaftar -->
+<div id="updatePendaftarOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;" onclick="if(event.target===this){ this.style.display='none'; }">
+	<div class="detail-modal" style="max-width: 600px;">
+		<div class="detail-header">
+			<h4>
+				<i class="lni lni-pencil icon-blue"></i>
+				Update Data Pendaftar
+			</h4>
+			<button class="detail-close" title="Tutup" onclick="closeUpdatePendaftarModal();">&times;</button>
+		</div>
+		<div class="detail-body">
+			<form id="formUpdatePendaftar" method="POST" onsubmit="return submitUpdatePendaftar(event);">
+				<input type="hidden" name="action" value="update_pendaftar">
+				<input type="hidden" name="id" id="updatePendaftarId">
+				<input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
+				
+				<div style="display: grid; gap: 16px;">
+					<div>
+						<label style="display: block; margin-bottom: 6px; color: #2c3e50; font-size: 13px; font-weight: 600;">Nama Lengkap <span style="color: #dc3545;">*</span></label>
+						<input type="text" name="nama" id="updatePendaftarNama" required style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+					</div>
+					
+					<div>
+						<label style="display: block; margin-bottom: 6px; color: #2c3e50; font-size: 13px; font-weight: 600;">NIM <span style="color: #dc3545;">*</span></label>
+						<input type="text" name="nim" id="updatePendaftarNim" required style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+					</div>
+					
+					<div>
+						<label style="display: block; margin-bottom: 6px; color: #2c3e50; font-size: 13px; font-weight: 600;">Email</label>
+						<input type="email" name="email" id="updatePendaftarEmail" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+					</div>
+					
+					<div>
+						<label style="display: block; margin-bottom: 6px; color: #2c3e50; font-size: 13px; font-weight: 600;">Foto (URL)</label>
+						<input type="text" name="foto" id="updatePendaftarFoto" placeholder="https://example.com/foto.jpg" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+					</div>
+					
+					<div>
+						<label style="display: block; margin-bottom: 6px; color: #2c3e50; font-size: 13px; font-weight: 600;">Minat</label>
+						<textarea name="minat" id="updatePendaftarMinat" rows="3" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box; resize: vertical;"></textarea>
+					</div>
+					
+					<div>
+						<label style="display: block; margin-bottom: 6px; color: #2c3e50; font-size: 13px; font-weight: 600;">Status</label>
+						<select name="status" id="updatePendaftarStatus" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+							<option value="pending">Pending</option>
+							<option value="accepted">Accepted</option>
+							<option value="rejected">Rejected</option>
+						</select>
+					</div>
+					
+					<div>
+						<label style="display: block; margin-bottom: 6px; color: #2c3e50; font-size: 13px; font-weight: 600;">Catatan Admin</label>
+						<textarea name="catatan_admin" id="updatePendaftarCatatan" rows="3" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box; resize: vertical;"></textarea>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="detail-footer">
+			<button type="button" class="button radius-10 border-button" onclick="closeUpdatePendaftarModal();">Tutup</button>
+			<button type="button" class="button radius-10 btn-edit" onclick="document.getElementById('formUpdatePendaftar').submit();">Simpan</button>
+		</div>
+	</div>
+</div>
+
+<!-- Confirm Modal for Delete Pendaftar -->
+<div id="confirmDeletePendaftarOverlay" class="confirm-modal-overlay" onclick="if(event.target===this) closeConfirmDeletePendaftar();">
+	<div class="confirm-modal-dark">
+		<div class="confirm-modal-header-dark">
+			<h4>localhost says</h4>
+		</div>
+		<div class="confirm-modal-body-dark">
+			<p id="confirmDeletePendaftarText">Yakin ingin menghapus pendaftar ini? Data tidak bisa dikembalikan.</p>
+		</div>
+		<div class="confirm-modal-footer-dark">
+			<button type="button" id="btnCancelDeletePendaftar" class="confirm-btn-cancel-dark" onclick="closeConfirmDeletePendaftar();">Cancel</button>
+			<button type="button" id="btnConfirmDeletePendaftar" class="confirm-btn-ok-dark" onclick="executeDeletePendaftar();">OK</button>
+		</div>
+	</div>
+</div>
+
+<!-- Modal Riwayat Pendaftar -->
+<div id="riwayatOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;" onclick="if(event.target===this){ this.style.display='none'; }">
+	<div class="detail-modal" style="max-width: 700px; max-height: 90vh;">
+		<div class="detail-header">
+			<h4>
+				<i class="lni lni-history icon-blue"></i>
+				Riwayat Pendaftar
+			</h4>
+			<button class="detail-close" title="Tutup" onclick="closeRiwayatModal();">&times;</button>
+		</div>
+		<div class="detail-body">
+			<div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;">
+				<div style="display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center;">
+					<strong style="color: #2c3e50;">Nama:</strong>
+					<span id="riwayatNama">-</span>
+					<strong style="color: #2c3e50;">NIM:</strong>
+					<span id="riwayatNim">-</span>
+				</div>
+			</div>
+			<div id="riwayatBody" style="max-height: 400px; overflow-y: auto;">
+				<!-- Timeline akan diisi oleh JavaScript -->
+			</div>
+		</div>
+		<div class="detail-footer">
+			<button type="button" class="button radius-10 border-button" onclick="closeRiwayatModal();">Tutup</button>
 		</div>
 	</div>
 </div>
@@ -536,6 +1412,7 @@ foreach ($pendaftar as $pp) {
 ?>
 <script>
 window.pendaftarData = <?php echo json_encode($pendaftar_map); ?>;
+window.pendaftarDataFull = <?php echo json_encode($pendaftar_map_full); ?>;
 </script>
 <script src="../../assets/js/classes/PendaftarModals.js"></script>
 <script>
@@ -543,6 +1420,91 @@ window.pendaftarData = <?php echo json_encode($pendaftar_map); ?>;
 if (typeof PendaftarModals !== 'undefined' && window.pendaftarData) {
     window.pendaftarModals = new PendaftarModals(window.pendaftarData);
 }
+
+// Variable global untuk menyimpan ID pendaftar yang akan dibuat akunnya
+window.pendingCreateAccountId = null;
+
+// Fungsi untuk konfirmasi create account
+function confirmCreateAccount() {
+    const id = window.pendingCreateAccountId;
+    if (!id) {
+        alert('ID pendaftar tidak ditemukan. Silakan refresh halaman.');
+        return;
+    }
+    
+    console.log('confirmCreateAccount called with id:', id);
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '';
+    form.innerHTML = `
+        <input type="hidden" name="action" value="create_account">
+        <input type="hidden" name="id" value="${id}">
+        <input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
+    `;
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Pastikan showCreateAccountModal tersedia
+setTimeout(function() {
+    // Jika PendaftarModals belum ready, buat fallback
+    if (typeof window.showCreateAccountModal === 'undefined') {
+        window.showCreateAccountModal = function(id, nim) {
+            console.log('showCreateAccountModal (fallback) called with id:', id, 'nim:', nim);
+            
+            window.pendingCreateAccountId = id;
+            
+            const overlay = document.getElementById('createAccountOverlay');
+            const usernameEl = document.getElementById('createAccountUsername');
+            const passwordEl = document.getElementById('createAccountPassword');
+            const btnConfirm = document.getElementById('btnConfirmCreateAccount');
+            
+            if (!overlay) {
+                console.error('createAccountOverlay not found');
+                alert('Modal tidak ditemukan. Silakan refresh halaman.');
+                return;
+            }
+            
+            // Set data
+            if (usernameEl) usernameEl.textContent = nim || '-';
+            if (passwordEl) passwordEl.textContent = nim || '-';
+            
+            // Reset button state
+            if (btnConfirm) {
+                btnConfirm.disabled = false;
+                btnConfirm.textContent = 'OK';
+                btnConfirm.style.pointerEvents = 'auto';
+                btnConfirm.style.cursor = 'pointer';
+                btnConfirm.style.position = 'relative';
+                btnConfirm.style.zIndex = '10001';
+            }
+            
+            // Show overlay
+            overlay.style.display = 'flex';
+            overlay.style.zIndex = '10000';
+        };
+    } else {
+        // Override PendaftarModals untuk menyimpan ID
+        const originalShow = window.showCreateAccountModal;
+        window.showCreateAccountModal = function(id, nim) {
+            window.pendingCreateAccountId = id;
+            originalShow(id, nim);
+            
+            // Pastikan button bisa diklik
+            setTimeout(function() {
+                const btnConfirm = document.getElementById('btnConfirmCreateAccount');
+                if (btnConfirm) {
+                    btnConfirm.disabled = false;
+                    btnConfirm.style.pointerEvents = 'auto';
+                    btnConfirm.style.cursor = 'pointer';
+                    btnConfirm.style.position = 'relative';
+                    btnConfirm.style.zIndex = '10001';
+                }
+            }, 100);
+        };
+    }
+}, 200);
 </script>
 
 <!-- Detail Modal -->
@@ -590,5 +1552,702 @@ if (typeof PendaftarModals !== 'undefined' && window.pendaftarData) {
 		</div>
 	</div>
 </div>
+
+<style>
+/* Dropdown Actions */
+.dropdown-actions {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    display: none;
+    position: fixed;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 200px;
+    z-index: 9999;
+    margin-top: 5px;
+    padding: 5px 0;
+}
+
+/* Pastikan table cell tidak memotong dropdown */
+.admin-table td {
+    position: relative;
+    overflow: visible !important;
+}
+
+/* Pastikan table responsive tidak memotong dropdown */
+.table-responsive {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+}
+
+/* Pastikan admin-table tidak memotong dropdown */
+.admin-table {
+    overflow: visible !important;
+}
+
+/* Pastikan container table tidak memotong */
+.admin-table tbody tr {
+    position: relative;
+    overflow: visible;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 10px 20px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.2s;
+    font-size: 14px;
+}
+
+.dropdown-item:hover {
+    background: #f5f5f5;
+}
+
+.dropdown-item i {
+    margin-right: 8px;
+    width: 18px;
+}
+
+.dropdown-item.text-success {
+    color: #28a745;
+}
+
+.dropdown-item.text-danger {
+    color: #dc3545;
+}
+
+.dropdown-item.text-warning {
+    color: #ffc107;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #e0e0e0;
+    margin: 5px 0;
+}
+
+/* Account Status Badge */
+.account-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.account-status-badge.account-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.account-status-badge.account-active i {
+    color: #28a745;
+}
+
+.account-status-badge.account-inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.account-status-badge.account-inactive i {
+    color: #dc3545;
+}
+
+/* Dark Theme Confirm Modal */
+.confirm-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.confirm-modal-dark {
+    background: #2c3e50;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    position: relative;
+}
+
+.confirm-modal-header-dark {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.confirm-modal-header-dark h4 {
+    margin: 0;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.confirm-modal-body-dark {
+    padding: 20px;
+}
+
+.confirm-modal-body-dark p {
+    margin: 0;
+    color: #ecf0f1;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.confirm-modal-footer-dark {
+    padding: 12px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.confirm-btn-ok-dark {
+    background: #9b59b6;
+    color: #fff;
+    border: 1px solid #8e44ad;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    pointer-events: auto !important;
+}
+
+.confirm-btn-ok-dark:hover {
+    background: #8e44ad;
+    border-color: #7d3c98;
+}
+
+.confirm-btn-ok-dark:active {
+    background: #7d3c98;
+}
+
+.confirm-btn-cancel-dark {
+    background: #34495e;
+    color: #fff;
+    border: 1px solid #2c3e50;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    pointer-events: auto !important;
+}
+
+.confirm-btn-cancel-dark:hover {
+    background: #2c3e50;
+    border-color: #1a252f;
+}
+
+.confirm-btn-cancel-dark:active {
+    background: #1a252f;
+}
+
+/* Riwayat Timeline Styles */
+.riwayat-item {
+    display: flex;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.riwayat-item:last-child {
+    border-bottom: none;
+}
+
+.riwayat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+    color: white;
+}
+
+.riwayat-icon.status-accepted {
+    background: #28a745;
+}
+
+.riwayat-icon.status-rejected {
+    background: #dc3545;
+}
+
+.riwayat-icon.status-pending {
+    background: #ffc107;
+}
+
+.riwayat-content {
+    flex: 1;
+}
+
+.riwayat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.riwayat-status {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.riwayat-status.status-accepted {
+    background: #d4edda;
+    color: #155724;
+}
+
+.riwayat-status.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.riwayat-status.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.riwayat-date {
+    font-size: 12px;
+    color: #999;
+}
+
+.riwayat-from {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.riwayat-catatan {
+    font-size: 13px;
+    color: #2c3e50;
+    margin-top: 8px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 3px solid #007bff;
+}
+
+.riwayat-admin {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+}
+</style>
+
+<script>
+// Toggle Dropdown Menu
+function toggleDropdown(id) {
+    // Tutup semua dropdown lain
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        if (menu.id !== 'dropdown-' + id) {
+            menu.classList.remove('show');
+        }
+    });
+    
+    // Toggle dropdown yang diklik
+    const dropdown = document.getElementById('dropdown-' + id);
+    const button = event.target.closest('.dropdown-toggle');
+    
+    if (dropdown && button) {
+        const isOpen = dropdown.classList.contains('show');
+        
+        if (!isOpen) {
+            // Hitung posisi button relatif terhadap viewport
+            const rect = button.getBoundingClientRect();
+            
+            // Gunakan fixed positioning untuk menghindari potong
+            dropdown.style.position = 'fixed';
+            dropdown.style.top = (rect.bottom + 5) + 'px';
+            dropdown.style.left = (rect.right - 200) + 'px'; // 200px = min-width dropdown
+            dropdown.style.right = 'auto';
+            dropdown.style.zIndex = '9999';
+            dropdown.classList.add('show');
+            
+            // Cek jika dropdown keluar dari viewport, sesuaikan posisi
+            setTimeout(() => {
+                const dropdownRect = dropdown.getBoundingClientRect();
+                if (dropdownRect.right > window.innerWidth) {
+                    dropdown.style.left = (rect.left) + 'px';
+                }
+                if (dropdownRect.bottom > window.innerHeight) {
+                    dropdown.style.top = (rect.top - dropdownRect.height - 5) + 'px';
+                }
+            }, 0);
+        } else {
+            dropdown.classList.remove('show');
+            dropdown.style.position = '';
+            dropdown.style.top = '';
+            dropdown.style.right = '';
+            dropdown.style.left = '';
+        }
+    }
+}
+
+// Tutup dropdown saat klik di luar
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.dropdown-actions')) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.remove('show');
+            menu.style.position = '';
+            menu.style.top = '';
+            menu.style.right = '';
+            menu.style.left = '';
+        });
+    }
+});
+
+// Variable global untuk menyimpan ID yang akan dioperasikan
+window.pendingResetPasswordId = null;
+window.pendingDeactivateAccountId = null;
+window.pendingDeletePendaftarId = null;
+
+// Reset Password - Tampilkan modal
+function resetPassword(id) {
+    showResetPasswordModal(id);
+}
+
+// Execute Reset Password
+function executeResetPassword() {
+    const id = window.pendingResetPasswordId;
+    if (!id) return;
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.innerHTML = `
+        <input type="hidden" name="action" value="reset_password">
+        <input type="hidden" name="id" value="${id}">
+        <input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
+    `;
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Close Reset Password Modal
+function closeConfirmResetPassword() {
+    window.pendingResetPasswordId = null;
+    const overlay = document.getElementById('confirmResetPasswordOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+// Show Reset Password Modal
+function showResetPasswordModal(id) {
+    window.pendingResetPasswordId = id;
+    const overlay = document.getElementById('confirmResetPasswordOverlay');
+    if (overlay) overlay.style.display = 'flex';
+}
+
+// Deactivate Account - Tampilkan modal
+function deactivateAccount(id) {
+    showDeactivateAccountModal(id);
+}
+
+// Execute Deactivate Account
+function executeDeactivateAccount() {
+    const id = window.pendingDeactivateAccountId;
+    if (!id) return;
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.innerHTML = `
+        <input type="hidden" name="action" value="deactivate_account">
+        <input type="hidden" name="id" value="${id}">
+        <input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
+    `;
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Close Deactivate Account Modal
+function closeConfirmDeactivateAccount() {
+    window.pendingDeactivateAccountId = null;
+    const overlay = document.getElementById('confirmDeactivateAccountOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+// Show Deactivate Account Modal
+function showDeactivateAccountModal(id) {
+    window.pendingDeactivateAccountId = id;
+    const overlay = document.getElementById('confirmDeactivateAccountOverlay');
+    if (overlay) overlay.style.display = 'flex';
+}
+
+// Delete Pendaftar - Tampilkan modal
+function deletePendaftar(id) {
+    window.pendingDeletePendaftarId = id;
+    const overlay = document.getElementById('confirmDeletePendaftarOverlay');
+    if (overlay) {
+        overlay.style.display = 'flex';
+    }
+}
+
+// Execute Delete Pendaftar
+function executeDeletePendaftar() {
+    const id = window.pendingDeletePendaftarId;
+    if (!id) return;
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.innerHTML = `
+        <input type="hidden" name="action" value="delete_pendaftar">
+        <input type="hidden" name="id" value="${id}">
+        <input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
+    `;
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Close Delete Pendaftar Modal
+function closeConfirmDeletePendaftar() {
+    window.pendingDeletePendaftarId = null;
+    const overlay = document.getElementById('confirmDeletePendaftarOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+// Show Edit Modal
+function showEditModal(id) {
+    const data = window.pendaftarData && window.pendaftarData[id] ? window.pendaftarData[id] : null;
+    if (!data) {
+        alert('Data pendaftar tidak ditemukan.');
+        return;
+    }
+    
+    // Set data ke form
+    document.getElementById('updatePendaftarId').value = data.id || id;
+    document.getElementById('updatePendaftarNama').value = data.nama || '';
+    document.getElementById('updatePendaftarNim').value = data.nim || '';
+    document.getElementById('updatePendaftarEmail').value = data.email || '';
+    
+    // Ambil data lengkap dari pendaftar_map
+    const pendaftarFull = window.pendaftarDataFull && window.pendaftarDataFull[id] ? window.pendaftarDataFull[id] : null;
+    if (pendaftarFull) {
+        document.getElementById('updatePendaftarFoto').value = pendaftarFull.foto || '';
+        document.getElementById('updatePendaftarMinat').value = pendaftarFull.minat || '';
+        document.getElementById('updatePendaftarStatus').value = pendaftarFull.status || 'pending';
+        document.getElementById('updatePendaftarCatatan').value = pendaftarFull.catatan_admin || '';
+    } else {
+        // Fallback: ambil dari data yang ada
+        document.getElementById('updatePendaftarFoto').value = '';
+        document.getElementById('updatePendaftarMinat').value = data.minat || '';
+        document.getElementById('updatePendaftarStatus').value = data.status || 'pending';
+        document.getElementById('updatePendaftarCatatan').value = '';
+    }
+    
+    // Tampilkan modal
+    const overlay = document.getElementById('updatePendaftarOverlay');
+    if (overlay) {
+        overlay.style.display = 'flex';
+    }
+}
+
+// Close Update Modal
+function closeUpdatePendaftarModal() {
+    const overlay = document.getElementById('updatePendaftarOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+// Submit Update Form
+function submitUpdatePendaftar(event) {
+    event.preventDefault();
+    const form = event.target;
+    form.submit();
+    return false;
+}
+
+// ============================================
+// BULK ACTIONS
+// ============================================
+function toggleSelectAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+    updateBulkActionsBar();
+}
+
+function updateBulkActionsBar() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    const count = checkboxes.length;
+    const bulkBar = document.getElementById('bulkActionsBar');
+    const selectedCount = document.getElementById('selectedCount');
+    
+    if (bulkBar && selectedCount) {
+        if (count > 0) {
+            bulkBar.style.display = 'block';
+            selectedCount.textContent = count;
+        } else {
+            bulkBar.style.display = 'none';
+        }
+    }
+    
+    // Update select all checkbox
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) {
+        const allCheckboxes = document.querySelectorAll('.row-checkbox');
+        selectAll.checked = allCheckboxes.length > 0 && checkboxes.length === allCheckboxes.length;
+        selectAll.indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
+    }
+}
+
+function clearSelection() {
+    document.querySelectorAll('.row-checkbox').forEach(cb => {
+        cb.checked = false;
+    });
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) selectAll.checked = false;
+    updateBulkActionsBar();
+}
+
+function bulkAction(action) {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('Pilih minimal satu pendaftar!');
+        return;
+    }
+    
+    const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+    const actionText = action === 'accept' ? 'terima' : (action === 'reject' ? 'tolak' : 'hapus');
+    const confirmText = action === 'delete' 
+        ? `Yakin ingin menghapus ${selectedIds.length} pendaftar? Data tidak bisa dikembalikan.`
+        : `Yakin ingin ${actionText} ${selectedIds.length} pendaftar?`;
+    
+    if (!confirm(confirmText)) {
+        return;
+    }
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.innerHTML = `
+        <input type="hidden" name="action" value="bulk_action">
+        <input type="hidden" name="bulk_action_type" value="${action}">
+        <input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
+        ${selectedIds.map(id => `<input type="hidden" name="selected_ids[]" value="${id}">`).join('')}
+    `;
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function exportSelected() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('Pilih minimal satu pendaftar untuk di-export!');
+        return;
+    }
+    
+    const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+    const idsParam = selectedIds.join(',');
+    window.location.href = `?export=excel&ids=${idsParam}`;
+}
+
+function changePerPage(value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('per_page', value);
+    url.searchParams.set('page', '1'); // Reset ke halaman 1
+    window.location.href = url.toString();
+}
+
+// ============================================
+// RIWAYAT
+// ============================================
+function viewRiwayat(id) {
+    // Ambil riwayat dari server
+    fetch(`?action=get_riwayat&id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showRiwayatModal(data.riwayat, data.pendaftar);
+            } else {
+                alert('Gagal mengambil riwayat: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Gagal mengambil riwayat. Silakan coba lagi.');
+        });
+}
+
+function showRiwayatModal(riwayat, pendaftar) {
+    const overlay = document.getElementById('riwayatOverlay');
+    const body = document.getElementById('riwayatBody');
+    
+    if (!overlay || !body) return;
+    
+    // Set data pendaftar
+    document.getElementById('riwayatNama').textContent = pendaftar.nama || '-';
+    document.getElementById('riwayatNim').textContent = pendaftar.nim || '-';
+    
+    // Build timeline
+    let timelineHTML = '';
+    if (riwayat.length === 0) {
+        timelineHTML = '<p style="text-align: center; color: #999; padding: 20px;">Belum ada riwayat perubahan</p>';
+    } else {
+        riwayat.forEach((r, index) => {
+            const statusClass = r.status_baru === 'accepted' ? 'status-accepted' : (r.status_baru === 'rejected' ? 'status-rejected' : 'status-pending');
+            const statusText = r.status_baru === 'accepted' ? 'Diterima' : (r.status_baru === 'rejected' ? 'Ditolak' : 'Pending');
+            const statusIcon = r.status_baru === 'accepted' ? 'lni-checkmark-circle' : (r.status_baru === 'rejected' ? 'lni-close' : 'lni-hourglass');
+            
+            timelineHTML += `
+                <div class="riwayat-item">
+                    <div class="riwayat-icon ${statusClass}">
+                        <i class="lni ${statusIcon}"></i>
+                    </div>
+                    <div class="riwayat-content">
+                        <div class="riwayat-header">
+                            <span class="riwayat-status ${statusClass}">${statusText}</span>
+                            <span class="riwayat-date">${r.changed_at || r.tanggal || '-'}</span>
+                        </div>
+                        ${r.status_lama ? `<div class="riwayat-from">Dari: <strong>${r.status_lama}</strong></div>` : ''}
+                        ${r.catatan ? `<div class="riwayat-catatan">${r.catatan}</div>` : ''}
+                        ${r.changed_by_username ? `<div class="riwayat-admin">Oleh: <strong>${r.changed_by_username}</strong></div>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    body.innerHTML = timelineHTML;
+    overlay.style.display = 'flex';
+}
+
+function closeRiwayatModal() {
+    const overlay = document.getElementById('riwayatOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+</script>
 
 <?php include __DIR__ . '/../../template/admin_footer.php'; ?>

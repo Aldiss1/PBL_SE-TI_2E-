@@ -52,7 +52,7 @@ $menu_items = [
     ]
 ];
 
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$id = (int)($_GET['id'] ?? 0);
 $data = null;
 if ($id > 0) {
     $q = pg_query($koneksi, "SELECT * FROM anggota WHERE id = $id");

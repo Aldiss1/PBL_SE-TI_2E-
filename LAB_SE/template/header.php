@@ -80,35 +80,41 @@ if (!defined('LABSE_BASE_PATH')) {
 
                   <div class="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent2">
                     <?php
-                    // Ambil statistik dari database untuk menu
-                    $stats = [
-                      'anggota' => 0,
-                      'pendaftar' => 0,
-                      'blog' => 0
-                    ];
+                    // Ambil statistik dari materialized view (lebih cepat!)
+                    $stats = ['anggota' => 0, 'pendaftar' => 0, 'blog' => 0];
                     
-                    // Hitung anggota
-                    $query_anggota = "SELECT COUNT(*) as total FROM anggota";
-                    $result_anggota = pg_query($koneksi, $query_anggota);
-                    if ($result_anggota) {
-                      $row = pg_fetch_assoc($result_anggota);
-                      $stats['anggota'] = (int)$row['total'];
+                    if (file_exists(__DIR__ . '/../fungsi/materialized_views_complete.php')) {
+                      require_once __DIR__ . '/../fungsi/materialized_views_complete.php';
+                      $stats_mv = get_stats_complete();
+                      if ($stats_mv) {
+                        $stats['anggota'] = (int)($stats_mv['total_anggota'] ?? 0);
+                        $stats['pendaftar'] = (int)($stats_mv['total_pendaftar'] ?? 0);
+                        $stats['blog'] = (int)($stats_mv['total_blog_published'] ?? 0);
+                      }
                     }
                     
-                    // Hitung pendaftar
-                    $query_pendaftar = "SELECT COUNT(*) as total FROM pendaftaran";
-                    $result_pendaftar = pg_query($koneksi, $query_pendaftar);
-                    if ($result_pendaftar) {
-                      $row = pg_fetch_assoc($result_pendaftar);
-                      $stats['pendaftar'] = (int)$row['total'];
-                    }
-                    
-                    // Hitung blog
-                    $query_blog = "SELECT COUNT(*) as total FROM blog WHERE is_published = true";
-                    $result_blog = pg_query($koneksi, $query_blog);
-                    if ($result_blog) {
-                      $row = pg_fetch_assoc($result_blog);
-                      $stats['blog'] = (int)$row['total'];
+                    // Fallback: Query langsung jika materialized view tidak tersedia
+                    if ($stats['anggota'] === 0 && $koneksi) {
+                      $query_anggota = "SELECT COUNT(*) as total FROM anggota";
+                      $result_anggota = pg_query($koneksi, $query_anggota);
+                      if ($result_anggota) {
+                        $row = pg_fetch_assoc($result_anggota);
+                        $stats['anggota'] = (int)$row['total'];
+                      }
+                      
+                      $query_pendaftar = "SELECT COUNT(*) as total FROM pendaftaran";
+                      $result_pendaftar = pg_query($koneksi, $query_pendaftar);
+                      if ($result_pendaftar) {
+                        $row = pg_fetch_assoc($result_pendaftar);
+                        $stats['pendaftar'] = (int)$row['total'];
+                      }
+                      
+                      $query_blog = "SELECT COUNT(*) as total FROM blog WHERE is_published = true";
+                      $result_blog = pg_query($koneksi, $query_blog);
+                      if ($result_blog) {
+                        $row = pg_fetch_assoc($result_blog);
+                        $stats['blog'] = (int)$row['total'];
+                      }
                     }
                     ?>
                     <?php include __DIR__ . '/menu.php'; ?>

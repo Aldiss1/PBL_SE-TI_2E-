@@ -54,7 +54,7 @@ function tambahBlog($data) {
     }
     
     // Get author_id from session
-    $author_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 1;
+    $author_id = (int)($_SESSION['user_id'] ?? 1);
     
     // Convert tags to array format for PostgreSQL
     $tags_array = [];

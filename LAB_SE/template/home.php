@@ -198,13 +198,24 @@
     </div>
     <div class="row">
       <?php
-      // Cek jumlah data dulu
-      $count_query = "SELECT COUNT(*) as total FROM anggota WHERE jabatan IS NOT NULL";
-      $count_result = pg_query($koneksi, $count_query);
+      // Cek jumlah data dari materialized view (lebih cepat!)
       $total_data = 0;
-      if ($count_result) {
-        $count_row = pg_fetch_assoc($count_result);
-        $total_data = (int)$count_row['total'];
+      if (file_exists(__DIR__ . '/../fungsi/materialized_views_complete.php')) {
+        require_once __DIR__ . '/../fungsi/materialized_views_complete.php';
+        $stats_mv = get_stats_complete();
+        if ($stats_mv) {
+          $total_data = (int)($stats_mv['total_anggota'] ?? 0);
+        }
+      }
+      
+      // Fallback: Query langsung jika materialized view tidak tersedia
+      if ($total_data === 0 && $koneksi) {
+        $count_query = "SELECT COUNT(*) as total FROM anggota WHERE jabatan IS NOT NULL";
+        $count_result = pg_query($koneksi, $count_query);
+        if ($count_result) {
+          $count_row = pg_fetch_assoc($count_result);
+          $total_data = (int)$count_row['total'];
+        }
       }
       
       // Query yang lebih inklusif untuk mengambil semua anggota (dosen, ketua, dll)
@@ -275,13 +286,24 @@
     </div>
     <div class="row">
       <?php
-      // Hitung total blog yang published
-      $count_query = "SELECT COUNT(*) as total FROM blog WHERE is_published = true";
-      $count_result = pg_query($koneksi, $count_query);
+      // Hitung total blog yang published dari materialized view (lebih cepat!)
       $total_blog_count = 0;
-      if ($count_result) {
-        $count_row = pg_fetch_assoc($count_result);
-        $total_blog_count = (int)$count_row['total'];
+      if (file_exists(__DIR__ . '/../fungsi/materialized_views_complete.php')) {
+        require_once __DIR__ . '/../fungsi/materialized_views_complete.php';
+        $stats_mv = get_stats_complete();
+        if ($stats_mv) {
+          $total_blog_count = (int)($stats_mv['total_blog_published'] ?? 0);
+        }
+      }
+      
+      // Fallback: Query langsung jika materialized view tidak tersedia
+      if ($total_blog_count === 0 && $koneksi) {
+        $count_query = "SELECT COUNT(*) as total FROM blog WHERE is_published = true";
+        $count_result = pg_query($koneksi, $count_query);
+        if ($count_result) {
+          $count_row = pg_fetch_assoc($count_result);
+          $total_blog_count = (int)$count_row['total'];
+        }
       }
       
       // Ambil blog yang sudah published (maksimal 6)
