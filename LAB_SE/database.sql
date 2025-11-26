@@ -149,6 +149,9 @@ INSERT INTO konten_page (page_key, title, content) VALUES
 -- PENTING: Jika pakai DBeaver/pgAdmin, jangan lupa klik tombol COMMIT (ikon Disket/Centang Hijau) setelah menjalankan ini!
 -- Data ini masih dummy
 
+
+-- Database roadmap
+
 CREATE TABLE roadmap_periode (
     id SERIAL PRIMARY KEY,
     tahun_periode VARCHAR(50) NOT NULL,    -- Contoh: '2024 Q1 - Q4'
@@ -161,5 +164,60 @@ CREATE TABLE roadmap_item (
     id_periode INTEGER REFERENCES roadmap_periode(id) ON DELETE CASCADE, -- Foreign Key
     deskripsi_tugas TEXT NOT NULL,         -- Contoh: 'Pembentukan struktur organisasi laboratorium'
     urutan INTEGER NOT NULL DEFAULT 0       -- Untuk sorting item di dalam fase
+);
+
+
+-- Memasukkan Periode 2024 (Fase Pendirian & Setup)
+INSERT INTO roadmap_periode (tahun_periode, judul_fase, urutan)
+VALUES ('2024 Q1 - Q4', 'Fase Pendirian & Setup', 1);
+
+-- Memasukkan Periode 2025 (Fase Pengembangan & Riset)
+INSERT INTO roadmap_periode (tahun_periode, judul_fase, urutan)
+VALUES ('2025 Q1 - Q4', 'Fase Pengembangan & Riset', 2);
+
+-- Ambil ID Periode untuk '2024 Q1 - Q4'
+WITH id_2024 AS (
+    SELECT id FROM roadmap_periode WHERE tahun_periode = '2024 Q1 - Q4'
+)
+-- Masukkan item-item (urutan 1 sampai 4)
+INSERT INTO roadmap_item (id_periode, deskripsi_tugas, urutan)
+VALUES 
+(
+    (SELECT id FROM id_2024), 
+    'Pembentukan struktur organisasi laboratorium', 
+    1
+),
+(
+    (SELECT id FROM id_2024), 
+    'Pengadaan infrastruktur dan peralatan dasar', 
+    2
+),
+(
+    (SELECT id FROM id_2024), 
+    'Rekrutmen anggota dan asisten laboratorium', 
+    3
+),
+(
+    (SELECT id FROM id_2024), 
+    'Peluncuran website dan sistem informasi lab', 
+    4
+);
+
+-- Ambil ID Periode untuk '2025 Q1 - Q4'
+WITH id_2025 AS (
+    SELECT id FROM roadmap_periode WHERE tahun_periode = '2025 Q1 - Q4'
+)
+-- Masukkan item-item (urutan 1 sampai 2)
+INSERT INTO roadmap_item (id_periode, deskripsi_tugas, urutan)
+VALUES 
+(
+    (SELECT id FROM id_2025), 
+    'Pengembangan proyek penelitian', 
+    1
+),
+(
+    (SELECT id FROM id_2025), 
+    'Kerjasama dengan industri untuk implementasi teknologi', 
+    2
 );
 
