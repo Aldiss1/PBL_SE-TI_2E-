@@ -1,8 +1,6 @@
 <?php
 /**
- * ============================================
- * FUNGSI MATERIALIZED VIEWS UNTUK PEMULA
- * ============================================
+
  * 
  * File ini berisi fungsi-fungsi untuk mengambil data dari materialized views
  * Materialized views = Data yang sudah dihitung dan disimpan di database (lebih cepat!)
@@ -47,7 +45,7 @@ function materialized_view_exists($view_name) {
  *     echo "Pending: " . $stats['pendaftar_pending'];
  * }
  * 
- * @return array|false Array berisi statistik, atau false jika materialized view belum dibuat
+ * @return array|false 
  */
 function get_stats_complete() {
     global $koneksi;
