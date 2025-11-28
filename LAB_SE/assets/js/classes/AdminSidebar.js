@@ -36,9 +36,6 @@ class AdminSidebar {
                 e.stopPropagation();
                 this.toggle();
             });
-            console.log('Sidebar toggle button initialized');
-        } else {
-            console.error('Sidebar toggle button not found!');
         }
         
         if (this.overlay) {
@@ -51,7 +48,6 @@ class AdminSidebar {
         // Expose global function for backward compatibility
         if (typeof window !== 'undefined') {
             window.toggleSidebar = () => {
-                console.log('toggleSidebar called');
                 this.toggle();
             };
         }

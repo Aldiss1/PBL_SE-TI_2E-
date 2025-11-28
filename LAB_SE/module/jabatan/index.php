@@ -70,7 +70,6 @@ $result = pg_query($koneksi, $query);
 // Simpan data untuk JavaScript
 $jabatan_data = [];
 if ($result && pg_num_rows($result) > 0) {
-    pg_result_seek($result, 0); // Reset pointer
     while ($row = pg_fetch_assoc($result)) {
         $jabatan_data[] = [
             'id' => (int)$row['id'],

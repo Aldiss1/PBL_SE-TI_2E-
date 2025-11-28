@@ -90,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             pesan_kilat('Username sudah digunakan.', 'error');
         } else {
             // Validasi password jika diisi
+            $query = '';
             if ($password !== '') {
                 if (strlen($password) < 5) {
                     pesan_kilat('Password minimal 5 karakter.', 'error');
@@ -104,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $query = "UPDATE users SET username = '$username_e', role = 'admin', updated_at = NOW() WHERE id = $id";
             }
             
-            if (isset($query)) {
+            if ($query !== '') {
                 $result = pg_query($koneksi, $query);
                 if ($result) {
                     pesan_kilat('Admin berhasil diperbarui!', 'success');

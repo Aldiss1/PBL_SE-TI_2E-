@@ -40,13 +40,6 @@ class AnggotaPreviewModal {
             }
             return;
         }
-        
-        // Debug: log data untuk memastikan data terkirim
-        // console.log('Preview data:', data);
-
-        if (!this.overlay) {
-            this.overlay = document.getElementById('anggotaPreviewOverlay');
-        }
 
         const nama = document.getElementById('apNama');
         const jabatan = document.getElementById('apJabatan');

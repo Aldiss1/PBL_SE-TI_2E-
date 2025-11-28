@@ -309,17 +309,6 @@ if (typeof AnggotaPreviewModal !== 'undefined' && window.anggotaData) {
     window.anggotaPreviewModal = new AnggotaPreviewModal(window.anggotaData);
 }
 
-// Fallback function if class not loaded
-function openPreviewAnggota(id) {
-    if (window.anggotaPreviewModal) {
-        window.anggotaPreviewModal.openPreview(id);
-    } else if (window.openPreviewAnggota) {
-        // Already defined
-    } else {
-        alert('Modal preview belum siap. Silakan refresh halaman.');
-    }
-}
-
 // Function to confirm delete with modal
 function confirmDeleteAnggota(id, nama) {
     if (window.anggotaConfirmModal) {

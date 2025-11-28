@@ -307,27 +307,23 @@ const chartData = <?php echo $chart_json; ?> || { labels: [], data: [] };
     function initChartManager() {
         // Check if both Chart.js and ChartManager are loaded
         if (typeof Chart === 'undefined') {
-            console.log('Waiting for Chart.js...');
             setTimeout(initChartManager, 100);
             return;
         }
         
         if (typeof ChartManager === 'undefined') {
-            console.log('Waiting for ChartManager...');
             setTimeout(initChartManager, 100);
             return;
         }
         
         // Check if chart data is valid
         if (!chartData || !chartData.labels || !chartData.data) {
-            console.warn('Chart data is invalid:', chartData);
             return;
         }
         
         // Check if canvas exists
         const canvas = document.getElementById('pendaftaranChart');
         if (!canvas) {
-            console.log('Waiting for canvas element...');
             setTimeout(initChartManager, 100);
             return;
         }
@@ -335,9 +331,8 @@ const chartData = <?php echo $chart_json; ?> || { labels: [], data: [] };
         // Initialize ChartManager
         try {
             window.chartManager = new ChartManager('pendaftaranChart', chartData);
-            console.log('ChartManager initialized successfully');
         } catch (error) {
-            console.error('Error initializing ChartManager:', error);
+            // Silent fail
         }
     }
     
@@ -370,7 +365,6 @@ const chartData = <?php echo $chart_json; ?> || { labels: [], data: [] };
                 live: true
             });
             window.wowInstance.init();
-            console.log('WOW.js initialized for animations');
         } else {
             // Retry if WOW.js not loaded yet
             setTimeout(initWOW, 100);

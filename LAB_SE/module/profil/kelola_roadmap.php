@@ -482,11 +482,7 @@ window.addEventListener('load', function() {
 })();
 
 /* Debug helper: show console log if jQuery missing (not fatal) */
-if (typeof jQuery === 'undefined') {
-    console.warn("jQuery not found (legacy scripts may rely on it). Bootstrap 5 does not require jQuery for modals.");
-} else {
-    console.log("jQuery detected.");
-}
+// jQuery check removed - Bootstrap 5 does not require jQuery
 </script>
 
 <?php

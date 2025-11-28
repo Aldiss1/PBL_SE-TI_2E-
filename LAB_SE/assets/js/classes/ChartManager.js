@@ -180,11 +180,8 @@ class ChartManager {
             // Buat chart baru
             canvas.chartInstance = new Chart(ctx, finalOptions);
             this.chart = canvas.chartInstance;
-            
-            console.log('Chart initialized successfully with data:', this.chartData);
         } catch (error) {
-            console.error('Error initializing chart:', error);
-            console.error('Chart data:', this.chartData);
+            // Silent fail
         }
     }
 
