@@ -11,12 +11,14 @@
 .admin-section-bg {
     background: #f8f9fa;
     padding-top: 30px !important;
+    padding-bottom: 30px !important;
 }
 
 .admin-section-bg-full {
     background: #f8f9fa;
     min-height: calc(100vh - 80px);
     padding-top: 40px !important;
+    padding-bottom: 40px !important;
 }
 
 /* Table Styles */
@@ -163,19 +165,6 @@
     box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
 }
 
-.btn-create-account {
-    background: #2F80ED;
-    color: white;
-    padding: 6px 14px;
-    border: none;
-    transition: all 0.2s ease;
-}
-
-.btn-create-account:hover {
-    background: #1E5FCC;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(47, 128, 237, 0.3);
-}
 
 /* Avatar & Initial Circle */
 .avatar-circle {
@@ -248,16 +237,7 @@
 }
 
 /* Badge styling in action column */
-.action-column-container .account-active-badge,
-.action-column-container .account-disabled-badge {
-    flex-shrink: 0;
-    white-space: nowrap;
-}
 
-/* Account status icon in action column */
-.action-column-container .account-status-icon {
-    flex-shrink: 0;
-}
 
 /* Dropdown Action Styles */
 .dropdown-action {
@@ -420,41 +400,6 @@
     color: #c0392b;
 }
 
-/* Create account item in dropdown */
-.dropdown-item-create {
-    color: #2F80ED;
-}
-
-.dropdown-item-create i {
-    color: #2F80ED;
-}
-
-.dropdown-item-create:hover {
-    color: #1E5FCC;
-    background: #e3f2fd;
-}
-
-.dropdown-item-create:hover i {
-    color: #1E5FCC;
-}
-
-/* Reset password item in dropdown */
-.dropdown-item-reset {
-    color: #9b59b6;
-}
-
-.dropdown-item-reset i {
-    color: #9b59b6;
-}
-
-.dropdown-item-reset:hover {
-    color: #8e44ad;
-    background: #f4ecf7;
-}
-
-.dropdown-item-reset:hover i {
-    color: #8e44ad;
-}
 
 /* Status Badges */
 .status-badge {
@@ -571,95 +516,7 @@
     font-size: 12px;
 }
 
-/* Account Active Badge */
-.account-active-badge {
-    background: #d4edda;
-    color: #155724;
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid #c3e6cb;
-    white-space: nowrap;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
 
-.account-active-badge i {
-    font-size: 14px;
-}
-
-/* Account Disabled Badge */
-.account-disabled-badge {
-    background: #fdecea;
-    color: #c0392b;
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid #f5c6cb;
-    white-space: nowrap;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.account-disabled-badge i {
-    font-size: 14px;
-}
-
-/* Account Status Icon - Small indicator only */
-.account-status-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.account-status-icon i {
-    font-size: 16px;
-}
-
-.account-status-active {
-    background: #d4edda;
-    color: #27AE60;
-    border: 2px solid #27AE60;
-}
-
-.account-status-active:hover {
-    background: #c3e6cb;
-    transform: scale(1.1);
-}
-
-.account-status-inactive {
-    background: #fdecea;
-    color: #e74c3c;
-    border: 2px solid #e74c3c;
-}
-
-.account-status-inactive:hover {
-    background: #f5c6cb;
-    transform: scale(1.1);
-}
-
-.account-status-pending {
-    background: #fff3cd;
-    color: #F2994A;
-    border: 2px solid #F2994A;
-}
-
-.account-status-pending:hover {
-    background: #ffe8bf;
-    transform: scale(1.1);
-}
 
 /* ============================================
    MODAL STYLES
@@ -677,6 +534,265 @@
     padding: 20px;
 }
 
+/* Bootstrap Modal Overlay for Anggota Preview */
+#anggotaPreviewOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000003;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+#anggotaPreviewOverlay.show {
+    display: flex !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.anggota-modal-bootstrap {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+    position: relative;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+}
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.anggota-modal-header {
+    padding: 20px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.anggota-modal-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+}
+
+.anggota-modal-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 18px;
+}
+
+.anggota-modal-close:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.anggota-modal-body {
+    padding: 30px;
+}
+
+.anggota-modal-footer {
+    padding: 15px 25px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.anggota-preview-content {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.anggota-preview-photo-section {
+    text-align: center;
+    margin-bottom: 10px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.anggota-preview-photo-wrapper {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    overflow: visible;
+}
+
+.anggota-preview-photo {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    background: #f8f9fa;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    display: none;
+}
+
+.anggota-preview-initial {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 72px;
+    font-weight: bold;
+    border: 4px solid #667eea !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.anggota-preview-info {
+    flex: 1;
+}
+
+.anggota-preview-nama {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 25px 0;
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.anggota-preview-item {
+    margin-bottom: 20px;
+}
+
+.anggota-preview-item:last-child {
+    margin-bottom: 0;
+}
+
+.anggota-preview-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.anggota-preview-label i {
+    font-size: 14px;
+    color: #667eea;
+}
+
+.anggota-preview-value {
+    font-size: 15px;
+    color: #2c3e50;
+    line-height: 1.6;
+}
+
+.anggota-preview-value .badge {
+    font-size: 14px;
+    padding: 8px 12px;
+}
+
+.anggota-preview-value p {
+    margin: 0;
+    word-wrap: break-word;
+}
+
+@media (max-width: 768px) {
+#anggotaPreviewOverlay {
+        padding: 10px;
+    }
+    
+    .anggota-modal-bootstrap {
+        max-width: 100%;
+        max-height: 95vh;
+    }
+    
+    .anggota-modal-body {
+    padding: 20px;
+}
+
+    .anggota-preview-content {
+        gap: 20px;
+    }
+    
+    .anggota-preview-photo-wrapper {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .anggota-preview-photo,
+    .anggota-preview-initial {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .anggota-preview-initial {
+        font-size: 54px;
+    }
+    
+    .anggota-preview-nama {
+        font-size: 22px;
+        margin-bottom: 20px;
+    }
+    
+    .anggota-preview-item {
+        margin-bottom: 18px;
+    }
+}
+
+/* Old anggota-modal styles (kept for backward compatibility) */
 .anggota-modal {
     background: #fff;
     border-radius: 12px;
@@ -920,28 +1036,6 @@
     font-weight: 600;
 }
 
-.detail-account-status {
-    margin-top: 8px;
-    padding-top: 12px;
-    border-top: 1px solid #f0f0f0;
-}
-
-.account-status-badge-active {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #d4edda;
-    color: #155724;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    border: 1px solid #c3e6cb;
-}
-
-.account-status-badge-active i {
-    font-size: 14px;
-}
 
 .detail-footer {
     padding: 12px 20px;
@@ -1006,15 +1100,11 @@
     background: #fafafa;
 }
 
-/* Create Account Modal */
-#createAccountOverlay,
-#deactivateAccountOverlay,
-#resetPasswordOverlay,
+/* Modal Overlays */
 #updatePendaftarOverlay,
 #deletePendaftarOverlay,
 #bulkStatusOverlay,
-#bulkDeleteOverlay,
-#bulkCreateAccountOverlay {
+#bulkDeleteOverlay {
     display: none;
     position: fixed;
     top: 0;
@@ -1033,14 +1123,10 @@
 }
 
 /* Ensure modals are displayed as flex when shown and centered */
-#createAccountOverlay[style*="flex"],
-#deactivateAccountOverlay[style*="flex"],
-#resetPasswordOverlay[style*="flex"],
 #updatePendaftarOverlay[style*="flex"],
 #deletePendaftarOverlay[style*="flex"],
 #bulkStatusOverlay[style*="flex"],
-#bulkDeleteOverlay[style*="flex"],
-#bulkCreateAccountOverlay[style*="flex"] {
+#bulkDeleteOverlay[style*="flex"] {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -1049,17 +1135,6 @@
 /* Prevent body scroll when modal is open */
 body.modal-open {
     overflow: hidden;
-}
-
-.create-account-modal {
-    background: #fff;
-    border-radius: 12px;
-    max-width: 480px;
-    width: 100%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    overflow: hidden;
-    position: relative;
-    margin: auto;
 }
 
 .update-pendaftar-modal {
@@ -1072,74 +1147,6 @@ body.modal-open {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-}
-
-.create-account-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid #f1f1f1;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.create-account-header i {
-    font-size: 20px;
-    color: #2F80ED;
-}
-
-.create-account-header h4 {
-    margin: 0;
-    color: #2c3e50;
-    font-weight: 600;
-    font-size: 16px;
-}
-
-.create-account-body {
-    padding: 20px;
-}
-
-.create-account-info {
-    background: #f8f9fa;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 16px;
-}
-
-.create-account-info-item {
-    margin-bottom: 8px;
-}
-
-.create-account-info-label {
-    color: #6c757d;
-    font-size: 13px;
-}
-
-.create-account-info-value {
-    color: #2c3e50;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.create-account-footer {
-    padding: 12px 20px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    background: #fafafa;
-}
-
-.create-account-body p {
-    margin: 0 0 16px 0;
-    color: #2c3e50;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.create-account-body p:last-of-type {
-    margin: 0;
-    color: #6c757d;
-    font-size: 13px;
-    line-height: 1.5;
 }
 
 /* Update Pendaftar Form Styles */
@@ -1205,30 +1212,6 @@ body.modal-open {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.btn-cancel-account {
-    background: #6c757d;
-    color: #fff;
-    border: none;
-}
-
-.btn-confirm-account {
-    background: #9b59b6;
-    color: #fff;
-    border: none;
-    pointer-events: auto !important;
-    cursor: pointer !important;
-    position: relative;
-    z-index: 10001;
-}
-
-.btn-confirm-account:hover {
-    background: #8e44ad;
-    opacity: 1;
-}
-
-.btn-confirm-account:active {
-    background: #7d3c98;
-}
 
 /* Email Link */
 .email-link {
@@ -1906,11 +1889,71 @@ table.custom-table tr:hover {
     .table-responsive {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        margin: 0 -15px;
+        padding: 0 15px;
     }
     
     .table thead th,
     .table tbody td {
         white-space: nowrap;
+    }
+    
+    /* Admin table responsive */
+    .admin-table {
+        min-width: 800px;
+        font-size: 13px;
+    }
+    
+    .admin-table th,
+    .admin-table td {
+        padding: 10px 8px;
+    }
+    
+    .admin-table th {
+        font-size: 11px;
+    }
+    
+    /* Section title responsive */
+    .section-title {
+        margin-bottom: 20px;
+    }
+    
+    .section-title h2 {
+        font-size: 24px;
+    }
+    
+    .section-title p {
+        font-size: 14px;
+    }
+    
+    /* Filter cards responsive */
+    .filter-card-wrapper,
+    .filter-advanced-card {
+        padding: 15px !important;
+    }
+    
+    .filter-buttons {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .filter-button {
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+    
+    /* Stat cards responsive */
+    .stat-card {
+        margin-bottom: 20px;
+        padding: 20px;
+    }
+    
+    .stat-card .stat-number {
+        font-size: 28px;
+    }
+    
+    .stat-card .stat-icon {
+        font-size: 28px;
     }
 }
 
@@ -2334,21 +2377,6 @@ input[type="checkbox"] {
     color: white;
 }
 
-.action-type-account_create {
-    background: #27ae60;
-    color: white;
-}
-
-.action-type-account_deactivate {
-    background: #e74c3c;
-    color: white;
-}
-
-.action-type-account_reset_password {
-    background: #f39c12;
-    color: white;
-}
-
 .action-type-update {
     background: #2F80ED;
     color: white;
@@ -2523,6 +2551,106 @@ input[type="checkbox"] {
     
     .pagination-numbers {
         justify-content: center;
+    }
+    
+    /* Table responsive improvements */
+    .admin-table {
+        font-size: 12px;
+        min-width: 700px;
+    }
+    
+    .admin-table th,
+    .admin-table td {
+        padding: 8px 6px;
+    }
+    
+    .admin-table th {
+        font-size: 10px;
+    }
+    
+    /* Action buttons responsive */
+    .action-column-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 5px;
+    }
+    
+    .action-column-container .button {
+        width: 100%;
+        justify-content: center;
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+    
+    /* Dropdown menu responsive */
+    .dropdown-menu {
+        position: fixed !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        top: auto !important;
+        right: auto !important;
+        margin-top: 5px;
+        min-width: 200px;
+        max-width: 90vw;
+    }
+    
+    /* Modal responsive */
+    .detail-modal {
+        max-width: 95vw !important;
+        margin: 10px !important;
+    }
+    
+    /* Form responsive */
+    .form-card {
+        padding: 20px 15px;
+    }
+    
+    /* Filter form responsive */
+    .filter-advanced-card .row > div {
+        margin-bottom: 15px;
+    }
+    
+    /* Section title responsive */
+    .section-title h2 {
+        font-size: 22px;
+    }
+    
+    .section-title p {
+        font-size: 13px;
+    }
+    
+    /* Bulk actions responsive */
+    .bulk-actions-bar {
+        padding: 12px !important;
+    }
+    
+    .bulk-actions-bar button {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+}
+
+/* Additional Responsive Improvements */
+@media (max-width: 991px) {
+    /* Container padding */
+    .admin-section-bg .container,
+    .admin-section-bg-full .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    /* Ensure main content takes full width */
+    .admin-main-content {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 575px) {
+    /* Container padding for small mobile */
+    .admin-section-bg .container,
+    .admin-section-bg-full .container {
+        padding-left: 10px;
+        padding-right: 10px;
     }
 }
 

@@ -18,6 +18,60 @@ $semua_konten = [];
 $data_list = [];
 // --- END DEFINISI ---
 
+// --- CEK DAN BUAT TABEL konten_page JIKA BELUM ADA ---
+$check_table = pg_query($koneksi, "
+    SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'konten_page'
+    )
+");
+
+if ($check_table) {
+    $table_exists = pg_fetch_result($check_table, 0, 0);
+    if ($table_exists !== 't') {
+        // Buat tabel konten_page
+        pg_query($koneksi, "
+            CREATE TABLE IF NOT EXISTS konten_page (
+                id SERIAL PRIMARY KEY,
+                page_key VARCHAR(100) NOT NULL UNIQUE,
+                title VARCHAR(255) NULL,
+                content TEXT NOT NULL,
+                last_updated TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        ");
+        
+        // Buat trigger untuk update last_updated
+        pg_query($koneksi, "
+            CREATE OR REPLACE FUNCTION update_last_updated_column()
+            RETURNS TRIGGER AS \$\$
+            BEGIN
+                NEW.last_updated = now();
+                RETURN NEW;
+            END;
+            \$\$ language 'plpgsql'
+        ");
+        
+        pg_query($koneksi, "
+            DROP TRIGGER IF EXISTS last_updated_trg ON konten_page;
+            CREATE TRIGGER last_updated_trg
+            BEFORE UPDATE ON konten_page
+            FOR EACH ROW
+            EXECUTE PROCEDURE update_last_updated_column()
+        ");
+        
+        // Insert data default jika tabel baru dibuat
+        pg_query($koneksi, "
+            INSERT INTO konten_page (page_key, title, content) VALUES 
+            ('roadmap_judul', 'Roadmap Laboratorium SE', 'Perjalanan dan Rencana Pengembangan Laboratorium Software Engineering.'),
+            ('visi_deskripsi', 'Visi Kami', 'Menjadi pusat penelitian software engineering yang relevan dan berdaya guna bagi pengembangan teknologi informasi di Indonesia.'),
+            ('misi_item_1', 'Misi Utama', 'Melakukan penelitian berkualitas di bidang perangkat lunak yang memberikan kontribusi nyata bagi industri dan akademisi.'),
+            ('tentang_kami', 'Tentang Lab SE', 'Laboratorium Software Engineering merupakan wadah kolaborasi mahasiswa dan dosen untuk penelitian dan pengembangan.')
+            ON CONFLICT (page_key) DO NOTHING
+        ");
+    }
+}
+
 // --- 2. KONFIGURASI MENU SIDEBAR ---
 // Catatan: Sidebar di View tampaknya ditujukan untuk Mahasiswa.
 // Namun, menu items ini adalah untuk navigasi Admin. Kita biarkan saja karena
@@ -127,6 +181,10 @@ if ($result_all) {
     while ($row = pg_fetch_assoc($result_all)) {
         $semua_konten[] = $row;
     }
+} else {
+    // Jika query gagal, log error tapi jangan crash
+    error_log("Error query konten_page: " . pg_last_error($koneksi));
+    $semua_konten = []; // Tetap set sebagai array kosong
 }
 
 // --- 6. TAMPILAN (VIEW) ---

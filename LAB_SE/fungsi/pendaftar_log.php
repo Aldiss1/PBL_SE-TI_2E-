@@ -1,7 +1,7 @@
 <?php
 /**
  * Fungsi untuk logging aktivitas pendaftar
- * Mencatat semua perubahan: status, akun, update, delete
+ * Mencatat semua perubahan: status, update, delete
  */
 
 require_once __DIR__ . '/../config/koneksi.php';
@@ -9,7 +9,7 @@ require_once __DIR__ . '/../config/koneksi.php';
 /**
  * Log aktivitas pendaftar
  * @param int $pendaftaran_id ID pendaftaran
- * @param string $action_type Jenis aksi: 'status_change', 'account_create', 'account_deactivate', 'account_reset_password', 'update', 'delete'
+ * @param string $action_type Jenis aksi: 'status_change', 'update', 'delete'
  * @param string $description Deskripsi aktivitas
  * @param array $old_data Data lama (optional)
  * @param array $new_data Data baru (optional)

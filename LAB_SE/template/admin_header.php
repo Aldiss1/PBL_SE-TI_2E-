@@ -47,13 +47,19 @@
                     <a class="navbar-brand" href="<?php echo $base_path; ?>index.php">
                       <img src="<?php echo $base_path; ?>assets/img/logo/logo.png" alt="Logo" />
                     </a>
+                    <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#navbarSupportedContent2" aria-controls="navbarSupportedContent2" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon">
+                            <i class="lni lni-menu"></i>
+                        </span>
+                    </button>
                     <div class="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent2">
                         <ul id="nav2" class="navbar-nav ml-auto">
                             <li class="nav-item">
                               <a class="page-scroll active" href="<?php echo $base_path; ?>module/admin/dashboard.php">Dashboard</a>
                             </li>
                         </ul>
-                      <a href="<?php echo $base_path; ?>logout.php" class="button button-sm radius-10 border-button d-none d-lg-flex">Logout</a>
+                      <a href="<?php echo $base_path; ?>module/auth/logout.php" class="button button-sm radius-10 border-button d-none d-lg-flex">Logout</a>
+                      <a href="<?php echo $base_path; ?>module/auth/logout.php" class="button button-sm radius-10 border-button d-lg-none mt-2">Logout</a>
                     </div>
                   </nav>
               </div>

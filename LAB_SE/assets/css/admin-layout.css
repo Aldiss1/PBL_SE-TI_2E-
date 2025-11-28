@@ -10,3 +10,85 @@ html { overflow-y: scroll; }
 	box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
 }
 
+/* Navbar Toggler */
+.navbar-toggler {
+	border: none;
+	background: transparent;
+	padding: 8px;
+	cursor: pointer;
+}
+
+.navbar-toggler-icon {
+	display: inline-block;
+	width: 24px;
+	height: 24px;
+}
+
+.navbar-toggler-icon i {
+	font-size: 24px;
+	color: #2c3e50;
+}
+
+/* Responsive Header */
+@media (max-width: 991px) {
+	.header.header-2 {
+		position: relative !important;
+		z-index: 1000 !important;
+	}
+	
+	/* Pastikan header tidak menutupi tombol toggle */
+	.header.header-2 .navbar-area {
+		position: relative;
+		z-index: 1;
+	}
+	
+	.header.header-2 .navbar {
+		padding: 10px 0;
+	}
+	
+	.header.header-2 .navbar-brand img {
+		max-height: 40px;
+	}
+	
+	.navbar-toggler {
+		display: block !important;
+	}
+	
+	/* Adjust main content when header is not fixed */
+	.admin-main-content {
+		margin-top: 0 !important;
+	}
+	
+	/* Navbar collapse */
+	.navbar-collapse {
+		margin-top: 15px;
+		padding-top: 15px;
+		border-top: 1px solid #e0e0e0;
+	}
+	
+	.navbar-nav {
+		margin-bottom: 10px;
+	}
+	
+	.navbar-nav .nav-item {
+		margin-bottom: 5px;
+	}
+}
+
+/* Ensure body has proper spacing */
+body {
+	margin: 0;
+	padding: 0;
+}
+
+/* Admin main content spacing */
+@media (min-width: 992px) {
+	.admin-main-content {
+		padding-top: 0;
+	}
+	
+	.navbar-toggler {
+		display: none !important;
+	}
+}
+

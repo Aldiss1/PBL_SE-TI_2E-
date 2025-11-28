@@ -23,7 +23,22 @@ class AdminSidebar {
         this.toggleButton = document.getElementById('sidebarToggle');
         
         if (this.toggleButton) {
-            this.toggleButton.addEventListener('click', () => this.toggle());
+            // Remove existing onclick handler and use addEventListener
+            this.toggleButton.onclick = null;
+            this.toggleButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggle();
+            });
+            // Also add touch event for mobile
+            this.toggleButton.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggle();
+            });
+            console.log('Sidebar toggle button initialized');
+        } else {
+            console.error('Sidebar toggle button not found!');
         }
         
         if (this.overlay) {
@@ -35,7 +50,10 @@ class AdminSidebar {
         
         // Expose global function for backward compatibility
         if (typeof window !== 'undefined') {
-            window.toggleSidebar = () => this.toggle();
+            window.toggleSidebar = () => {
+                console.log('toggleSidebar called');
+                this.toggle();
+            };
         }
     }
 

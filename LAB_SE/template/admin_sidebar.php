@@ -33,7 +33,7 @@ foreach ($menu_items as $key => $item) {
 ?>
 
 <!-- Sidebar Toggle Button (Mobile) -->
-<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+<button class="sidebar-toggle" id="sidebarToggle" onclick="if(typeof toggleSidebar === 'function') { toggleSidebar(); } else if(window.adminSidebar) { window.adminSidebar.toggle(); }" style="z-index: 1000000 !important; position: fixed !important; pointer-events: auto !important; cursor: pointer !important;">
     <i class="lni lni-menu"></i>
 </button>
 

@@ -15,6 +15,7 @@
     <script src="<?php echo $base_path; ?>assets/js/bootstrap.5.0.0.alpha-2-min.js"></script>
     <script src="<?php echo $base_path; ?>assets/js/count-up.min.js"></script>
     <script src="<?php echo $base_path; ?>assets/js/wow.min.js"></script>
+    <script src="<?php echo $base_path; ?>assets/js/classes/AdminSidebar.js"></script>
     <script src="<?php echo $base_path; ?>assets/js/main.js"></script>
   </body>
 </html>

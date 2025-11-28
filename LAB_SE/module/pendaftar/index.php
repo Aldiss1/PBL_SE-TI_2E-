@@ -133,16 +133,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 					$error_count++;
 				}
 			} elseif ($bulk_action === 'delete') {
-				// Hapus user jika ada
-				$q = pg_query($koneksi, "SELECT nim FROM pendaftaran WHERE id = $id_escaped LIMIT 1");
-				if ($q && pg_num_rows($q) > 0) {
-					$pd = pg_fetch_assoc($q);
-					$nim = trim($pd['nim'] ?? '');
-					if ($nim) {
-						$nim_escaped = pg_escape_string($koneksi, $nim);
-						pg_query($koneksi, "DELETE FROM users WHERE username = '$nim_escaped'");
-					}
-				}
 				$delete = pg_query($koneksi, "DELETE FROM pendaftaran WHERE id = $id_escaped");
 				if ($delete) {
 					$success_count++;
@@ -160,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 			pesan_kilat("$error_count pendaftar gagal diproses.", 'error');
 		}
 		
-		$redirect_url = build_redirect_url($current_filter, $search_query, $filter_tanggal_dari, $filter_tanggal_sampai, $filter_akun, $filter_minat, $per_page);
+		$redirect_url = build_redirect_url($current_filter, $search_query, $filter_tanggal_dari, $filter_tanggal_sampai, $filter_minat, $per_page);
 		header('Location: ' . $redirect_url);
 		exit;
 	}
@@ -271,13 +261,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_riwayat' && isset($_GET['
 }
 
 // Helper function untuk build redirect URL dengan semua filter
-function build_redirect_url($status_filter, $search_query = '', $filter_tanggal_dari = '', $filter_tanggal_sampai = '', $filter_akun = 'all', $filter_minat = '', $per_page = 25) {
+function build_redirect_url($status_filter, $search_query = '', $filter_tanggal_dari = '', $filter_tanggal_sampai = '', $filter_minat = '', $per_page = 25) {
 	$params = [];
 	if ($status_filter !== 'all') $params[] = 'status=' . urlencode($status_filter);
 	if (!empty($search_query)) $params[] = 'search=' . urlencode($search_query);
 	if (!empty($filter_tanggal_dari)) $params[] = 'tanggal_dari=' . urlencode($filter_tanggal_dari);
 	if (!empty($filter_tanggal_sampai)) $params[] = 'tanggal_sampai=' . urlencode($filter_tanggal_sampai);
-	if ($filter_akun !== 'all') $params[] = 'akun=' . urlencode($filter_akun);
 	if (!empty($filter_minat)) $params[] = 'minat=' . urlencode($filter_minat);
 	if ($per_page != 25) $params[] = 'per_page=' . $per_page;
 	
@@ -293,7 +282,6 @@ $status_filter = isset($_GET['status']) ? clean_input($_GET['status']) : 'all';
 $search_query = isset($_GET['search']) ? trim(clean_input($_GET['search'])) : '';
 $filter_tanggal_dari = isset($_GET['tanggal_dari']) ? clean_input($_GET['tanggal_dari']) : '';
 $filter_tanggal_sampai = isset($_GET['tanggal_sampai']) ? clean_input($_GET['tanggal_sampai']) : '';
-$filter_akun = isset($_GET['akun']) ? clean_input($_GET['akun']) : 'all'; // all, aktif, non-aktif
 $filter_minat = isset($_GET['minat']) ? trim(clean_input($_GET['minat'])) : '';
 
 // ============================================
@@ -307,8 +295,6 @@ $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($current_page - 1) * $per_page;
 
 // Proses update status
-// PENTING: Proses ini HANYA mengubah status pendaftaran, TIDAK membuat akun user secara otomatis
-// Akun user hanya dibuat ketika admin mengklik tombol "Buat Akun" secara manual
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_status') {
 	$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 	$new_status = isset($_POST['status']) ? clean_input($_POST['status']) : '';
@@ -354,63 +340,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 			pesan_kilat('Gagal mengupdate status. Error: ' . pg_last_error($koneksi), 'error');
 		}
 		
-		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_minat ?? '', $per_page ?? 25);
 		header('Location: ' . $redirect_url);
 		exit;
 	}
 }
 
-// Proses pembuatan akun mahasiswa dari pendaftar accepted
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'create_account') {
-	$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-	$current_filter = isset($_POST['current_filter']) ? clean_input($_POST['current_filter']) : 'all';
-
-	if ($id > 0) {
-		// Ambil data pendaftar
-		$id_escaped = pg_escape_string($koneksi, $id);
-		$q = "SELECT * FROM pendaftaran WHERE id = $id_escaped LIMIT 1";
-		$res = pg_query($koneksi, $q);
-		if ($res && pg_num_rows($res) === 1) {
-			$pd = pg_fetch_assoc($res);
-			$nim = trim($pd['nim'] ?? '');
-			$nama = trim($pd['nama'] ?? '');
-			$email = trim($pd['email'] ?? '');
-			$status = $pd['status'] ?? 'pending';
-
-			if ($status !== 'accepted') {
-				pesan_kilat('Akun hanya bisa dibuat untuk pendaftar yang sudah diterima.', 'error');
-			} elseif ($nim === '' || $nama === '') {
-				pesan_kilat('Data pendaftar tidak lengkap (NIM/Nama).', 'error');
-			} else {
-				// Cek apakah user sudah ada (username = NIM)
-				$nim_escaped = pg_escape_string($koneksi, $nim);
-				$check_user = pg_query($koneksi, "SELECT id FROM users WHERE username = '$nim_escaped' LIMIT 1");
-				if ($check_user && pg_num_rows($check_user) > 0) {
-					pesan_kilat('Akun sudah ada untuk NIM tersebut.', 'error');
-				} else {
-					// Buat akun: username = NIM, password default = MD5(NIM), role = mahasiswa
-					$insert = pg_query($koneksi, "
-						INSERT INTO users (username, password, role)
-						VALUES ('$nim_escaped', MD5('$nim_escaped'), 'mahasiswa')
-					");
-					if ($insert) {
-						// Log aktivitas
-						log_pendaftar_activity($id, 'account_create', 'Akun mahasiswa dibuat', ['has_account' => false], ['has_account' => true, 'username' => $nim]);
-						pesan_kilat('Akun mahasiswa berhasil dibuat. Username & password awal: NIM.', 'success');
-					} else {
-						pesan_kilat('Gagal membuat akun: ' . pg_last_error($koneksi), 'error');
-					}
-				}
-			}
-		} else {
-			pesan_kilat('Data pendaftar tidak ditemukan.', 'error');
-		}
-
-		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
-		header('Location: ' . $redirect_url);
-		exit;
-	}
-}
 
 // Proses update data pendaftar
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_pendaftar') {
@@ -485,71 +420,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 			}
 		}
 		
-		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_minat ?? '', $per_page ?? 25);
 		header('Location: ' . $redirect_url);
 		exit;
 	}
 }
 
-// Proses reset password
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'reset_password') {
-	$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-	$current_filter = isset($_POST['current_filter']) ? clean_input($_POST['current_filter']) : 'all';
-	
-	if ($id > 0) {
-		$id_escaped = pg_escape_string($koneksi, $id);
-		$q = "SELECT nim FROM pendaftaran WHERE id = $id_escaped LIMIT 1";
-		$res = pg_query($koneksi, $q);
-		if ($res && pg_num_rows($res) === 1) {
-			$pd = pg_fetch_assoc($res);
-			$nim = trim($pd['nim'] ?? '');
-			if ($nim) {
-				$nim_escaped = pg_escape_string($koneksi, $nim);
-				$update = pg_query($koneksi, "UPDATE users SET password = MD5('$nim_escaped'), updated_at = NOW() WHERE username = '$nim_escaped'");
-				if ($update) {
-					// Log aktivitas
-					log_pendaftar_activity($id, 'account_reset_password', 'Password direset ke NIM', null, ['nim' => $nim]);
-					pesan_kilat('Password berhasil direset ke NIM.', 'success');
-				} else {
-					pesan_kilat('Gagal reset password: ' . pg_last_error($koneksi), 'error');
-				}
-			}
-		}
-		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
-		header('Location: ' . $redirect_url);
-		exit;
-	}
-}
 
-// Proses non aktifkan akun (hapus user)
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'deactivate_account') {
-	$id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
-	$current_filter = isset($_POST['current_filter']) ? clean_input($_POST['current_filter']) : 'all';
-	
-	if ($id > 0) {
-		$id_escaped = pg_escape_string($koneksi, $id);
-		$q = "SELECT nim FROM pendaftaran WHERE id = $id_escaped LIMIT 1";
-		$res = pg_query($koneksi, $q);
-		if ($res && pg_num_rows($res) === 1) {
-			$pd = pg_fetch_assoc($res);
-			$nim = trim($pd['nim'] ?? '');
-			if ($nim) {
-				$nim_escaped = pg_escape_string($koneksi, $nim);
-				$delete = pg_query($koneksi, "DELETE FROM users WHERE username = '$nim_escaped'");
-				if ($delete) {
-					// Log aktivitas
-					log_pendaftar_activity($id, 'account_deactivate', 'Akun dinonaktifkan', ['has_account' => true], ['has_account' => false]);
-					pesan_kilat('Akun berhasil dinonaktifkan.', 'success');
-				} else {
-					pesan_kilat('Gagal non aktifkan akun: ' . pg_last_error($koneksi), 'error');
-				}
-			}
-		}
-		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
-		header('Location: ' . $redirect_url);
-		exit;
-	}
-}
 
 // Proses hapus pendaftar
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_pendaftar') {
@@ -558,17 +435,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 	
 	if ($id > 0) {
 		$id_escaped = pg_escape_string($koneksi, $id);
-		// Hapus juga user jika ada
-		$q = "SELECT nim FROM pendaftaran WHERE id = $id_escaped LIMIT 1";
-		$res = pg_query($koneksi, $q);
-		if ($res && pg_num_rows($res) === 1) {
-			$pd = pg_fetch_assoc($res);
-			$nim = trim($pd['nim'] ?? '');
-			if ($nim) {
-				$nim_escaped = pg_escape_string($koneksi, $nim);
-				pg_query($koneksi, "DELETE FROM users WHERE username = '$nim_escaped'");
-			}
-		}
 		// Ambil data sebelum hapus untuk log
 		$q_before = pg_query($koneksi, "SELECT * FROM pendaftaran WHERE id = $id_escaped LIMIT 1");
 		$before_data = null;
@@ -584,7 +450,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 		} else {
 			pesan_kilat('Gagal menghapus pendaftar: ' . pg_last_error($koneksi), 'error');
 		}
-		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_akun ?? 'all', $filter_minat ?? '', $per_page ?? 25);
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_minat ?? '', $per_page ?? 25);
 		header('Location: ' . $redirect_url);
 		exit;
 	}
@@ -598,7 +464,6 @@ $total_records = 0;
 
 // Build WHERE conditions
 $where_conditions = [];
-$join_users = false;
 
 // Filter status
 if ($status_filter !== 'all') {
@@ -628,25 +493,11 @@ if (!empty($filter_minat)) {
 	$where_conditions[] = "p.minat ILIKE '%$minat_escaped%'";
 }
 
-// Filter akun (aktif/non-aktif)
-if ($filter_akun !== 'all') {
-	$join_users = true;
-	if ($filter_akun === 'aktif') {
-		$where_conditions[] = "u.id IS NOT NULL";
-	} elseif ($filter_akun === 'non-aktif') {
-		$where_conditions[] = "u.id IS NULL";
-	}
-}
-
 // Build query
 $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
 // Query untuk total records (untuk pagination)
-$count_query = "SELECT COUNT(*) as total FROM pendaftaran p";
-if ($join_users) {
-	$count_query .= " LEFT JOIN users u ON u.username = p.nim";
-}
-$count_query .= " $where_clause";
+$count_query = "SELECT COUNT(*) as total FROM pendaftaran p $where_clause";
 
 $count_result = pg_query($koneksi, $count_query);
 if ($count_result) {
@@ -655,20 +506,11 @@ if ($count_result) {
 }
 
 // Query untuk data dengan pagination
-$query = "SELECT p.* FROM pendaftaran p";
-if ($join_users) {
-	$query .= " LEFT JOIN users u ON u.username = p.nim";
-}
-$query .= " $where_clause ORDER BY p.tanggal_daftar DESC LIMIT $per_page OFFSET $offset";
+$query = "SELECT p.* FROM pendaftaran p $where_clause ORDER BY p.tanggal_daftar DESC LIMIT $per_page OFFSET $offset";
 
 $result = pg_query($koneksi, $query);
 if ($result && pg_num_rows($result) > 0) {
 	while ($row = pg_fetch_assoc($result)) {
-		// Cek apakah user sudah ada
-		$nim_escaped = pg_escape_string($koneksi, $row['nim'] ?? '');
-		$user_check = pg_query($koneksi, "SELECT id, username FROM users WHERE username = '$nim_escaped' LIMIT 1");
-		$row['has_account'] = $user_check && pg_num_rows($user_check) > 0;
-		$row['user_id'] = $row['has_account'] ? (int)pg_fetch_assoc($user_check)['id'] : 0;
 		$pendaftar[] = $row;
 	}
 }
@@ -754,16 +596,16 @@ include __DIR__ . '/../../template/admin_header.php';
 						<span class="filter-label">
 							<i class="lni lni-filter"></i>Filter Status:
 						</span>
-						<a href="?status=all<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo $filter_akun !== 'all' ? '&akun=' . urlencode($filter_akun) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'all' ? 'filter-button-active' : 'border-button'; ?>">
+						<a href="?status=all<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'all' ? 'filter-button-active' : 'border-button'; ?>">
 							<i class="lni lni-list"></i> Semua
 						</a>
-						<a href="?status=pending<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo $filter_akun !== 'all' ? '&akun=' . urlencode($filter_akun) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'pending' ? 'filter-button-pending' : 'border-button'; ?>">
+						<a href="?status=pending<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'pending' ? 'filter-button-pending' : 'border-button'; ?>">
 							<i class="lni lni-hourglass"></i> Pending
 						</a>
-						<a href="?status=accepted<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo $filter_akun !== 'all' ? '&akun=' . urlencode($filter_akun) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'accepted' ? 'filter-button-accepted' : 'border-button'; ?>">
+						<a href="?status=accepted<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'accepted' ? 'filter-button-accepted' : 'border-button'; ?>">
 							<i class="lni lni-checkmark-circle"></i> Diterima
 						</a>
-						<a href="?status=rejected<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo $filter_akun !== 'all' ? '&akun=' . urlencode($filter_akun) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'rejected' ? 'filter-button-rejected' : 'border-button'; ?>">
+						<a href="?status=rejected<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'rejected' ? 'filter-button-rejected' : 'border-button'; ?>">
 							<i class="lni lni-close"></i> Ditolak
 						</a>
 					</div>
@@ -803,20 +645,8 @@ include __DIR__ . '/../../template/admin_header.php';
 								<input type="date" name="tanggal_sampai" value="<?php echo htmlspecialchars($filter_tanggal_sampai); ?>" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
 							</div>
 							
-							<!-- Filter Akun -->
-							<div class="col-md-2 mb-3">
-								<label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50; font-size: 13px;">
-									<i class="lni lni-user"></i> Status Akun
-								</label>
-								<select name="akun" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
-									<option value="all" <?php echo $filter_akun === 'all' ? 'selected' : ''; ?>>Semua</option>
-									<option value="aktif" <?php echo $filter_akun === 'aktif' ? 'selected' : ''; ?>>Aktif</option>
-									<option value="non-aktif" <?php echo $filter_akun === 'non-aktif' ? 'selected' : ''; ?>>Non Aktif</option>
-								</select>
-							</div>
-							
 							<!-- Filter Minat -->
-							<div class="col-md-2 mb-3">
+							<div class="col-md-3 mb-3">
 								<label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50; font-size: 13px;">
 									<i class="lni lni-tag"></i> Minat
 								</label>
@@ -831,7 +661,7 @@ include __DIR__ . '/../../template/admin_header.php';
 							</div>
 						</div>
 						
-						<?php if (!empty($search_query) || !empty($filter_tanggal_dari) || !empty($filter_tanggal_sampai) || $filter_akun !== 'all' || !empty($filter_minat)): ?>
+						<?php if (!empty($search_query) || !empty($filter_tanggal_dari) || !empty($filter_tanggal_sampai) || !empty($filter_minat)): ?>
 						<div class="row mt-2">
 							<div class="col-md-12">
 								<a href="?status=<?php echo htmlspecialchars($status_filter); ?>" class="button button-sm radius-10 border-button">
@@ -891,7 +721,6 @@ include __DIR__ . '/../../template/admin_header.php';
 								<th>NIM</th>
 								<th>Minat</th>
 								<th>Status</th>
-								<th>Akun</th>
 								<th>Tanggal Daftar</th>
 								<th class="text-center">Aksi</th>
 							</tr>
@@ -963,20 +792,6 @@ include __DIR__ . '/../../template/admin_header.php';
 										echo $status_badge;
 										?>
 									</td>
-									<td class="text-center">
-										<?php
-										$has_account = $p['has_account'] ?? false;
-										if ($has_account):
-										?>
-											<span class="account-status-badge account-active" title="Akun Aktif">
-												<i class="lni lni-checkmark-circle"></i> Aktif
-											</span>
-										<?php else: ?>
-											<span class="account-status-badge account-inactive" title="Akun Non Aktif">
-												<i class="lni lni-close"></i> Non Aktif
-											</span>
-										<?php endif; ?>
-									</td>
 									<td>
 										<?php 
 										if (!empty($p['tanggal_daftar'])) {
@@ -1024,20 +839,6 @@ include __DIR__ . '/../../template/admin_header.php';
 													<a href="javascript:void(0)" onclick="showEditModal(<?php echo $p['id']; ?>)" class="dropdown-item">
 														<i class="lni lni-pencil"></i> Update Data
 													</a>
-													<?php if ($has_account): ?>
-														<a href="javascript:void(0)" onclick="resetPassword(<?php echo $p['id']; ?>)" class="dropdown-item text-warning">
-															<i class="lni lni-key"></i> Reset Password
-														</a>
-														<a href="javascript:void(0)" onclick="deactivateAccount(<?php echo $p['id']; ?>)" class="dropdown-item text-danger">
-															<i class="lni lni-ban"></i> Non Aktifkan Akun
-														</a>
-													<?php else: ?>
-														<?php if ($status === 'accepted'): ?>
-															<a href="javascript:void(0)" onclick="event.stopPropagation(); event.preventDefault(); setTimeout(function(){ if(typeof showCreateAccountModal === 'function') { showCreateAccountModal(<?php echo (int)$p['id']; ?>, '<?php echo htmlspecialchars($p['nim'], ENT_QUOTES); ?>'); } else { console.error('showCreateAccountModal not found'); alert('Fungsi belum siap. Silakan refresh halaman.'); } }, 100);" class="dropdown-item text-success">
-																<i class="lni lni-user"></i> Aktifkan Akun
-															</a>
-														<?php endif; ?>
-													<?php endif; ?>
 												<?php endif; ?>
 												<div class="dropdown-divider"></div>
 												<a href="javascript:void(0)" onclick="deletePendaftar(<?php echo $p['id']; ?>)" class="dropdown-item text-danger">
@@ -1050,7 +851,7 @@ include __DIR__ . '/../../template/admin_header.php';
 								<?php endforeach; ?>
 							<?php else: ?>
 								<tr>
-									<td colspan="10" class="text-center admin-table-empty">
+									<td colspan="9" class="text-center admin-table-empty">
 										<i class="lni lni-inbox admin-table-empty-icon"></i>
 										<p class="mt-3 text-muted">
 											<?php if ($status_filter !== 'all'): ?>
@@ -1093,7 +894,6 @@ include __DIR__ . '/../../template/admin_header.php';
 					if (!empty($search_query)) $query_params[] = 'search=' . urlencode($search_query);
 					if (!empty($filter_tanggal_dari)) $query_params[] = 'tanggal_dari=' . urlencode($filter_tanggal_dari);
 					if (!empty($filter_tanggal_sampai)) $query_params[] = 'tanggal_sampai=' . urlencode($filter_tanggal_sampai);
-					if ($filter_akun !== 'all') $query_params[] = 'akun=' . urlencode($filter_akun);
 					if (!empty($filter_minat)) $query_params[] = 'minat=' . urlencode($filter_minat);
 					if ($per_page != 25) $query_params[] = 'per_page=' . $per_page;
 					$query_string = !empty($query_params) ? '?' . implode('&', $query_params) : '';
@@ -1179,73 +979,6 @@ include __DIR__ . '/../../template/admin_header.php';
 	</div>
 </div>
 
-<!-- Confirm Modal for Create Account -->
-<div id="createAccountOverlay">
-	<div class="create-account-modal">
-		<div class="create-account-header">
-			<i class="lni lni-user"></i>
-			<h4>localhost says</h4>
-		</div>
-		<div class="create-account-body">
-			<p>Buat akun login untuk mahasiswa ini?</p>
-			<div class="create-account-info">
-				<div class="create-account-info-item">
-					<span class="create-account-info-label">Username: </span>
-					<span id="createAccountUsername" class="create-account-info-value">-</span>
-				</div>
-				<div class="create-account-info-item">
-					<span class="create-account-info-label">Password: </span>
-					<span id="createAccountPassword" class="create-account-info-value">-</span>
-				</div>
-			</div>
-			<p>Mahasiswa bisa login ke halaman mahasiswa dengan NIM sebagai username dan password.</p>
-		</div>
-		<div class="create-account-footer">
-			<button type="button" id="btnCancelCreateAccount" class="button radius-10 btn-cancel-account" onclick="document.getElementById('createAccountOverlay').style.display='none';">Cancel</button>
-			<button type="button" id="btnConfirmCreateAccount" class="button radius-10 btn-confirm-account" onclick="confirmCreateAccount();" style="pointer-events: auto !important; cursor: pointer !important; z-index: 10001; position: relative;">OK</button>
-		</div>
-	</div>
-</div>
-
-<!-- Confirm Modal for Reset Password -->
-<div id="confirmResetPasswordOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px;" onclick="if(event.target===this){ this.style.display='none'; }">
-	<div class="detail-modal">
-		<div class="detail-header">
-			<h4>
-				<i class="lni lni-key icon-blue"></i>
-				Reset Password
-			</h4>
-			<button class="detail-close" title="Tutup" onclick="closeConfirmResetPassword();">&times;</button>
-		</div>
-		<div class="detail-body">
-			<p style="margin: 0; color: #2c3e50; font-size: 14px; line-height: 1.6;">Yakin ingin reset password ke NIM?</p>
-		</div>
-		<div class="detail-footer">
-			<button type="button" class="button radius-10 border-button" onclick="closeConfirmResetPassword();">Tutup</button>
-			<button type="button" class="button radius-10 btn-edit" onclick="executeResetPassword();">OK</button>
-		</div>
-	</div>
-</div>
-
-<!-- Confirm Modal for Deactivate Account -->
-<div id="confirmDeactivateAccountOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px;" onclick="if(event.target===this){ this.style.display='none'; }">
-	<div class="detail-modal">
-		<div class="detail-header">
-			<h4>
-				<i class="lni lni-ban icon-blue"></i>
-				Non Aktifkan Akun
-			</h4>
-			<button class="detail-close" title="Tutup" onclick="closeConfirmDeactivateAccount();">&times;</button>
-		</div>
-		<div class="detail-body">
-			<p style="margin: 0; color: #2c3e50; font-size: 14px; line-height: 1.6;">Yakin ingin non aktifkan akun? User tidak bisa login lagi.</p>
-		</div>
-		<div class="detail-footer">
-			<button type="button" class="button radius-10 border-button" onclick="closeConfirmDeactivateAccount();">Tutup</button>
-			<button type="button" class="button radius-10 btn-edit" onclick="executeDeactivateAccount();">OK</button>
-		</div>
-	</div>
-</div>
 
 <!-- Update Modal for Pendaftar -->
 <div id="updatePendaftarOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;" onclick="if(event.target===this){ this.style.display='none'; }">
@@ -1359,6 +1092,7 @@ include __DIR__ . '/../../template/admin_header.php';
 
 <?php
 $pendaftar_map = [];
+$pendaftar_map_full = [];
 foreach ($pendaftar as $pp) {
 	// Format tanggal_daftar ke WIB
 	$tanggal_daftar_formatted = '-';
@@ -1396,6 +1130,7 @@ foreach ($pendaftar as $pp) {
 		}
 	}
 	
+	// Data untuk display (dengan format tanggal)
 	$pendaftar_map[(string)$pp['id']] = [
 		'id' => (int)$pp['id'],
 		'nama' => $pp['nama'] ?? '',
@@ -1406,6 +1141,18 @@ foreach ($pendaftar as $pp) {
 		'status' => $pp['status'] ?? 'pending',
 		'tanggal_daftar' => $tanggal_daftar_formatted,
 		'tanggal_review' => $tanggal_review_formatted,
+		'catatan_admin' => $pp['catatan_admin'] ?? ''
+	];
+	
+	// Data lengkap untuk form edit (tanpa format tanggal)
+	$pendaftar_map_full[(string)$pp['id']] = [
+		'id' => (int)$pp['id'],
+		'nama' => $pp['nama'] ?? '',
+		'email' => $pp['email'] ?? '',
+		'nim' => $pp['nim'] ?? '',
+		'minat' => $pp['minat'] ?? '',
+		'foto' => $pp['foto'] ?? '',
+		'status' => $pp['status'] ?? 'pending',
 		'catatan_admin' => $pp['catatan_admin'] ?? ''
 	];
 }
@@ -1421,90 +1168,6 @@ if (typeof PendaftarModals !== 'undefined' && window.pendaftarData) {
     window.pendaftarModals = new PendaftarModals(window.pendaftarData);
 }
 
-// Variable global untuk menyimpan ID pendaftar yang akan dibuat akunnya
-window.pendingCreateAccountId = null;
-
-// Fungsi untuk konfirmasi create account
-function confirmCreateAccount() {
-    const id = window.pendingCreateAccountId;
-    if (!id) {
-        alert('ID pendaftar tidak ditemukan. Silakan refresh halaman.');
-        return;
-    }
-    
-    console.log('confirmCreateAccount called with id:', id);
-    
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '';
-    form.innerHTML = `
-        <input type="hidden" name="action" value="create_account">
-        <input type="hidden" name="id" value="${id}">
-        <input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
-    `;
-    document.body.appendChild(form);
-    form.submit();
-}
-
-// Pastikan showCreateAccountModal tersedia
-setTimeout(function() {
-    // Jika PendaftarModals belum ready, buat fallback
-    if (typeof window.showCreateAccountModal === 'undefined') {
-        window.showCreateAccountModal = function(id, nim) {
-            console.log('showCreateAccountModal (fallback) called with id:', id, 'nim:', nim);
-            
-            window.pendingCreateAccountId = id;
-            
-            const overlay = document.getElementById('createAccountOverlay');
-            const usernameEl = document.getElementById('createAccountUsername');
-            const passwordEl = document.getElementById('createAccountPassword');
-            const btnConfirm = document.getElementById('btnConfirmCreateAccount');
-            
-            if (!overlay) {
-                console.error('createAccountOverlay not found');
-                alert('Modal tidak ditemukan. Silakan refresh halaman.');
-                return;
-            }
-            
-            // Set data
-            if (usernameEl) usernameEl.textContent = nim || '-';
-            if (passwordEl) passwordEl.textContent = nim || '-';
-            
-            // Reset button state
-            if (btnConfirm) {
-                btnConfirm.disabled = false;
-                btnConfirm.textContent = 'OK';
-                btnConfirm.style.pointerEvents = 'auto';
-                btnConfirm.style.cursor = 'pointer';
-                btnConfirm.style.position = 'relative';
-                btnConfirm.style.zIndex = '10001';
-            }
-            
-            // Show overlay
-            overlay.style.display = 'flex';
-            overlay.style.zIndex = '10000';
-        };
-    } else {
-        // Override PendaftarModals untuk menyimpan ID
-        const originalShow = window.showCreateAccountModal;
-        window.showCreateAccountModal = function(id, nim) {
-            window.pendingCreateAccountId = id;
-            originalShow(id, nim);
-            
-            // Pastikan button bisa diklik
-            setTimeout(function() {
-                const btnConfirm = document.getElementById('btnConfirmCreateAccount');
-                if (btnConfirm) {
-                    btnConfirm.disabled = false;
-                    btnConfirm.style.pointerEvents = 'auto';
-                    btnConfirm.style.cursor = 'pointer';
-                    btnConfirm.style.position = 'relative';
-                    btnConfirm.style.zIndex = '10001';
-                }
-            }, 100);
-        };
-    }
-}, 200);
 </script>
 
 <!-- Detail Modal -->
@@ -1638,35 +1301,6 @@ setTimeout(function() {
     height: 1px;
     background: #e0e0e0;
     margin: 5px 0;
-}
-
-/* Account Status Badge */
-.account-status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.account-status-badge.account-active {
-    background: #d4edda;
-    color: #155724;
-}
-
-.account-status-badge.account-active i {
-    color: #28a745;
-}
-
-.account-status-badge.account-inactive {
-    background: #f8d7da;
-    color: #721c24;
-}
-
-.account-status-badge.account-inactive i {
-    color: #dc3545;
 }
 
 /* Dark Theme Confirm Modal */
@@ -1933,79 +1567,7 @@ document.addEventListener('click', function(event) {
 });
 
 // Variable global untuk menyimpan ID yang akan dioperasikan
-window.pendingResetPasswordId = null;
-window.pendingDeactivateAccountId = null;
 window.pendingDeletePendaftarId = null;
-
-// Reset Password - Tampilkan modal
-function resetPassword(id) {
-    showResetPasswordModal(id);
-}
-
-// Execute Reset Password
-function executeResetPassword() {
-    const id = window.pendingResetPasswordId;
-    if (!id) return;
-    
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.innerHTML = `
-        <input type="hidden" name="action" value="reset_password">
-        <input type="hidden" name="id" value="${id}">
-        <input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
-    `;
-    document.body.appendChild(form);
-    form.submit();
-}
-
-// Close Reset Password Modal
-function closeConfirmResetPassword() {
-    window.pendingResetPasswordId = null;
-    const overlay = document.getElementById('confirmResetPasswordOverlay');
-    if (overlay) overlay.style.display = 'none';
-}
-
-// Show Reset Password Modal
-function showResetPasswordModal(id) {
-    window.pendingResetPasswordId = id;
-    const overlay = document.getElementById('confirmResetPasswordOverlay');
-    if (overlay) overlay.style.display = 'flex';
-}
-
-// Deactivate Account - Tampilkan modal
-function deactivateAccount(id) {
-    showDeactivateAccountModal(id);
-}
-
-// Execute Deactivate Account
-function executeDeactivateAccount() {
-    const id = window.pendingDeactivateAccountId;
-    if (!id) return;
-    
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.innerHTML = `
-        <input type="hidden" name="action" value="deactivate_account">
-        <input type="hidden" name="id" value="${id}">
-        <input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
-    `;
-    document.body.appendChild(form);
-    form.submit();
-}
-
-// Close Deactivate Account Modal
-function closeConfirmDeactivateAccount() {
-    window.pendingDeactivateAccountId = null;
-    const overlay = document.getElementById('confirmDeactivateAccountOverlay');
-    if (overlay) overlay.style.display = 'none';
-}
-
-// Show Deactivate Account Modal
-function showDeactivateAccountModal(id) {
-    window.pendingDeactivateAccountId = id;
-    const overlay = document.getElementById('confirmDeactivateAccountOverlay');
-    if (overlay) overlay.style.display = 'flex';
-}
 
 // Delete Pendaftar - Tampilkan modal
 function deletePendaftar(id) {
