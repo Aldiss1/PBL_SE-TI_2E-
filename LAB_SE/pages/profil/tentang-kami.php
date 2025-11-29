@@ -28,9 +28,11 @@ $tentang_kami_data = ambil_konten($koneksi, 'tentang_kami');
 // pg_close($koneksi); 
 ?>
 
+<?php 
+// Deteksi halaman tentang-kami untuk inject CSS khusus di head
+$is_tentang_kami_page = true;
+?>
 <?php include __DIR__ . '/../../template/header.php'; ?>
-
-<link rel="stylesheet" href="../../assets/css/tentang-kami.css" />
 
 <section class="about-hero">
   <div class="container">
@@ -119,4 +121,5 @@ if (isset($koneksi) && $koneksi) {
     pg_close($koneksi);
 }
 ?>
+
 <?php include __DIR__ . '/../../template/footer.php'; ?>

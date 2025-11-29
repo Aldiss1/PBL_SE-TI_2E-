@@ -53,32 +53,6 @@ section,
 	position: relative !important;
 }
 
-/* Navbar HARUS selalu di atas - SANGAT TINGGI */
-.header,
-.header.header-2,
-.hero-section-wrapper-2 .header {
-	position: fixed !important;
-	top: 0 !important;
-	left: 0 !important;
-	right: 0 !important;
-	width: 100% !important;
-	z-index: 99999 !important;
-	background: #fff !important;
-	box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
-}
-
-.header.sticky,
-.header.header-2.sticky,
-.hero-section-wrapper-2 .header.sticky {
-	position: fixed !important;
-	top: 0 !important;
-	left: 0 !important;
-	right: 0 !important;
-	width: 100% !important;
-	z-index: 99999 !important;
-	background: #fff !important;
-	box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
-}
 
 /* Blog Card Hover Effect */
 .blog-card-item {
@@ -106,36 +80,10 @@ section,
 	position: relative !important;
 }
 
-/* Navbar area juga harus fixed */
-.header .navbar-area,
-.header.header-2 .navbar-area,
-.hero-section-wrapper-2 .header .navbar-area {
-	position: relative !important;
-	z-index: 1 !important;
-}
-
-/* Pastikan navbar tidak pernah tersembunyi */
-.navbar,
-.navbar-area,
-.header .navbar,
-.header .navbar-area {
-	position: relative !important;
-	z-index: 1 !important;
-}
-
 /* Pastikan galeri dosen tidak konflik dengan navbar */
 #galeri-dosen {
 	position: relative;
 	z-index: 1;
-}
-
-/* Override semua kemungkinan yang menyembunyikan navbar */
-.header[style*="display: none"],
-.header[style*="visibility: hidden"],
-.header[style*="opacity: 0"] {
-	display: block !important;
-	visibility: visible !important;
-	opacity: 1 !important;
 }
 
 /* ========================= Mascot Styling ========================= */

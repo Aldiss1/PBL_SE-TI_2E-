@@ -1,14 +1,26 @@
+/* ============================================
+   TENTANG KAMI PAGE STYLING
+   ============================================ */
+
+/* Pastikan section tidak menutupi navbar */
 .about-hero {
 	background-color: #ffffff;
 	padding: 60px 0;
 	text-align: center;
 	border-bottom: 2px solid #f0f0f0;
 	margin-top: 80px;
+	position: relative;
+	z-index: 1;
 }
 .about-hero h2 { font-size: 2rem; color: #2F80ED; font-weight: 600; margin-bottom: 20px; }
 .about-hero p { color: #585978; font-size: 1rem; }
 
-.about-content { padding: 60px 0; background: #f4f7fb; }
+.about-content { 
+	padding: 60px 0; 
+	background: #f4f7fb; 
+	position: relative;
+	z-index: 1;
+}
 
 .about-card {
 	background: #fff;
@@ -28,11 +40,11 @@
 .about-title { font-size: 1.6rem; font-weight: 600; color: #2F80ED; margin: 0; }
 .about-text { font-size: 1rem; line-height: 1.7; color: #515e7b; margin: 0 0 30px 0; text-align: justify; }
 
-.about-features { 
-    margin-top: 30px; 
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-    gap: 20px; 
+.about-features {
+	margin-top: 30px;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 20px;
 }
 .feature-item {
 	display: flex; align-items: flex-start; padding: 20px; background: #f8f9fa;
@@ -46,11 +58,33 @@
 .feature-content h5 { font-size: 1rem; font-weight: 600; color: #22243e; margin-bottom: 8px; }
 .feature-content p { font-size: 0.9rem; color: #515e7b; margin: 0; line-height: 1.6; }
 
+
+/* Pastikan section tidak overlap navbar */
+section.about-hero,
+section.about-content {
+	position: relative !important;
+	z-index: 1 !important;
+}
+
+/* Pastikan body tidak menutupi navbar saat scroll */
+body {
+	padding-top: 0 !important;
+}
+
+/* Pastikan hero-section-wrapper tidak menyembunyikan navbar */
+.hero-section-wrapper-2 {
+	position: relative !important;
+	z-index: 1 !important;
+	overflow: visible !important;
+}
+
+
 @media (max-width: 768px) {
 	.about-hero h2 { font-size: 1.75rem; }
 	.about-card { padding: 20px; }
 	.about-icon { width: 45px; height: 45px; font-size: 1.3rem; }
 	.about-title { font-size: 1.4rem; }
 	.about-features { grid-template-columns: 1fr; }
+	.about-hero { margin-top: 70px; }
 }
 

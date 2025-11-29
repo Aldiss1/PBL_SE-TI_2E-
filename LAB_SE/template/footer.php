@@ -70,7 +70,67 @@
     <script src="<?php echo $labseFooterBase; ?>/assets/js/count-up.min.js"></script>
     <script src="<?php echo $labseFooterBase; ?>/assets/js/wow.min.js"></script>
     <script src="<?php echo $labseFooterBase; ?>/assets/js/main.js"></script>
-    <script src="<?php echo $labseFooterBase; ?>/assets/js/classes/NavbarManager.js"></script>
+    
+    <!-- Navbar Toggle Script & Effects -->
+    <script>
+    (function() {
+        var toggleBtn = document.getElementById('navbarToggleNew');
+        var navbarMenu = document.getElementById('navbarMenuNew');
+        
+        // Toggle mobile menu
+        if (toggleBtn && navbarMenu) {
+            toggleBtn.addEventListener('click', function() {
+                navbarMenu.classList.toggle('active');
+                toggleBtn.classList.toggle('active');
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!toggleBtn.contains(e.target) && !navbarMenu.contains(e.target)) {
+                    navbarMenu.classList.remove('active');
+                    toggleBtn.classList.remove('active');
+                }
+            });
+        }
+        
+        // Pastikan navbar selalu visible
+        var fixedNavbar = document.getElementById('fixed-navbar');
+        if (fixedNavbar) {
+            function ensureVisible() {
+                fixedNavbar.style.setProperty('position', 'fixed', 'important');
+                fixedNavbar.style.setProperty('top', '0', 'important');
+                fixedNavbar.style.setProperty('z-index', '999999', 'important');
+                fixedNavbar.style.setProperty('display', 'block', 'important');
+                fixedNavbar.style.setProperty('visibility', 'visible', 'important');
+                fixedNavbar.style.setProperty('opacity', '1', 'important');
+            }
+            
+            ensureVisible();
+            setInterval(ensureVisible, 100);
+            window.addEventListener('scroll', ensureVisible, { passive: true });
+            
+        }
+        
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#' && href !== '#0') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        const offset = 80; // Navbar height
+                        const targetPosition = target.offsetTop - offset;
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+    })();
+    </script>
   </body>
 </html>
 
