@@ -70,16 +70,21 @@ $semua_periode = ambil_periode_roadmap($koneksi);
 
 <?php include __DIR__ . '/../../template/header.php'; ?>
 
-<link rel="stylesheet" href="../../assets/css/roadmap.css" />
-
-<section class="hero-section-wrapper-2">
+<section class="pt-150 pb-50">
     <div class="container">
-        <h2>Roadmap Laboratorium SE</h2>
-        <p>Perjalanan dan Rencana Pengembangan Laboratorium Software Engineering.</p>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section-title text-center mb-30">
+                    <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s"><span>Roadmap</span></h2>
+                    <p class="wow fadeInUp" data-wow-delay=".4s">Perjalanan dan Rencana Pengembangan Laboratorium Software Engineering</p>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<div class="container py-5">
+<section id="roadmap-content" class="pt-100 pb-70">
+    <div class="container">
     <div class="row">
         <div class="col-lg-12">
             
@@ -128,7 +133,7 @@ $semua_periode = ambil_periode_roadmap($koneksi);
             
         </div>
     </div>
-</div>
+</section>
 
 <?php 
 // Tutup koneksi database di akhir file (disarankan)

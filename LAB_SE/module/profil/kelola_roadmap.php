@@ -36,7 +36,61 @@ $menu_items = [
     'profil' => ['title'=>'Kelola Profil','icon'=>'lni lni-cog','link'=>'../../module/profil/index.php','active'=>true],
 ];
 
-include __DIR__ . '/../../template/admin_header.php';
+// --------------------------------------------------
+// 2. CEK DAN BUAT TABEL JIKA BELUM ADA
+// --------------------------------------------------
+
+// Cek tabel roadmap_periode
+$check_periode = pg_query($koneksi, "
+    SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'roadmap_periode'
+    )
+");
+
+if ($check_periode) {
+    $table_periode_exists = pg_fetch_result($check_periode, 0, 0);
+    if ($table_periode_exists !== 't') {
+        // Buat tabel roadmap_periode
+        pg_query($koneksi, "
+            CREATE TABLE IF NOT EXISTS roadmap_periode (
+                id SERIAL PRIMARY KEY,
+                tahun_periode VARCHAR(100) NOT NULL,
+                judul_fase VARCHAR(255) NOT NULL,
+                urutan INTEGER NOT NULL DEFAULT 1,
+                created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        ");
+    }
+}
+
+// Cek tabel roadmap_item
+$check_item = pg_query($koneksi, "
+    SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'roadmap_item'
+    )
+");
+
+if ($check_item) {
+    $table_item_exists = pg_fetch_result($check_item, 0, 0);
+    if ($table_item_exists !== 't') {
+        // Buat tabel roadmap_item
+        pg_query($koneksi, "
+            CREATE TABLE IF NOT EXISTS roadmap_item (
+                id SERIAL PRIMARY KEY,
+                id_periode INTEGER NOT NULL REFERENCES roadmap_periode(id) ON DELETE CASCADE,
+                deskripsi_tugas TEXT NOT NULL,
+                urutan INTEGER NOT NULL DEFAULT 1,
+                created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        ");
+    }
+}
 
 // --------------------------------------------------
 // 3. LOGIC CRUD ROADMAP PERIODE & ITEM
@@ -45,6 +99,25 @@ include __DIR__ . '/../../template/admin_header.php';
 // Ambil list periode
 $query_periode = "SELECT id, tahun_periode, judul_fase, urutan FROM roadmap_periode ORDER BY urutan ASC";
 $result_periode = pg_query($koneksi, $query_periode);
+if ($result_periode === false) {
+    // Jika query gagal, kemungkinan tabel belum ada atau ada error
+    $error = pg_last_error($koneksi);
+    if (strpos($error, 'does not exist') !== false) {
+        // Tabel belum ada, coba buat lagi
+        pg_query($koneksi, "
+            CREATE TABLE IF NOT EXISTS roadmap_periode (
+                id SERIAL PRIMARY KEY,
+                tahun_periode VARCHAR(100) NOT NULL,
+                judul_fase VARCHAR(255) NOT NULL,
+                urutan INTEGER NOT NULL DEFAULT 1,
+                created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            )
+        ");
+        // Coba query lagi
+        $result_periode = pg_query($koneksi, $query_periode);
+    }
+}
 $periode_list = ($result_periode !== false) ? pg_fetch_all($result_periode) : [];
 
 // --- HANDLING: Tambah Periode ---
@@ -54,16 +127,42 @@ if (isset($_POST['tambah_periode'])) {
     $urutan = (int)($_POST['urutan'] ?? 1);
 
     if ($tahun_periode === '' || $judul_fase === '') {
-        $pesan = "Isi tahun/periode dan judul fase.";
+        $pesan = "<div class='alert alert-danger'>Isi tahun/periode dan judul fase.</div>";
     } else {
+        // Escape input untuk keamanan
+        $tahun_periode_escaped = pg_escape_string($koneksi, $tahun_periode);
+        $judul_fase_escaped = pg_escape_string($koneksi, $judul_fase);
+        
         $sql = "INSERT INTO roadmap_periode (tahun_periode, judul_fase, urutan) VALUES ($1, $2, $3)";
-        $res = pg_query_params($koneksi, $sql, [$tahun_periode, $judul_fase, $urutan]);
+        $res = pg_query_params($koneksi, $sql, [$tahun_periode_escaped, $judul_fase_escaped, $urutan]);
         if ($res) {
             // redirect agar form tidak submit ulang saat reload
             header("Location: kelola_roadmap.php");
             exit;
         } else {
-            $pesan = "Gagal menyimpan periode: " . pg_last_error($koneksi);
+            $error_msg = pg_last_error($koneksi);
+            $pesan = "<div class='alert alert-danger'>Gagal menyimpan periode: " . htmlspecialchars($error_msg) . "</div>";
+        }
+    }
+}
+
+// --- HANDLING: Edit Periode ---
+if (isset($_POST['edit_periode'])) {
+    $id_edit = (int)($_POST['id_periode'] ?? 0);
+    $tahun_periode = trim($_POST['tahun_periode'] ?? '');
+    $judul_fase = trim($_POST['judul_fase'] ?? '');
+    $urutan = (int)($_POST['urutan'] ?? 1);
+
+    if ($id_edit <= 0 || $tahun_periode === '' || $judul_fase === '') {
+        $pesan = "Data edit tidak valid.";
+    } else {
+        $sql = "UPDATE roadmap_periode SET tahun_periode = $1, judul_fase = $2, urutan = $3, updated_at = NOW() WHERE id = $4";
+        $res = pg_query_params($koneksi, $sql, [$tahun_periode, $judul_fase, $urutan, $id_edit]);
+        if ($res) {
+            header("Location: kelola_roadmap.php");
+            exit;
+        } else {
+            $pesan = "Gagal update periode: " . pg_last_error($koneksi);
         }
     }
 }
@@ -157,58 +256,93 @@ if (isset($_GET['kelola_tugas'])) {
 // --------------------------------------------------
 // 4. VIEW (HTML)
 // --------------------------------------------------
-?>
+?><!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title><?php echo htmlspecialchars($page_title); ?></title>
 
-<!-- Sidebar -->
-<?php include __DIR__ . '/../../template/admin_sidebar.php'; ?>
+<link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/bootstrap-5.0.0-alpha-2.min.css" />
+<link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/LineIcons.2.0.css"/>
+<link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-layout.css"/>
+<link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-dashboard.css"/>
+<style>
+/* minimal styling untuk demo */
+.admin-sidebar { position: fixed; top:0; left:0; height:100vh; width:260px; background:#2c3e50; padding:20px; color:#fff; overflow:auto; z-index:1102;}
+.admin-content-wrapper { margin-left:260px; padding:30px; transition:margin-left .25s ease; }
+@media (max-width:992px){ .admin-content-wrapper{ margin-left:0; } }
+.card { margin-bottom:1rem; }
+.sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1101; display: none; }
+.sidebar-overlay.active { display: block; }
+.sidebar-toggle { position: fixed; top: 14px; left: 14px; z-index: 1103; background: #2F80ED; color: #fff; border: none; border-radius: 5px; width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(0,0,0,0.2); cursor: pointer; }
+@media (max-width:992px){ .admin-sidebar { transform: translateX(-100%); transition: transform .2s ease; } .admin-sidebar.active { transform: translateX(0); } }
+/* Pastikan modal bisa diklik dan terlihat */
+.modal { z-index: 1055 !important; }
+.modal-backdrop { z-index: 1050 !important; background-color: rgba(0,0,0,0.5) !important; }
+/* Pastikan tombol bisa diklik */
+.btn { cursor: pointer !important; pointer-events: auto !important; position: relative; z-index: 1; }
+</style>
+</head>
+<body>
 
-<!-- Main Content -->
-<main class="admin-main-content">
-<section class="pt-50 pb-50 admin-section-bg">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="section-title mb-50">
-                    <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Kelola Roadmap</h2>
-                    <p class="wow fadeInUp" data-wow-delay=".4s">Atur periode (tahun) dan daftar tugas di setiap fase pengembangan laboratorium.</p>
-                </div>
-            </div>
-        </div>
+<button class="sidebar-toggle btn btn-light" id="sidebarToggle" onclick="toggleSidebar()"><i class="lni lni-menu"></i></button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
+<aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+        <h4>Admin Panel</h4>
+        <p><i class="lni lni-user"></i> <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'admin'; ?></p>
+    </div>
+    <ul class="sidebar-menu list-unstyled">
+        <?php foreach ($menu_items as $item): ?>
+        <li class="<?php echo $item['active'] ? 'active' : ''; ?>">
+            <a href="<?php echo htmlspecialchars($item['link']); ?>" class="text-white">
+                <i class="<?php echo htmlspecialchars($item['icon']); ?>"></i> <?php echo htmlspecialchars($item['title']); ?>
+            </a>
+        </li>
+        <?php endforeach; ?>
+    </ul>
+    <hr style="border-color:rgba(255,255,255,0.06);">
+    <ul class="list-unstyled">
+        <li><a href="<?php echo $base_path; ?>index.php" target="_blank" class="text-white"><i class="lni lni-website"></i> Lihat Website</a></li>
+        <li><a href="<?php echo $base_path; ?>module/auth/logout.php" class="text-danger"><i class="lni lni-exit"></i> Logout</a></li>
+    </ul>
+</aside>
+
+<div class="admin-content-wrapper" id="adminContentWrapper">
+    <div class="container-fluid">
         <?php if ($pesan): ?>
-            <div class="alert alert-warning wow fadeInUp" data-wow-delay=".3s"><?php echo htmlspecialchars($pesan); ?></div>
+            <?php echo $pesan; ?>
         <?php endif; ?>
 
-        <div class="row">
-            <div class="col-lg-12">
-                <?php if ($periode_aktif): ?>
-                    <div class="card wow fadeInUp" data-wow-delay=".3s" style="border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border: none;">
-                        <div class="card-header" style="background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%); color: white; border-radius: 15px 15px 0 0; padding: 20px 30px;">
-                            <h4 class="mb-0" style="color: white; font-weight: 600;">
-                                <i class="lni lni-calendar mr-2"></i>
-                                Kelola Tugas: <?php echo htmlspecialchars($periode_aktif['tahun_periode']) . ' - ' . htmlspecialchars($periode_aktif['judul_fase']); ?>
-                            </h4>
-                        </div>
-                        <div class="card-body" style="padding: 30px;">
-                            <div class="mb-3">
-                                <a href="kelola_roadmap.php" class="button button-sm radius-10" style="margin-right: 10px;">
-                                    <i class="lni lni-arrow-left"></i> Kembali ke Periode
-                                </a>
+        <h2 class="mb-4">Kelola Roadmap</h2>
+        <p>Atur periode (tahun) dan daftar tugas di setiap fase pengembangan laboratorium.</p>
 
-                                <!-- Tambah tugas (modal trigger) -->
-                                <button type="button" class="button button-sm radius-10" style="background: #27AE60; border-color: #27AE60;"
-                                    data-bs-toggle="modal" data-bs-target="#modalTambahTugas">
-                                    <i class="lni lni-plus"></i> Tambah Tugas
-                                </button>
-                            </div>
+        <div class="row">
+            <div class="col-12">
+                <?php if ($periode_aktif): ?>
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            Kelola Tugas: <?php echo htmlspecialchars($periode_aktif['tahun_periode']) . ' - ' . htmlspecialchars($periode_aktif['judul_fase']); ?>
+                        </div>
+                        <div class="card-body">
+                            <a href="kelola_roadmap.php" class="btn btn-sm btn-secondary mb-3"><i class="lni lni-arrow-left"></i> Kembali ke Periode</a>
+
+                            <!-- Tambah tugas (modal trigger) -->
+                            <button type="button" class="btn btn-sm btn-success mb-3"
+                                data-bs-toggle="modal" data-bs-target="#modalTambahTugas"
+                                onclick="openModalTambahTugas(event)">
+                                <i class="lni lni-plus"></i> Tambah Tugas
+                            </button>
 
                             <div class="table-responsive">
-                                <table class="table table-striped table-hover admin-table">
+                                <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
                                             <th style="width:50px">Urutan</th>
                                             <th>Deskripsi Tugas</th>
-                                            <th style="width:200px; text-align: center;">Aksi</th>
+                                            <th style="width:150px">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -216,22 +350,19 @@ if (isset($_GET['kelola_tugas'])) {
                                         <tr>
                                             <td><?php echo htmlspecialchars($tugas['urutan']); ?></td>
                                             <td><?php echo htmlspecialchars($tugas['deskripsi_tugas']); ?></td>
-                                            <td style="text-align: center;">
-                                                <div class="btn-group" role="group">
-                                                    <!-- Edit trigger: data attributes diisi -->
-                                                    <button type="button" class="btn btn-warning btn-sm"
-                                                        data-bs-toggle="modal" data-bs-target="#modalEditTugas"
-                                                        data-id="<?php echo $tugas['id']; ?>"
-                                                        data-deskripsi="<?php echo htmlspecialchars($tugas['deskripsi_tugas']); ?>"
-                                                        data-urutan="<?php echo htmlspecialchars($tugas['urutan']); ?>">
-                                                        <i class="lni lni-pencil me-1"></i> Edit
-                                                    </button>
+                                            <td>
+                                                <!-- Edit trigger: data attributes diisi -->
+                                                <button type="button" class="btn btn-sm btn-warning"
+                                                    data-bs-toggle="modal" data-bs-target="#modalEditTugas"
+                                                    data-id="<?php echo $tugas['id']; ?>"
+                                                    data-deskripsi="<?php echo htmlspecialchars($tugas['deskripsi_tugas']); ?>"
+                                                    data-urutan="<?php echo htmlspecialchars($tugas['urutan']); ?>"
+                                                    onclick="openModalEditTugas(event, this)">
+                                                    Edit
+                                                </button>
 
-                                                    <a href="?hapus_tugas=<?php echo $tugas['id']; ?>&kelola_tugas=<?php echo $id_periode_aktif; ?>"
-                                                       class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus tugas ini?')">
-                                                        <i class="lni lni-trash me-1"></i> Hapus
-                                                    </a>
-                                                </div>
+                                                <a href="?hapus_tugas=<?php echo $tugas['id']; ?>&kelola_tugas=<?php echo $id_periode_aktif; ?>"
+                                                   class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus tugas ini?')">Hapus</a>
                                             </td>
                                         </tr>
                                     <?php endforeach; else: ?>
@@ -244,28 +375,21 @@ if (isset($_GET['kelola_tugas'])) {
                     </div>
 
                 <?php else: ?>
-                    <div class="card wow fadeInUp" data-wow-delay=".3s" style="border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border: none;">
-                        <div class="card-header" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; border-radius: 15px 15px 0 0; padding: 20px 30px;">
-                            <h4 class="mb-0" style="color: white; font-weight: 600;">
-                                <i class="lni lni-list mr-2"></i>
-                                Daftar Periode Roadmap
-                            </h4>
-                        </div>
-                        <div class="card-body" style="padding: 30px;">
-                            <div class="mb-3">
-                                <button type="button" class="button button-sm radius-10" data-bs-toggle="modal" data-bs-target="#modalTambahPeriode">
-                                    <i class="lni lni-plus"></i> Tambah Periode
-                                </button>
-                            </div>
+                    <div class="card">
+                        <div class="card-header bg-dark text-white">Daftar Periode Roadmap</div>
+                        <div class="card-body">
+                            <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#modalTambahPeriode" onclick="openModalTambahPeriode(event)">
+                                <i class="lni lni-plus"></i> Tambah Periode
+                            </button>
 
                             <div class="table-responsive">
-                                <table class="table table-striped table-hover admin-table">
+                                <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
                                             <th style="width:50px">Urutan</th>
                                             <th>Tahun & Periode</th>
                                             <th>Judul Fase</th>
-                                            <th style="width:300px; text-align: center;">Aksi</th>
+                                            <th style="width:250px">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -274,30 +398,22 @@ if (isset($_GET['kelola_tugas'])) {
                                                 <td><?php echo htmlspecialchars($periode['urutan']); ?></td>
                                                 <td><?php echo htmlspecialchars($periode['tahun_periode']); ?></td>
                                                 <td><?php echo htmlspecialchars($periode['judul_fase']); ?></td>
-                                                <td style="text-align: center;">
-                                                    <div class="btn-group" role="group">
-                                                        <a href="?kelola_tugas=<?php echo $periode['id']; ?>" class="btn btn-info btn-sm text-white">
-                                                            <i class="lni lni-cog me-1"></i> Kelola Tugas
-                                                        </a>
-                                                        <a href="?edit_periode=<?php echo $periode['id']; ?>" class="btn btn-warning btn-sm">
-                                                            <i class="lni lni-pencil me-1"></i> Edit
-                                                        </a>
-                                                        <a href="?hapus_periode=<?php echo $periode['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus periode dan semua tugas di dalamnya?')">
-                                                            <i class="lni lni-trash me-1"></i> Hapus
-                                                        </a>
-                                                    </div>
+                                                <td>
+                                                    <a href="?kelola_tugas=<?php echo $periode['id']; ?>" class="btn btn-sm btn-info text-white">Kelola Tugas</a>
+                                                    <button type="button" class="btn btn-sm btn-warning" 
+                                                        data-bs-toggle="modal" data-bs-target="#modalEditPeriode"
+                                                        data-id="<?php echo $periode['id']; ?>"
+                                                        data-tahun="<?php echo htmlspecialchars($periode['tahun_periode']); ?>"
+                                                        data-judul="<?php echo htmlspecialchars($periode['judul_fase']); ?>"
+                                                        data-urutan="<?php echo htmlspecialchars($periode['urutan']); ?>"
+                                                        onclick="openModalEditPeriode(event, this)">
+                                                        Edit
+                                                    </button>
+                                                    <a href="?hapus_periode=<?php echo $periode['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus periode dan semua tugas di dalamnya?')">Hapus</a>
                                                 </td>
                                             </tr>
                                         <?php endforeach; else: ?>
-                                            <tr>
-                                                <td colspan="4" class="text-center">
-                                                    <div class="empty-state" style="padding: 40px 20px;">
-                                                        <i class="lni lni-calendar empty-state-icon" style="font-size: 48px; color: #6c757d; margin-bottom: 15px;"></i>
-                                                        <h3 class="empty-state-title" style="color: #2c3e50; margin-bottom: 10px;">Roadmap belum memiliki periode</h3>
-                                                        <p class="empty-state-message" style="color: #6c757d; margin-bottom: 20px;">Silakan tambah periode baru untuk memulai.</p>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            <tr><td colspan="4" class="text-center">Roadmap belum memiliki periode. Silakan tambah periode baru.</td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
@@ -308,31 +424,28 @@ if (isset($_GET['kelola_tugas'])) {
             </div>
         </div>
     </div>
-</section>
-</main>
+</div>
 
 <!-- MODAL: Tambah Periode -->
 <div class="modal fade" id="modalTambahPeriode" tabindex="-1" aria-labelledby="modalTambahPeriodeLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+  <div class="modal-dialog">
+    <div class="modal-content">
       <form action="kelola_roadmap.php" method="POST">
-        <div class="modal-header" style="background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%); color: white; border-radius: 15px 15px 0 0; border: none;">
-          <h5 class="modal-title" id="modalTambahPeriodeLabel" style="color: white; font-weight: 600;">
-            <i class="lni lni-plus-circle mr-2"></i>Tambah Periode Baru
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTambahPeriodeLabel">Tambah Periode Baru</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" style="padding: 30px;">
+        <div class="modal-body">
           <div class="mb-3">
-            <label for="tahun_periode" class="form-label" style="font-weight: 600; color: #2c3e50;">Tahun & Periode (Contoh: 2024 Q1 - Q4)</label>
-            <input type="text" class="form-control" id="tahun_periode" name="tahun_periode" required style="border-radius: 8px; border: 1px solid #dee2e6; padding: 10px 15px;">
+            <label for="tahun_periode" class="form-label">Tahun & Periode (Contoh: 2024 Q1 - Q4)</label>
+            <input type="text" class="form-control" id="tahun_periode" name="tahun_periode" required>
           </div>
           <div class="mb-3">
-            <label for="judul_fase" class="form-label" style="font-weight: 600; color: #2c3e50;">Judul Fase</label>
-            <input type="text" class="form-control" id="judul_fase" name="judul_fase" required style="border-radius: 8px; border: 1px solid #dee2e6; padding: 10px 15px;">
+            <label for="judul_fase" class="form-label">Judul Fase</label>
+            <input type="text" class="form-control" id="judul_fase" name="judul_fase" required>
           </div>
           <div class="mb-3">
-            <label for="urutan" class="form-label" style="font-weight: 600; color: #2c3e50;">Urutan Tampil</label>
+            <label for="urutan" class="form-label">Urutan Tampil</label>
             <?php
             $urutan_periode_baru = 1;
             if (!empty($periode_list)) {
@@ -340,12 +453,45 @@ if (isset($_GET['kelola_tugas'])) {
                 $urutan_periode_baru = $last_periode['urutan'] + 1;
             }
             ?>
-            <input type="number" class="form-control" id="urutan" name="urutan" value="<?php echo $urutan_periode_baru; ?>" required style="border-radius: 8px; border: 1px solid #dee2e6; padding: 10px 15px;">
+            <input type="number" class="form-control" id="urutan" name="urutan" value="<?php echo $urutan_periode_baru; ?>" required>
           </div>
         </div>
-        <div class="modal-footer" style="border-top: 1px solid #f1f1f1; padding: 20px 30px;">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px; padding: 10px 20px;">Batal</button>
-          <button type="submit" name="tambah_periode" class="button button-sm radius-10" style="background: #2F80ED; border-color: #2F80ED;">Simpan Periode</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" name="tambah_periode" class="btn btn-primary">Simpan Periode</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Periode -->
+<div class="modal fade" id="modalEditPeriode" tabindex="-1" aria-labelledby="modalEditPeriodeLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="kelola_roadmap.php" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditPeriodeLabel">Edit Periode</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit_id_periode" name="id_periode" value="">
+          <div class="mb-3">
+            <label for="edit_tahun_periode" class="form-label">Tahun & Periode (Contoh: 2024 Q1 - Q4)</label>
+            <input type="text" class="form-control" id="edit_tahun_periode" name="tahun_periode" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_judul_fase" class="form-label">Judul Fase</label>
+            <input type="text" class="form-control" id="edit_judul_fase" name="judul_fase" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_urutan_periode" class="form-label">Urutan Tampil</label>
+            <input type="number" class="form-control" id="edit_urutan_periode" name="urutan" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" name="edit_periode" class="btn btn-primary">Simpan Perubahan</button>
         </div>
       </form>
     </div>
@@ -354,22 +500,20 @@ if (isset($_GET['kelola_tugas'])) {
 
 <!-- MODAL: Tambah Tugas -->
 <div class="modal fade" id="modalTambahTugas" tabindex="-1" aria-labelledby="modalTambahTugasLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+  <div class="modal-dialog">
+    <div class="modal-content">
       <form action="kelola_roadmap.php?kelola_tugas=<?php echo $id_periode_aktif; ?>" method="POST">
-        <div class="modal-header" style="background: linear-gradient(135deg, #27AE60 0%, #1E8E4F 100%); color: white; border-radius: 15px 15px 0 0; border: none;">
-          <h5 class="modal-title" id="modalTambahTugasLabel" style="color: white; font-weight: 600;">
-            <i class="lni lni-plus-circle mr-2"></i>Tambah Tugas Baru
-          </h5>
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTambahTugasLabel">Tambah Tugas Baru</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" style="padding: 30px;">
+        <div class="modal-body">
           <div class="mb-3">
-            <label for="deskripsi_tugas_tambah" class="form-label" style="font-weight: 600; color: #2c3e50;">Deskripsi Tugas</label>
-            <textarea class="form-control" id="deskripsi_tugas_tambah" name="deskripsi_tugas" rows="3" required style="border-radius: 8px; border: 1px solid #dee2e6; padding: 10px 15px;"></textarea>
+            <label for="deskripsi_tugas_tambah" class="form-label">Deskripsi Tugas</label>
+            <textarea class="form-control" id="deskripsi_tugas_tambah" name="deskripsi_tugas" rows="3" required></textarea>
           </div>
           <div class="mb-3">
-            <label for="urutan_tugas_tambah" class="form-label" style="font-weight: 600; color: #2c3e50;">Urutan Tampil Tugas</label>
+            <label for="urutan_tugas_tambah" class="form-label">Urutan Tampil Tugas</label>
             <?php
             $urutan_tugas_baru = 1;
             if (!empty($tugas_list)) {
@@ -378,12 +522,12 @@ if (isset($_GET['kelola_tugas'])) {
             }
             ?>
             <input type="hidden" name="id_periode" value="<?php echo htmlspecialchars($id_periode_aktif); ?>">
-            <input type="number" class="form-control" id="urutan_tugas_tambah" name="urutan" value="<?php echo $urutan_tugas_baru; ?>" required style="border-radius: 8px; border: 1px solid #dee2e6; padding: 10px 15px;">
+            <input type="number" class="form-control" id="urutan_tugas_tambah" name="urutan" value="<?php echo $urutan_tugas_baru; ?>" required>
           </div>
         </div>
-        <div class="modal-footer" style="border-top: 1px solid #f1f1f1; padding: 20px 30px;">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px; padding: 10px 20px;">Batal</button>
-          <button type="submit" name="tambah_tugas" class="button button-sm radius-10" style="background: #27AE60; border-color: #27AE60;">Simpan Tugas</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" name="tambah_tugas" class="btn btn-primary">Simpan Tugas</button>
         </div>
       </form>
     </div>
@@ -392,40 +536,421 @@ if (isset($_GET['kelola_tugas'])) {
 
 <!-- MODAL: Edit Tugas -->
 <div class="modal fade" id="modalEditTugas" tabindex="-1" aria-labelledby="modalEditTugasLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+  <div class="modal-dialog">
+    <div class="modal-content">
       <form id="formEditTugas" action="kelola_roadmap.php?kelola_tugas=<?php echo $id_periode_aktif; ?>" method="POST">
-        <div class="modal-header" style="background: linear-gradient(135deg, #F2994A 0%, #E67E22 100%); color: white; border-radius: 15px 15px 0 0; border: none;">
-          <h5 class="modal-title" id="modalEditTugasLabel" style="color: white; font-weight: 600;">
-            <i class="lni lni-pencil mr-2"></i>Edit Tugas
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditTugasLabel">Edit Tugas</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" style="padding: 30px;">
+        <div class="modal-body">
           <input type="hidden" id="edit_id_tugas" name="id_tugas" value="">
           <input type="hidden" name="id_periode" value="<?php echo htmlspecialchars($id_periode_aktif); ?>">
 
           <div class="mb-3">
-            <label for="edit_deskripsi_tugas" class="form-label" style="font-weight: 600; color: #2c3e50;">Deskripsi Tugas</label>
-            <textarea class="form-control" id="edit_deskripsi_tugas" name="deskripsi_tugas" rows="3" required style="border-radius: 8px; border: 1px solid #dee2e6; padding: 10px 15px;"></textarea>
+            <label for="edit_deskripsi_tugas" class="form-label">Deskripsi Tugas</label>
+            <textarea class="form-control" id="edit_deskripsi_tugas" name="deskripsi_tugas" rows="3" required></textarea>
           </div>
           <div class="mb-3">
-            <label for="edit_urutan_tugas" class="form-label" style="font-weight: 600; color: #2c3e50;">Urutan Tampil Tugas</label>
-            <input type="number" class="form-control" id="edit_urutan_tugas" name="urutan" required value="" style="border-radius: 8px; border: 1px solid #dee2e6; padding: 10px 15px;">
+            <label for="edit_urutan_tugas" class="form-label">Urutan Tampil Tugas</label>
+            <input type="number" class="form-control" id="edit_urutan_tugas" name="urutan" required value="">
           </div>
         </div>
-        <div class="modal-footer" style="border-top: 1px solid #f1f1f1; padding: 20px 30px;">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 8px; padding: 10px 20px;">Batal</button>
-          <button type="submit" name="edit_tugas" class="button button-sm radius-10" style="background: #F2994A; border-color: #F2994A;">Simpan Perubahan</button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" name="edit_tugas" class="btn btn-primary">Simpan Perubahan</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
+<!-- SCRIPTS: load bootstrap bundle (sudah include Popper), optional jQuery kept for other legacy code -->
+<script src="<?php echo $base_path; ?>assets/js/jquery-3.5.1.min.js"></script>
+<script src="<?php echo $base_path; ?>assets/js/bootstrap.5.0.0.alpha-2-min.js"></script>
+
 <script>
+// Fungsi untuk membuka modal tambah periode (fallback)
+function openModalTambahPeriode(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    var modalEl = document.getElementById('modalTambahPeriode');
+    if (!modalEl) {
+        console.error('Modal tidak ditemukan!');
+        return false;
+    }
+    
+    // Cek apakah Bootstrap tersedia
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        // Gunakan Bootstrap 5 API
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    } else {
+        // Fallback: buka modal secara manual
+        modalEl.style.display = 'block';
+        modalEl.classList.add('show');
+        document.body.classList.add('modal-open');
+        
+        // Hapus backdrop lama jika ada
+        var oldBackdrop = document.getElementById('modalBackdrop');
+        if (oldBackdrop) {
+            oldBackdrop.remove();
+        }
+        
+        // Buat backdrop baru
+        var backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'modalBackdrop';
+        backdrop.style.zIndex = '1050';
+        document.body.appendChild(backdrop);
+        
+        // Tutup modal saat klik backdrop
+        backdrop.addEventListener('click', function() {
+            closeModalTambahPeriode();
+        });
+        
+        // Tutup modal saat klik tombol close
+        var closeBtns = modalEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-close');
+        closeBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                closeModalTambahPeriode();
+            };
+        });
+    }
+    
+    return false;
+}
+
+// Fungsi untuk menutup modal
+function closeModalTambahPeriode() {
+    var modalEl = document.getElementById('modalTambahPeriode');
+    if (modalEl) {
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
+    
+    var backdrop = document.getElementById('modalBackdrop');
+    if (backdrop) {
+        backdrop.remove();
+    }
+}
+
+// Fungsi untuk membuka modal edit periode
+function openModalEditPeriode(e, button) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    var modalEl = document.getElementById('modalEditPeriode');
+    if (!modalEl) {
+        console.error('Modal edit periode tidak ditemukan!');
+        return false;
+    }
+    
+    // Ambil data dari button
+    var id = button.getAttribute('data-id') || '';
+    var tahun = button.getAttribute('data-tahun') || '';
+    var judul = button.getAttribute('data-judul') || '';
+    var urutan = button.getAttribute('data-urutan') || '';
+    
+    // Populate form
+    var form = modalEl.querySelector('form');
+    if (form) {
+        var inputId = form.querySelector('#edit_id_periode');
+        var inputTahun = form.querySelector('#edit_tahun_periode');
+        var inputJudul = form.querySelector('#edit_judul_fase');
+        var inputUrutan = form.querySelector('#edit_urutan_periode');
+        
+        if (inputId) inputId.value = id;
+        if (inputTahun) inputTahun.value = tahun;
+        if (inputJudul) inputJudul.value = judul;
+        if (inputUrutan) inputUrutan.value = urutan;
+    }
+    
+    // Cek apakah Bootstrap tersedia
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        // Gunakan Bootstrap 5 API
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    } else {
+        // Fallback: buka modal secara manual
+        modalEl.style.display = 'block';
+        modalEl.classList.add('show');
+        document.body.classList.add('modal-open');
+        
+        // Hapus backdrop lama jika ada
+        var oldBackdrop = document.getElementById('modalBackdrop');
+        if (oldBackdrop) {
+            oldBackdrop.remove();
+        }
+        
+        // Buat backdrop baru
+        var backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'modalBackdrop';
+        backdrop.style.zIndex = '1050';
+        document.body.appendChild(backdrop);
+        
+        // Tutup modal saat klik backdrop
+        backdrop.addEventListener('click', function() {
+            closeModalEditPeriode();
+        });
+        
+        // Tutup modal saat klik tombol close
+        var closeBtns = modalEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-close');
+        closeBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                closeModalEditPeriode();
+            };
+        });
+    }
+    
+    return false;
+}
+
+// Fungsi untuk menutup modal edit periode
+function closeModalEditPeriode() {
+    var modalEl = document.getElementById('modalEditPeriode');
+    if (modalEl) {
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
+    
+    var backdrop = document.getElementById('modalBackdrop');
+    if (backdrop) {
+        backdrop.remove();
+    }
+}
+
+// Fungsi untuk membuka modal edit tugas
+function openModalEditTugas(e, button) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    var modalEl = document.getElementById('modalEditTugas');
+    if (!modalEl) {
+        console.error('Modal edit tugas tidak ditemukan!');
+        return false;
+    }
+    
+    // Ambil data dari button
+    var id = button.getAttribute('data-id') || '';
+    var deskripsi = button.getAttribute('data-deskripsi') || '';
+    var urutan = button.getAttribute('data-urutan') || '';
+    
+    // Populate form
+    var form = modalEl.querySelector('#formEditTugas');
+    if (form) {
+        var inputId = form.querySelector('#edit_id_tugas');
+        var inputDesc = form.querySelector('#edit_deskripsi_tugas');
+        var inputUrut = form.querySelector('#edit_urutan_tugas');
+        
+        if (inputId) inputId.value = id;
+        if (inputDesc) inputDesc.value = deskripsi;
+        if (inputUrut) inputUrut.value = urutan;
+    }
+    
+    // Cek apakah Bootstrap tersedia
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        // Gunakan Bootstrap 5 API
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    } else {
+        // Fallback: buka modal secara manual
+        modalEl.style.display = 'block';
+        modalEl.classList.add('show');
+        document.body.classList.add('modal-open');
+        
+        // Hapus backdrop lama jika ada
+        var oldBackdrop = document.getElementById('modalBackdrop');
+        if (oldBackdrop) {
+            oldBackdrop.remove();
+        }
+        
+        // Buat backdrop baru
+        var backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'modalBackdrop';
+        backdrop.style.zIndex = '1050';
+        document.body.appendChild(backdrop);
+        
+        // Tutup modal saat klik backdrop
+        backdrop.addEventListener('click', function() {
+            closeModalEditTugas();
+        });
+        
+        // Tutup modal saat klik tombol close
+        var closeBtns = modalEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-close');
+        closeBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                closeModalEditTugas();
+            };
+        });
+    }
+    
+    return false;
+}
+
+// Fungsi untuk menutup modal edit tugas
+function closeModalEditTugas() {
+    var modalEl = document.getElementById('modalEditTugas');
+    if (modalEl) {
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
+    
+    var backdrop = document.getElementById('modalBackdrop');
+    if (backdrop) {
+        backdrop.remove();
+    }
+}
+
+// Fungsi untuk membuka modal tambah tugas
+function openModalTambahTugas(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    var modalEl = document.getElementById('modalTambahTugas');
+    if (!modalEl) {
+        console.error('Modal tambah tugas tidak ditemukan!');
+        return false;
+    }
+    
+    // Cek apakah Bootstrap tersedia
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        // Gunakan Bootstrap 5 API
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    } else {
+        // Fallback: buka modal secara manual
+        modalEl.style.display = 'block';
+        modalEl.classList.add('show');
+        document.body.classList.add('modal-open');
+        
+        // Hapus backdrop lama jika ada
+        var oldBackdrop = document.getElementById('modalBackdrop');
+        if (oldBackdrop) {
+            oldBackdrop.remove();
+        }
+        
+        // Buat backdrop baru
+        var backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'modalBackdrop';
+        backdrop.style.zIndex = '1050';
+        document.body.appendChild(backdrop);
+        
+        // Tutup modal saat klik backdrop
+        backdrop.addEventListener('click', function() {
+            closeModalTambahTugas();
+        });
+        
+        // Tutup modal saat klik tombol close
+        var closeBtns = modalEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-close');
+        closeBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                closeModalTambahTugas();
+            };
+        });
+    }
+    
+    return false;
+}
+
+// Fungsi untuk menutup modal tambah tugas
+function closeModalTambahTugas() {
+    var modalEl = document.getElementById('modalTambahTugas');
+    if (modalEl) {
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
+    
+    var backdrop = document.getElementById('modalBackdrop');
+    if (backdrop) {
+        backdrop.remove();
+    }
+}
+
+// Pastikan Bootstrap dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    // Debug: Cek apakah Bootstrap tersedia
+    if (typeof bootstrap === 'undefined') {
+        console.warn('Bootstrap tidak ter-load, menggunakan fallback modal');
+    } else {
+        console.log('Bootstrap loaded successfully');
+    }
+});
+
+/* Toggle sidebar (keeps margin for desktop) */
+function toggleSidebar() {
+    const sidebar = document.getElementById('adminSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const content = document.getElementById('adminContentWrapper');
+
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+
+    if (window.innerWidth > 992) {
+        if (sidebar.classList.contains('active')) {
+            content.style.marginLeft = '0px';
+        } else {
+            content.style.marginLeft = '260px';
+        }
+    }
+}
+
+/* ensure initial margin on load */
+window.addEventListener('load', function() {
+    if (window.innerWidth > 992) {
+        document.getElementById('adminContentWrapper').style.marginLeft = '260px';
+    }
+});
+
 /* ------------------------------
-   Modal Edit: native Bootstrap 5 event handling
+   Modal Edit Periode: native Bootstrap 5 event handling
+   ------------------------------ */
+(function () {
+    var modalEl = document.getElementById('modalEditPeriode');
+    if (!modalEl) return;
+
+    modalEl.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        if (!button) return;
+
+        var id = button.getAttribute('data-id') || '';
+        var tahun = button.getAttribute('data-tahun') || '';
+        var judul = button.getAttribute('data-judul') || '';
+        var urutan = button.getAttribute('data-urutan') || '';
+
+        var form = modalEl.querySelector('form');
+        if (!form) return;
+
+        var inputId = form.querySelector('#edit_id_periode');
+        var inputTahun = form.querySelector('#edit_tahun_periode');
+        var inputJudul = form.querySelector('#edit_judul_fase');
+        var inputUrutan = form.querySelector('#edit_urutan_periode');
+
+        if (inputId) inputId.value = id;
+        if (inputTahun) inputTahun.value = tahun;
+        if (inputJudul) inputJudul.value = judul;
+        if (inputUrutan) inputUrutan.value = urutan;
+    });
+})();
+
+/* ------------------------------
+   Modal Edit Tugas: native Bootstrap 5 event handling
    ------------------------------ */
 (function () {
     var modalEl = document.getElementById('modalEditTugas');
@@ -462,44 +987,16 @@ if (isset($_GET['kelola_tugas'])) {
     });
 })();
 
-// Initialize WOW.js for animations
-(function() {
-    function initWOW() {
-        if (typeof WOW !== 'undefined') {
-            // Destroy existing WOW instance if any
-            if (window.wowInstance) {
-                window.wowInstance = null;
-            }
-            // Initialize WOW
-            window.wowInstance = new WOW({
-                boxClass: 'wow',
-                animateClass: 'animated',
-                offset: 0,
-                mobile: true,
-                live: true
-            });
-            window.wowInstance.init();
-        } else {
-            // Retry if WOW.js not loaded yet
-            setTimeout(initWOW, 100);
-        }
-    }
-    
-    // Initialize WOW after scripts are loaded
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(initWOW, 200);
-        });
-    } else {
-        setTimeout(initWOW, 200);
-    }
-    
-    // Also try on window load as backup
-    window.addEventListener('load', function() {
-        setTimeout(initWOW, 100);
-    });
-})();
+/* Debug helper: show console log if jQuery missing (not fatal) */
+// jQuery check removed - Bootstrap 5 does not require jQuery
 </script>
 
-<?php include __DIR__ . '/../../template/admin_footer.php'; ?>
+<?php
+// Optional: close DB connection (not strictly necessary in PHP but okay)
+if (isset($koneksi) && $koneksi) {
+    // pg_close($koneksi); // Uncomment only if you want to close explicitly
+}
+?>
+</body>
+</html>
 

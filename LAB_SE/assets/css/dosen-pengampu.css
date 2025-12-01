@@ -2,21 +2,30 @@
    DOSEN PENGAMPU - STYLING MODERN & MENARIK
    ============================================ */
 
-/* Section Header */
-#galeri-dosen .section-title h3 {
-	font-size: 36px;
-	font-weight: 700;
-	color: #2c3e50;
-	margin-bottom: 15px;
+/* Section Background - Konsisten dengan landing page */
+#galeri-dosen.team-style-1 {
+	background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 50%, #ffffff 100%) !important;
+	padding: 100px 0 70px !important;
 	position: relative;
-	display: inline-block;
 }
 
-#galeri-dosen .section-title h3::after,
-.team-style-1 .section-title h3::after {
+/* Section Header - Konsisten dengan section lain */
+#galeri-dosen .section-title h3.gradient-text {
+	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	font-weight: 700 !important;
+	font-size: 2.5rem !important;
+	position: relative;
+	display: inline-block;
+	margin-bottom: 20px !important;
+}
+
+#galeri-dosen .section-title h3.gradient-text::after {
 	content: '';
 	position: absolute;
-	bottom: -8px;
+	bottom: -10px;
 	left: 50%;
 	transform: translateX(-50%);
 	width: 60px;
@@ -26,23 +35,23 @@
 }
 
 #galeri-dosen .section-title p {
-	font-size: 16px;
-	color: #6c757d;
-	line-height: 1.6;
-	margin-top: 20px;
+	font-size: 1.1rem !important;
+	color: #6c757d !important;
+	line-height: 1.8 !important;
+	margin-top: 0 !important;
 }
 
-/* Card Styling - Modern & Elegant */
+/* Card Styling - Modern & Elegant - Konsisten dengan feature cards */
 #galeri-dosen .single-team,
 .team-style-1 .single-team {
-	background: #ffffff;
-	border-radius: 16px;
-	padding: 0;
+	background: #ffffff !important;
+	border-radius: 16px !important;
+	padding: 0 !important;
 	text-align: center;
 	margin-bottom: 30px;
-	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-	border: 1px solid rgba(47, 128, 237, 0.1);
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+	border: 1px solid rgba(47, 128, 237, 0.1) !important;
 	overflow: hidden;
 	position: relative;
 	height: 100%;
@@ -142,26 +151,29 @@
 	line-height: 1.5;
 }
 
-/* Button Styling */
+/* Button Styling - Konsisten dengan landing page */
 #galeri-dosen .single-team .info .button,
-.team-style-1 .single-team .info .button {
-	background: transparent;
-	border: 2px solid #2F80ED;
-	color: #2F80ED;
-	padding: 12px 28px;
-	border-radius: 8px;
-	font-weight: 600;
-	font-size: 14px;
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	text-decoration: none;
-	display: inline-block;
+.team-style-1 .single-team .info .button,
+#galeri-dosen .single-team .info .border-button {
+	background: transparent !important;
+	border: 2px solid #2F80ED !important;
+	color: #2F80ED !important;
+	padding: 12px 28px !important;
+	border-radius: 10px !important;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	text-decoration: none !important;
+	display: inline-block !important;
 	margin-top: auto;
 	position: relative;
 	overflow: hidden;
+	box-shadow: none !important;
 }
 
 #galeri-dosen .single-team .info .button::before,
-.team-style-1 .single-team .info .button::before {
+.team-style-1 .single-team .info .button::before,
+#galeri-dosen .single-team .info .border-button::before {
 	content: '';
 	position: absolute;
 	top: 0;
@@ -173,16 +185,18 @@
 }
 
 #galeri-dosen .single-team .info .button:hover,
-.team-style-1 .single-team .info .button:hover {
-	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%);
-	color: #ffffff;
-	border-color: #2F80ED;
-	transform: translateY(-2px);
-	box-shadow: 0 6px 20px rgba(47, 128, 237, 0.3);
+.team-style-1 .single-team .info .button:hover,
+#galeri-dosen .single-team .info .border-button:hover {
+	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+	color: #ffffff !important;
+	border-color: #2F80ED !important;
+	transform: translateY(-2px) !important;
+	box-shadow: 0 6px 20px rgba(47, 128, 237, 0.3) !important;
 }
 
 #galeri-dosen .single-team .info .button:hover::before,
-.team-style-1 .single-team .info .button:hover::before {
+.team-style-1 .single-team .info .button:hover::before,
+#galeri-dosen .single-team .info .border-button:hover::before {
 	left: 100%;
 }
 
@@ -197,8 +211,8 @@
 		padding: 0 25px 25px;
 	}
 	
-	#galeri-dosen .section-title h3 {
-		font-size: 30px;
+	#galeri-dosen .section-title h3.gradient-text {
+		font-size: 2rem !important;
 	}
 }
 
@@ -220,12 +234,12 @@
 		font-size: 14px;
 	}
 	
-	#galeri-dosen .section-title h3 {
-		font-size: 26px;
+	#galeri-dosen .section-title h3.gradient-text {
+		font-size: 1.75rem !important;
 	}
 	
 	#galeri-dosen .section-title p {
-		font-size: 14px;
+		font-size: 1rem !important;
 	}
 }
 

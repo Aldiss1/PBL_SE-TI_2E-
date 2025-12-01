@@ -30,16 +30,6 @@
 
 
     window.onscroll = function () {
-        var header_navbar = document.querySelector(".hero-section-wrapper-2 .header");
-        if (!header_navbar) return;
-        var sticky = header_navbar.offsetTop;
-
-        if (window.pageYOffset > sticky) {
-            header_navbar.classList.add("sticky");
-        } else {
-            header_navbar.classList.remove("sticky");
-        }
-
         // show or hide the back-top-top button
         var backToTo = document.querySelector(".scroll-top");
 		if (backToTo) {
@@ -50,22 +40,6 @@
 			}
 		}
     };
-
-      // header-5  toggler-icon
-      let navbarToggler2 = document.querySelector(".header-2 .navbar-toggler");
-      var navbarCollapse2 = document.querySelector(".header-2 .navbar-collapse");
-
-      document.querySelectorAll(".header-2 .page-scroll").forEach(e =>
-          e.addEventListener("click", () => {
-			  if (navbarToggler2) navbarToggler2.classList.remove("active");
-			  if (navbarCollapse2) navbarCollapse2.classList.remove('show')
-          })
-      );
-	  if (navbarToggler2) {
-		  navbarToggler2.addEventListener('click', function() {
-			  navbarToggler2.classList.toggle("active");
-		  })
-	  }
 
     // section menu active
 	function onScroll(event) {

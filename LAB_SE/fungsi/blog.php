@@ -56,16 +56,27 @@ function tambahBlog($data) {
     // Get author_id from session
     $author_id = (int)($_SESSION['user_id'] ?? 1);
     
-    // Convert tags to array format for PostgreSQL
+    // Convert tags to PostgreSQL text[] array format
     $tags_array = [];
     if (!empty($tags)) {
         $tags_list = explode(',', $tags);
         foreach ($tags_list as $tag) {
-            $tags_array[] = trim($tag);
+            $tag_trimmed = trim($tag);
+            if (!empty($tag_trimmed)) {
+                $tags_array[] = pg_escape_string($koneksi, $tag_trimmed);
+            }
         }
     }
-    $tags_json = json_encode($tags_array);
-    $tags_json_escaped = pg_escape_string($koneksi, $tags_json);
+    
+    // Format untuk PostgreSQL text[] array
+    if (empty($tags_array)) {
+        $tags_sql = "NULL";
+    } else {
+        $tags_quoted = array_map(function($tag) {
+            return "'" . $tag . "'";
+        }, $tags_array);
+        $tags_sql = "ARRAY[" . implode(', ', $tags_quoted) . "]";
+    }
     
     // Set published_at
     $published_at_str = $is_published ? "'" . date('Y-m-d H:i:s') . "'" : "NULL";
@@ -73,7 +84,7 @@ function tambahBlog($data) {
     
     // Insert blog
     $query = "INSERT INTO blog (title, slug, content, excerpt, featured_image, author_id, category, tags, is_published, published_at, created_at, updated_at) 
-              VALUES ('$title_escaped', '$slug_escaped', '$content_escaped', '$excerpt_escaped', '$featured_image_escaped', $author_id, '$category_escaped', '$tags_json_escaped'::jsonb, $is_published_bool, $published_at_str, NOW(), NOW())";
+              VALUES ('$title_escaped', '$slug_escaped', '$content_escaped', '$excerpt_escaped', '$featured_image_escaped', $author_id, '$category_escaped', $tags_sql, $is_published_bool, $published_at_str, NOW(), NOW())";
     
     $result = pg_query($koneksi, $query);
     
@@ -139,16 +150,27 @@ function updateBlog($id, $data) {
         $published_at_update = ", published_at = '$published_at'";
     }
     
-    // Convert tags to array format for PostgreSQL
+    // Convert tags to PostgreSQL text[] array format
     $tags_array = [];
     if (!empty($tags)) {
         $tags_list = explode(',', $tags);
         foreach ($tags_list as $tag) {
-            $tags_array[] = trim($tag);
+            $tag_trimmed = trim($tag);
+            if (!empty($tag_trimmed)) {
+                $tags_array[] = pg_escape_string($koneksi, $tag_trimmed);
+            }
         }
     }
-    $tags_json = json_encode($tags_array);
-    $tags_json_escaped = pg_escape_string($koneksi, $tags_json);
+    
+    // Format untuk PostgreSQL text[] array
+    if (empty($tags_array)) {
+        $tags_sql = "NULL";
+    } else {
+        $tags_quoted = array_map(function($tag) {
+            return "'" . $tag . "'";
+        }, $tags_array);
+        $tags_sql = "ARRAY[" . implode(', ', $tags_quoted) . "]";
+    }
     
     $is_published_bool = $is_published ? 'true' : 'false';
     
@@ -159,7 +181,7 @@ function updateBlog($id, $data) {
               excerpt = '$excerpt_escaped',
               featured_image = '$featured_image_escaped',
               category = '$category_escaped',
-              tags = '$tags_json_escaped'::jsonb,
+              tags = $tags_sql,
               is_published = $is_published_bool
               $slug_update
               $published_at_update,

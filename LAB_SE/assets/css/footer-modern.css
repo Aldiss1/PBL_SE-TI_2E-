@@ -1,0 +1,647 @@
+/* ============================================
+   FOOTER MODERN & ELEGAN - DESAIN BAGUS
+   ============================================ */
+
+.footer-style-1 {
+	background: #ffffff;
+	padding-top: 70px;
+	padding-bottom: 0;
+	position: relative;
+	overflow: hidden;
+	border-top: 1px solid rgba(47, 128, 237, 0.1);
+}
+
+/* Background pattern subtle */
+.footer-style-1::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: 
+		radial-gradient(circle at 15% 30%, rgba(47, 128, 237, 0.02) 0%, transparent 50%),
+		radial-gradient(circle at 85% 70%, rgba(47, 128, 237, 0.02) 0%, transparent 50%);
+	pointer-events: none;
+	z-index: 0;
+}
+
+.footer-style-1 .container {
+	position: relative;
+	z-index: 1;
+}
+
+/* Widget Styling */
+.footer-style-1 .widget-wrapper {
+	padding-bottom: 50px;
+}
+
+.footer-style-1 .footer-widget {
+	margin-bottom: 40px;
+}
+
+/* Logo Section */
+.footer-style-1 .footer-widget .logo {
+	margin-bottom: 20px;
+}
+
+.footer-style-1 .footer-widget .logo img {
+	max-height: 65px;
+	width: auto;
+	transition: transform 0.3s ease;
+	filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
+}
+
+.footer-style-1 .footer-widget .logo:hover img {
+	transform: scale(1.05);
+}
+
+/* Description */
+.footer-style-1 .footer-widget p.desc {
+	margin-bottom: 25px;
+	font-size: 14px;
+	line-height: 1.75;
+	color: #6c757d;
+	font-weight: 400;
+	text-align: left;
+}
+
+/* Social Media Icons - Clean & Modern */
+.footer-style-1 .footer-widget .socials {
+	justify-content: flex-start;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.footer-style-1 .footer-widget .socials li {
+	list-style: none;
+	margin: 0;
+}
+
+.footer-style-1 .footer-widget .socials li a {
+	width: 40px;
+	height: 40px;
+	border-radius: 10px;
+	background: #f8f9fa;
+	color: #2F80ED;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 17px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	text-decoration: none;
+	border: 1px solid rgba(47, 128, 237, 0.1);
+	position: relative;
+	overflow: hidden;
+}
+
+.footer-style-1 .footer-widget .socials li a::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+	z-index: 0;
+}
+
+.footer-style-1 .footer-widget .socials li a i {
+	position: relative;
+	z-index: 1;
+	transition: color 0.3s ease;
+}
+
+.footer-style-1 .footer-widget .socials li a:hover {
+	border-color: #2F80ED;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(47, 128, 237, 0.25);
+}
+
+.footer-style-1 .footer-widget .socials li a:hover::before {
+	opacity: 1;
+}
+
+.footer-style-1 .footer-widget .socials li a:hover i {
+	color: #ffffff;
+}
+
+/* Section Headings - Clean & Modern */
+.footer-style-1 .footer-widget h6 {
+	font-weight: 700;
+	font-size: 16px;
+	color: #2c3e50;
+	margin-bottom: 20px;
+	margin-top: 0;
+	position: relative;
+	padding-bottom: 10px;
+	letter-spacing: 0.3px;
+}
+
+.footer-style-1 .footer-widget h6::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 35px;
+	height: 2px;
+	background: linear-gradient(90deg, #2F80ED 0%, #1E5FCC 100%);
+	border-radius: 2px;
+}
+
+/* Links - Clean Design */
+.footer-style-1 .footer-widget .links {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+/* OVERRIDE GLOBAL - Pastikan SEMUA link di footer tidak terlihat seperti button */
+html body .footer-style-1 .footer-widget .links li a,
+html body .footer-style-1 .footer-widget .links li a.button,
+html body .footer-style-1 .footer-widget .links li a[class*="button"],
+html body .footer-style-1 .footer-widget .links li a.radius-10,
+html body .footer-style-1 .footer-widget .links li a[class*="radius"],
+html body .footer-style-1 .footer-widget .links li a.button-sm,
+html body .footer-style-1 .footer-widget .links li a.border-button,
+html body .footer-style-1 .footer-widget .links li a[href*="pendaftaran"],
+html body .footer-style-1 .footer-widget .links li a[href*="daftar"] {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	border: none !important;
+	border-width: 0 !important;
+	border-style: none !important;
+	border-color: transparent !important;
+	padding: 0 !important;
+	padding-top: 0 !important;
+	padding-right: 0 !important;
+	padding-bottom: 0 !important;
+	padding-left: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+	color: #6c757d !important;
+	font-weight: 400 !important;
+	font-size: 14px !important;
+	width: auto !important;
+	height: auto !important;
+	min-width: auto !important;
+	min-height: auto !important;
+	max-width: none !important;
+	max-height: none !important;
+	display: inline-block !important;
+	text-align: left !important;
+	transform: none !important;
+	line-height: 1.6 !important;
+	margin: 0 !important;
+}
+
+html body .footer-style-1 .footer-widget .links li a:hover,
+html body .footer-style-1 .footer-widget .links li a.button:hover,
+html body .footer-style-1 .footer-widget .links li a[class*="button"]:hover,
+html body .footer-style-1 .footer-widget .links li a.radius-10:hover,
+html body .footer-style-1 .footer-widget .links li a[class*="radius"]:hover,
+html body .footer-style-1 .footer-widget .links li a.button-sm:hover,
+html body .footer-style-1 .footer-widget .links li a.border-button:hover {
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #2F80ED !important;
+	transform: translateX(2px) !important;
+	padding: 0 !important;
+}
+
+html body .footer-style-1 .footer-widget .links li a.button::before,
+html body .footer-style-1 .footer-widget .links li a[class*="button"]::before {
+	display: none !important;
+	content: none !important;
+}
+
+/* OVERRIDE KHUSUS UNTUK LINK PENDAFTARAN - Selector sangat spesifik */
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a[href*="pendaftaran"],
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a[href*="daftar"],
+html body .footer-style-1 .footer-widget .links li:first-child a[href*="pendaftaran"],
+html body .footer-style-1 .footer-widget .links li:first-child a[href*="daftar"],
+html body .footer-style-1 .footer-widget h6 + .links li:first-child a,
+html body .footer-style-1 .footer-widget h6 + .links li a[href*="pendaftaran"],
+html body .footer-style-1 .footer-widget h6 + .links li a[href*="daftar"] {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	border: none !important;
+	border-width: 0 !important;
+	border-style: none !important;
+	border-color: transparent !important;
+	padding: 0 !important;
+	padding-top: 0 !important;
+	padding-right: 0 !important;
+	padding-bottom: 0 !important;
+	padding-left: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+	color: #6c757d !important;
+	font-weight: 400 !important;
+	font-size: 14px !important;
+	width: auto !important;
+	height: auto !important;
+	min-width: auto !important;
+	min-height: auto !important;
+	max-width: none !important;
+	max-height: none !important;
+	display: inline-block !important;
+	text-align: left !important;
+	transform: none !important;
+	line-height: 1.6 !important;
+	margin: 0 !important;
+	text-decoration: none !important;
+}
+
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a[href*="pendaftaran"]:hover,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a[href*="daftar"]:hover,
+html body .footer-style-1 .footer-widget .links li:first-child a[href*="pendaftaran"]:hover,
+html body .footer-style-1 .footer-widget .links li:first-child a[href*="daftar"]:hover,
+html body .footer-style-1 .footer-widget h6 + .links li:first-child a:hover,
+html body .footer-style-1 .footer-widget h6 + .links li a[href*="pendaftaran"]:hover,
+html body .footer-style-1 .footer-widget h6 + .links li a[href*="daftar"]:hover {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #2F80ED !important;
+	transform: translateX(2px) !important;
+	padding: 0 !important;
+}
+
+.footer-style-1 .footer-widget .links li {
+	margin-bottom: 10px;
+	position: relative;
+	padding-left: 0;
+	transition: padding-left 0.3s ease;
+}
+
+.footer-style-1 .footer-widget .links li::before {
+	content: '→';
+	position: absolute;
+	left: -18px;
+	opacity: 0;
+	color: #2F80ED;
+	font-weight: 600;
+	font-size: 14px;
+	transition: all 0.3s ease;
+}
+
+.footer-style-1 .footer-widget .links li:hover {
+	padding-left: 18px;
+}
+
+.footer-style-1 .footer-widget .links li:hover::before {
+	opacity: 1;
+	left: 0;
+}
+
+.footer-style-1 .footer-widget .links li a {
+	font-size: 14px;
+	line-height: 1.6;
+	color: #6c757d;
+	text-decoration: none;
+	transition: all 0.3s ease;
+	font-weight: 400;
+	display: inline-block;
+	position: relative;
+	/* Pastikan link tidak terlihat seperti button - OVERRIDE MAKSIMAL */
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	border: none !important;
+	border-width: 0 !important;
+	border-style: none !important;
+	border-color: transparent !important;
+	padding: 0 !important;
+	padding-top: 0 !important;
+	padding-right: 0 !important;
+	padding-bottom: 0 !important;
+	padding-left: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+	width: auto !important;
+	height: auto !important;
+	min-width: auto !important;
+	min-height: auto !important;
+	max-width: none !important;
+	max-height: none !important;
+}
+
+/* Override SEMUA style button yang mungkin diterapkan - Specificity SANGAT TINGGI */
+.footer-style-1 .footer-widget .links li a,
+.footer-style-1 .footer-widget .links li a.button,
+.footer-style-1 .footer-widget .links li a[class*="button"],
+.footer-style-1 .footer-widget .links li a.radius-10,
+.footer-style-1 .footer-widget .links li a[class*="radius"],
+.footer-style-1 .footer-widget .links li a.button-sm,
+.footer-style-1 .footer-widget .links li a.border-button,
+footer .footer-style-1 .footer-widget .links li a,
+footer .footer-style-1 .footer-widget .links li a.button,
+body .footer-style-1 .footer-widget .links li a,
+body .footer-style-1 .footer-widget .links li a.button {
+	background: transparent !important;
+	border: none !important;
+	padding: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+	color: #6c757d !important;
+	font-weight: 400 !important;
+	font-size: 14px !important;
+	width: auto !important;
+	height: auto !important;
+	min-width: auto !important;
+	min-height: auto !important;
+	display: inline-block !important;
+	text-align: left !important;
+	transform: none !important;
+	line-height: 1.6 !important;
+	margin: 0 !important;
+}
+
+/* Override hover state untuk SEMUA button di footer */
+.footer-style-1 .footer-widget .links li a:hover,
+.footer-style-1 .footer-widget .links li a.button:hover,
+.footer-style-1 .footer-widget .links li a[class*="button"]:hover,
+.footer-style-1 .footer-widget .links li a.radius-10:hover,
+.footer-style-1 .footer-widget .links li a[class*="radius"]:hover,
+.footer-style-1 .footer-widget .links li a.button-sm:hover,
+.footer-style-1 .footer-widget .links li a.border-button:hover,
+footer .footer-style-1 .footer-widget .links li a:hover,
+footer .footer-style-1 .footer-widget .links li a.button:hover,
+body .footer-style-1 .footer-widget .links li a:hover,
+body .footer-style-1 .footer-widget .links li a.button:hover {
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #2F80ED !important;
+	transform: translateX(2px) !important;
+	padding: 0 !important;
+}
+
+/* Override ::before pseudo-element untuk button */
+.footer-style-1 .footer-widget .links li a.button::before,
+.footer-style-1 .footer-widget .links li a[class*="button"]::before {
+	display: none !important;
+	content: none !important;
+}
+
+.footer-style-1 .footer-widget .links li a::after {
+	content: '';
+	position: absolute;
+	bottom: -1px;
+	left: 0;
+	width: 0;
+	height: 1px;
+	background: linear-gradient(90deg, #2F80ED 0%, #1E5FCC 100%);
+	transition: width 0.3s ease;
+}
+
+.footer-style-1 .footer-widget .links li a:hover {
+	color: #2F80ED;
+	transform: translateX(2px);
+}
+
+.footer-style-1 .footer-widget .links li a:hover::after {
+	width: 100%;
+}
+
+/* Copyright Section - Minimalist */
+.footer-style-1 .copyright-wrapper {
+	border-top: 1px solid rgba(47, 128, 237, 0.1);
+	padding: 25px 0;
+	background: #f8f9fa;
+	margin-top: 30px;
+	position: relative;
+}
+
+.footer-style-1 .copyright-wrapper::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 1px;
+	background: linear-gradient(90deg, transparent 0%, rgba(47, 128, 237, 0.2) 50%, transparent 100%);
+}
+
+.footer-style-1 .copyright-wrapper p {
+	font-size: 13px;
+	font-weight: 400;
+	text-align: center;
+	color: #6c757d;
+	margin: 0;
+	line-height: 1.6;
+}
+
+.footer-style-1 .copyright-wrapper p a {
+	color: #2F80ED;
+	text-decoration: none;
+	font-weight: 500;
+	transition: all 0.3s ease;
+}
+
+.footer-style-1 .copyright-wrapper p a:hover {
+	color: #1E5FCC;
+	text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+	.footer-style-1 {
+		padding-top: 50px;
+	}
+	
+	.footer-style-1 .footer-widget {
+		margin-bottom: 30px;
+	}
+	
+	.footer-style-1 .footer-widget h6 {
+		font-size: 15px;
+		margin-bottom: 18px;
+	}
+	
+	.footer-style-1 .footer-widget .socials li a {
+		width: 36px;
+		height: 36px;
+		font-size: 15px;
+	}
+}
+
+@media (max-width: 767px) {
+	.footer-style-1 {
+		padding-top: 40px;
+	}
+	
+	.footer-style-1 .footer-widget .logo img {
+		max-height: 55px;
+	}
+	
+	.footer-style-1 .footer-widget p.desc {
+		font-size: 13px;
+		text-align: center;
+	}
+	
+	.footer-style-1 .footer-widget .socials {
+		justify-content: center;
+	}
+	
+	.footer-style-1 .footer-widget h6 {
+		text-align: center;
+	}
+	
+	.footer-style-1 .footer-widget h6::after {
+		left: 50%;
+		transform: translateX(-50%);
+	}
+	
+	.footer-style-1 .footer-widget .links {
+		text-align: center;
+	}
+	
+	.footer-style-1 .copyright-wrapper {
+		padding: 20px 15px;
+	}
+	
+	.footer-style-1 .copyright-wrapper p {
+		font-size: 12px;
+	}
+}
+
+/* ============================================
+   OVERRIDE AGGRESIF - PASTIKAN TIDAK ADA BUTTON DI FOOTER
+   ============================================ */
+/* Override dengan specificity maksimal */
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-2 .footer-widget .links li a,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-lg-3 .footer-widget .links li a,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-lg-2 .footer-widget .links li a,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-md-6 .footer-widget .links li a,
+html body .footer-style-1 .footer-widget .links li a[href*="pendaftaran"],
+html body .footer-style-1 .footer-widget .links li a[href*="daftar"],
+html body .footer-style-1 .footer-widget .links li a[href*="personil"],
+html body .footer-style-1 .footer-widget .links li a[href*="tentang-kami"],
+html body .footer-style-1 .footer-widget .links li a[href*="blog"] {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	border: none !important;
+	border-width: 0 !important;
+	border-style: none !important;
+	border-color: transparent !important;
+	padding: 0 !important;
+	padding-top: 0 !important;
+	padding-right: 0 !important;
+	padding-bottom: 0 !important;
+	padding-left: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+	color: #6c757d !important;
+	font-weight: 400 !important;
+	font-size: 14px !important;
+	width: auto !important;
+	height: auto !important;
+	min-width: auto !important;
+	min-height: auto !important;
+	max-width: none !important;
+	max-height: none !important;
+	display: inline-block !important;
+	text-align: left !important;
+	transform: none !important;
+	line-height: 1.6 !important;
+	margin: 0 !important;
+	text-decoration: none !important;
+}
+
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a:hover,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-2 .footer-widget .links li a:hover,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-lg-3 .footer-widget .links li a:hover,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-lg-2 .footer-widget .links li a:hover,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-md-6 .footer-widget .links li a:hover,
+html body .footer-style-1 .footer-widget .links li a[href*="pendaftaran"]:hover,
+html body .footer-style-1 .footer-widget .links li a[href*="daftar"]:hover,
+html body .footer-style-1 .footer-widget .links li a[href*="personil"]:hover,
+html body .footer-style-1 .footer-widget .links li a[href*="tentang-kami"]:hover,
+html body .footer-style-1 .footer-widget .links li a[href*="blog"]:hover {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #2F80ED !important;
+	transform: translateX(2px) !important;
+	padding: 0 !important;
+}
+
+/* Hapus semua pseudo-element button */
+html body .footer-style-1 .footer-widget .links li a::before,
+html body .footer-style-1 .footer-widget .links li a.button::before,
+html body .footer-style-1 .footer-widget .links li a[class*="button"]::before {
+	display: none !important;
+	content: none !important;
+	background: none !important;
+	opacity: 0 !important;
+	visibility: hidden !important;
+}
+
+/* OVERRIDE FINAL - PASTIKAN LINK PENDAFTARAN TIDAK JADI BUTTON */
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget h6 + .links li:first-child a,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li:first-child a,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a[href*="/pages/pendaftaran/daftar.php"],
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a[href*="pendaftaran"],
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a[href*="daftar"],
+html body .footer-style-1 .footer-widget:last-child .links li:first-child a,
+html body .footer-style-1 .footer-widget h6:contains("Informasi") + .links li:first-child a {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	border: none !important;
+	border-width: 0 !important;
+	border-style: none !important;
+	border-color: transparent !important;
+	padding: 0 !important;
+	padding-top: 0 !important;
+	padding-right: 0 !important;
+	padding-bottom: 0 !important;
+	padding-left: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+	color: #6c757d !important;
+	font-weight: 400 !important;
+	font-size: 14px !important;
+	width: auto !important;
+	height: auto !important;
+	min-width: auto !important;
+	min-height: auto !important;
+	max-width: none !important;
+	max-height: none !important;
+	display: inline-block !important;
+	text-align: left !important;
+	transform: none !important;
+	line-height: 1.6 !important;
+	margin: 0 !important;
+	text-decoration: none !important;
+}
+
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget h6 + .links li:first-child a:hover,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li:first-child a:hover,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a[href*="/pages/pendaftaran/daftar.php"]:hover,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a[href*="pendaftaran"]:hover,
+html body footer.footer.footer-style-1 .container .widget-wrapper .row .col-xl-3 .footer-widget .links li a[href*="daftar"]:hover,
+html body .footer-style-1 .footer-widget:last-child .links li:first-child a:hover,
+html body .footer-style-1 .footer-widget h6:contains("Informasi") + .links li:first-child a:hover {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #2F80ED !important;
+	transform: translateX(2px) !important;
+	padding: 0 !important;
+}

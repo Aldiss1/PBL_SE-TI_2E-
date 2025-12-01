@@ -1,43 +1,464 @@
-/* Blog List Styles */
-.blog-card {
-	transition: all 0.3s ease;
+/* ============================================
+   BLOG LIST PAGE - SAMA DENGAN PERSONIL & DAFTAR
+   ============================================ */
+
+/* ============================================
+   SECTION HEADER - SAMA PERSIS DENGAN PERSONIL
+   ============================================ */
+
+/* Section Header Background - Fresh Gradient */
+section.pt-150.pb-50 {
+	background: linear-gradient(180deg, #f8fbff 0%, #ffffff 20%, #ffffff 80%, #f8fbff 100%) !important;
+	position: relative;
+	overflow: hidden;
+	margin-top: 80px !important;
+	padding: 120px 0 80px !important;
 }
 
-.blog-card:hover {
-	transform: translateY(-5px);
-	box-shadow: 0 5px 20px rgba(0,0,0,0.1) !important;
+/* Pattern Background - Subtle Lines */
+section.pt-150.pb-50::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-image: 
+		repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 1px,
+			rgba(47, 128, 237, 0.02) 1px,
+			rgba(47, 128, 237, 0.02) 2px
+		);
+	pointer-events: none;
+	z-index: 0;
+	opacity: 0.5;
 }
 
-.blog-card:hover .blog-image img {
-	transform: scale(1.1);
+/* Decorative Circles */
+section.pt-150.pb-50::after {
+	content: '';
+	position: absolute;
+	top: -100px;
+	right: -100px;
+	width: 400px;
+	height: 400px;
+	background: radial-gradient(circle, rgba(47, 128, 237, 0.05) 0%, transparent 70%);
+	border-radius: 50%;
+	pointer-events: none;
+	z-index: 0;
+	animation: float 6s ease-in-out infinite;
 }
 
-.blog-card-item {
-	cursor: pointer;
+@keyframes float {
+	0%, 100% {
+		transform: translateY(0) translateX(0);
+	}
+	50% {
+		transform: translateY(-20px) translateX(-10px);
+	}
 }
 
-.blog-card-item:hover h5 a {
+section.pt-150.pb-50 .container {
+	position: relative;
+	z-index: 1;
+}
+
+/* Section Title - Fresh Design */
+section.pt-150.pb-50 .section-title {
+	text-align: center;
+	position: relative;
+	animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInDown {
+	from {
+		opacity: 0;
+		transform: translateY(-30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+section.pt-150.pb-50 .section-title h2 {
+	font-size: 3rem !important;
+	font-weight: 900 !important;
+	line-height: 1.2 !important;
+	position: relative;
+	display: inline-block;
+	margin-bottom: 20px !important;
+	letter-spacing: -0.5px !important;
+}
+
+/* Two-tone Text Effect */
+section.pt-150.pb-50 .section-title h2 {
+	background: none !important;
+	-webkit-background-clip: unset !important;
+	-webkit-text-fill-color: unset !important;
+	background-clip: unset !important;
+}
+
+/* Style untuk kata "Blog" */
+section.pt-150.pb-50 .section-title h2 {
+	color: #22243e !important;
+}
+
+/* Style untuk kata "Artikel" - akan di-handle dengan span di HTML */
+section.pt-150.pb-50 .section-title h2 span {
+	color: #2F80ED !important;
+	position: relative;
+}
+
+/* Underline Animation */
+section.pt-150.pb-50 .section-title h2::after {
+	content: '';
+	position: absolute;
+	bottom: -12px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 4px;
+	background: linear-gradient(90deg, #2F80ED 0%, #1E5FCC 50%, #2F80ED 100%);
+	border-radius: 2px;
+	animation: underlineExpand 1s ease-out 0.5s forwards;
+	box-shadow: 0 2px 8px rgba(47, 128, 237, 0.3);
+}
+
+@keyframes underlineExpand {
+	from {
+		width: 0;
+	}
+	to {
+		width: 120px;
+	}
+}
+
+/* Decorative dots around underline */
+section.pt-150.pb-50 .section-title h2::before {
+	content: '';
+	position: absolute;
+	bottom: -10px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 140px;
+	height: 4px;
+	background: 
+		radial-gradient(circle, #2F80ED 2px, transparent 2px),
+		radial-gradient(circle, #2F80ED 2px, transparent 2px);
+	background-size: 20px 4px;
+	background-position: 0 0, 120px 0;
+	opacity: 0.3;
+	animation: fadeIn 1s ease-out 1s forwards;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+/* Subtitle - Fresh Design */
+section.pt-150.pb-50 .section-title p {
+	font-size: 1.15rem !important;
+	color: #6c757d !important;
+	margin-top: 30px !important;
+	line-height: 1.8 !important;
+	font-weight: 400 !important;
+	letter-spacing: 0.3px !important;
+	animation: fadeInUp 0.8s ease-out 0.3s both;
+	max-width: 700px;
+	margin-left: auto !important;
+	margin-right: auto !important;
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Blog List Section */
+#blog-list {
+	background: linear-gradient(180deg, #f8fbff 0%, #ffffff 10%, #fafbfc 30%, #f8f9fa 50%, #fafbfc 70%, #ffffff 90%, #f8fbff 100%) !important;
+	padding: 80px 0 70px !important;
+	position: relative;
+	margin-top: 0 !important;
+}
+
+/* Blog Card - Sama dengan Personil Card */
+#blog-list .blog-card {
+	background: #ffffff !important;
+	border-radius: 16px !important;
+	overflow: hidden !important;
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+	border: 1px solid rgba(47, 128, 237, 0.1) !important;
+	position: relative !important;
+	height: 100% !important;
+	display: flex !important;
+	flex-direction: column !important;
+	margin-bottom: 30px !important;
+}
+
+#blog-list .blog-card::before {
+	content: '' !important;
+	position: absolute !important;
+	top: 0 !important;
+	left: 0 !important;
+	right: 0 !important;
+	height: 4px !important;
+	background: linear-gradient(90deg, #2F80ED 0%, #1E5FCC 50%, #2F80ED 100%) !important;
+	opacity: 0 !important;
+	transition: opacity 0.4s ease !important;
+	z-index: 1 !important;
+}
+
+#blog-list .blog-card:hover {
+	transform: translateY(-10px) !important;
+	box-shadow: 0 12px 40px rgba(47, 128, 237, 0.2) !important;
+	border-color: rgba(47, 128, 237, 0.3) !important;
+}
+
+#blog-list .blog-card:hover::before {
+	opacity: 1 !important;
+}
+
+/* Blog Image */
+#blog-list .blog-card .blog-image {
+	position: relative !important;
+	overflow: hidden !important;
+	width: 100% !important;
+	height: 250px !important;
+	background: #f0f7ff !important;
+}
+
+#blog-list .blog-card .blog-image img {
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover !important;
+	transition: all 0.4s ease !important;
+	display: block !important;
+}
+
+#blog-list .blog-card:hover .blog-image img {
+	transform: scale(1.1) !important;
+}
+
+/* Blog Category Badge */
+#blog-list .blog-card .blog-category {
+	position: absolute !important;
+	top: 15px !important;
+	right: 15px !important;
+	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+	color: #ffffff !important;
+	padding: 6px 15px !important;
+	border-radius: 20px !important;
+	font-size: 12px !important;
+	font-weight: 600 !important;
+	text-transform: uppercase !important;
+	letter-spacing: 0.5px !important;
+	z-index: 2 !important;
+	box-shadow: 0 2px 10px rgba(47, 128, 237, 0.3) !important;
+}
+
+/* Blog Content */
+#blog-list .blog-card .blog-content {
+	padding: 30px !important;
+	flex: 1 !important;
+	display: flex !important;
+	flex-direction: column !important;
+}
+
+/* Blog Meta */
+#blog-list .blog-card .blog-meta {
+	display: flex !important;
+	gap: 15px !important;
+	margin-bottom: 15px !important;
+	font-size: 13px !important;
+	color: #6c757d !important;
+}
+
+#blog-list .blog-card .blog-meta span {
+	display: flex !important;
+	align-items: center !important;
+	gap: 5px !important;
+}
+
+#blog-list .blog-card .blog-meta i {
+	font-size: 14px !important;
 	color: #2F80ED !important;
 }
 
-/* Pagination Styles */
-.pagination-wrapper {
-	margin-top: 40px;
+/* Blog Title */
+#blog-list .blog-card .blog-title {
+	margin-bottom: 15px !important;
+	font-size: 1.4rem !important;
+	font-weight: 700 !important;
+	line-height: 1.4 !important;
 }
 
-.pagination .page-link {
-	transition: all 0.3s ease;
+#blog-list .blog-card .blog-title a {
+	color: #22243e !important;
+	text-decoration: none !important;
+	transition: all 0.3s ease !important;
+	display: -webkit-box !important;
+	-webkit-line-clamp: 2 !important;
+	-webkit-box-orient: vertical !important;
+	overflow: hidden !important;
 }
 
-.pagination .page-link:hover {
-	background: #2F80ED;
-	color: white;
-	border-color: #2F80ED;
+#blog-list .blog-card .blog-title a:hover {
+	color: #2F80ED !important;
 }
 
-.pagination .page-item.active .page-link {
-	background: #2F80ED;
-	border-color: #2F80ED;
-	color: white;
+/* Blog Excerpt */
+#blog-list .blog-card .blog-excerpt {
+	color: #6c757d !important;
+	font-size: 0.95rem !important;
+	line-height: 1.7 !important;
+	margin-bottom: 20px !important;
+	flex: 1 !important;
+	display: -webkit-box !important;
+	-webkit-line-clamp: 3 !important;
+	-webkit-box-orient: vertical !important;
+	overflow: hidden !important;
 }
 
+/* Read More Button */
+#blog-list .blog-card .read-more {
+	color: #2F80ED !important;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+	text-decoration: none !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	transition: all 0.3s ease !important;
+	margin-top: auto !important;
+}
+
+#blog-list .blog-card .read-more i {
+	transition: transform 0.3s ease !important;
+}
+
+#blog-list .blog-card .read-more:hover {
+	color: #1E5FCC !important;
+	gap: 12px !important;
+}
+
+#blog-list .blog-card .read-more:hover i {
+	transform: translateX(5px) !important;
+}
+
+/* Empty State */
+#blog-list .text-muted {
+	color: #6c757d !important;
+	font-size: 1.1rem !important;
+	padding: 60px 20px !important;
+}
+
+/* Pagination - Sama dengan Personil Style */
+#blog-list .pagination-wrapper {
+	margin-top: 50px !important;
+}
+
+#blog-list .pagination {
+	display: flex !important;
+	justify-content: center !important;
+	align-items: center !important;
+	gap: 10px !important;
+	list-style: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+#blog-list .pagination li {
+	margin: 0 !important;
+}
+
+#blog-list .pagination li a {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 40px !important;
+	height: 40px !important;
+	border-radius: 10px !important;
+	background: #ffffff !important;
+	border: 1px solid rgba(47, 128, 237, 0.1) !important;
+	color: #22243e !important;
+	text-decoration: none !important;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+#blog-list .pagination li a:hover {
+	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+	color: #ffffff !important;
+	border-color: #2F80ED !important;
+	transform: translateY(-2px) !important;
+	box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3) !important;
+}
+
+#blog-list .pagination li.active a {
+	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+	color: #ffffff !important;
+	border-color: #2F80ED !important;
+	box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3) !important;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+	section.pt-150.pb-50 {
+		padding: 100px 0 60px !important;
+	}
+	
+	section.pt-150.pb-50 .section-title h2 {
+		font-size: 2.5rem !important;
+	}
+	
+	#blog-list {
+		padding: 60px 0 50px !important;
+	}
+	
+	#blog-list .blog-card .blog-image {
+		height: 200px !important;
+	}
+}
+
+@media (max-width: 767px) {
+	section.pt-150.pb-50 {
+		padding: 80px 0 50px !important;
+	}
+	
+	section.pt-150.pb-50 .section-title h2 {
+		font-size: 2rem !important;
+	}
+	
+	section.pt-150.pb-50 .section-title p {
+		font-size: 1rem !important;
+	}
+	
+	#blog-list {
+		padding: 50px 0 40px !important;
+	}
+	
+	#blog-list .blog-card .blog-image {
+		height: 180px !important;
+	}
+	
+	#blog-list .blog-card .blog-content {
+		padding: 20px !important;
+	}
+	
+	#blog-list .blog-card .blog-title {
+		font-size: 1.2rem !important;
+	}
+}

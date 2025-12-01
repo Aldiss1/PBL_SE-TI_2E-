@@ -36,6 +36,7 @@ $is_tentang_kami_page = true;
 ?>
 <?php include __DIR__ . '/../../template/header.php'; ?>
 
+<<<<<<< Updated upstream
 <section class="about-hero">
     <div class="container">
         <h2 class="wow fadeInUp" data-wow-delay=".2s">Tentang Kami</h2>
@@ -120,6 +121,93 @@ $is_tentang_kami_page = true;
             
         </div>
     </div>
+=======
+<section class="pt-150 pb-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section-title text-center mb-30">
+                    <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Tentang <span>Kami</span></h2>
+                    <p class="wow fadeInUp" data-wow-delay=".4s">Mengenal Laboratorium Software Engineering lebih dekat</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="tentang-kami-content" class="pt-100 pb-70">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        
+        <div class="about-card wow fadeInUp" data-wow-delay=".2s">
+          <div class="about-header">
+            <div class="about-icon">
+              <i class="lni lni-information"></i>
+            </div>
+            <h3 class="about-title">
+                <?php 
+                // Menggunakan Judul dari database, fallback ke 'Tentang Kami' jika kosong
+                echo empty($tentang_kami_data['title']) ? 'Tentang Kami' : htmlspecialchars($tentang_kami_data['title']); 
+                ?>
+            </h3>
+          </div>
+          
+          <p class="about-text">
+            <?php 
+                // Teks Utama Ditarik dari Database
+                echo nl2br(htmlspecialchars($tentang_kami_data['content'])); 
+            ?>
+          </p>
+          
+                    <div class="about-features">
+            <div class="feature-item wow fadeInUp" data-wow-delay=".3s">
+              <div class="feature-icon">
+                <i class="lni lni-code-alt"></i>
+              </div>
+              <div class="feature-content">
+                <h5>Rekayasa Perangkat Lunak</h5>
+                <p>Fokus pada pengembangan perangkat lunak berkualitas tinggi dengan metodologi terkini</p>
+              </div>
+            </div>
+            
+            <div class="feature-item wow fadeInUp" data-wow-delay=".4s">
+              <div class="feature-icon">
+                <i class="lni lni-book"></i>
+              </div>
+              <div class="feature-content">
+                <h5>Publikasi Ilmiah</h5>
+                <p>Mendorong penelitian dan publikasi hasil riset di bidang software engineering</p>
+              </div>
+            </div>
+            
+            <div class="feature-item wow fadeInUp" data-wow-delay=".5s">
+              <div class="feature-icon">
+                <i class="lni lni-handshake"></i>
+              </div>
+              <div class="feature-content">
+                <h5>Kemitraan Industri</h5>
+                <p>Membangun kerjasama dengan industri untuk implementasi teknologi nyata</p>
+              </div>
+            </div>
+            
+            <div class="feature-item wow fadeInUp" data-wow-delay=".6s">
+              <div class="feature-icon">
+                <i class="lni lni-graduation"></i>
+              </div>
+              <div class="feature-content">
+                <h5>Pembinaan Kompetensi</h5>
+                <p>Membina mahasiswa melalui proyek nyata dan pengembangan skill praktis</p>
+              </div>
+            </div>
+          </div>
+        
+
+      </div>
+      
+    </div>
+  </div>
+>>>>>>> Stashed changes
 </section>
 
 <style>
