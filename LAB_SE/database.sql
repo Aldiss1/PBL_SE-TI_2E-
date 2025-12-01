@@ -147,18 +147,22 @@ INSERT INTO konten_page (page_key, title, content) VALUES
 
 -- Database roadmap
 
-CREATE TABLE roadmap_periode (
+CREATE TABLE IF NOT EXISTS roadmap_periode (
     id SERIAL PRIMARY KEY,
-    tahun_periode VARCHAR(50) NOT NULL,    -- Contoh: '2024 Q1 - Q4'
-    judul_fase VARCHAR(150) NOT NULL,      -- Contoh: 'Fase Pendirian & Setup'
-    urutan INTEGER NOT NULL DEFAULT 0       -- Untuk sorting
+    tahun_periode VARCHAR(100) NOT NULL,    -- Contoh: '2024 Q1 - Q4'
+    judul_fase VARCHAR(255) NOT NULL,      -- Contoh: 'Fase Pendirian & Setup'
+    urutan INTEGER NOT NULL DEFAULT 1,      -- Untuk sorting
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE roadmap_item (
+CREATE TABLE IF NOT EXISTS roadmap_item (
     id SERIAL PRIMARY KEY,
-    id_periode INTEGER REFERENCES roadmap_periode(id) ON DELETE CASCADE, -- Foreign Key
+    id_periode INTEGER NOT NULL REFERENCES roadmap_periode(id) ON DELETE CASCADE, -- Foreign Key
     deskripsi_tugas TEXT NOT NULL,         -- Contoh: 'Pembentukan struktur organisasi laboratorium'
-    urutan INTEGER NOT NULL DEFAULT 0       -- Untuk sorting item di dalam fase
+    urutan INTEGER NOT NULL DEFAULT 1,     -- Untuk sorting item di dalam fase
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 

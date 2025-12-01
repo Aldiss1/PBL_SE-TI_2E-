@@ -7,6 +7,7 @@
 	background: linear-gradient(135deg, #f8fbff 0%, #ffffff 50%, #f0f7ff 100%);
 	position: relative;
 	overflow: hidden;
+	padding-bottom: 100px !important;
 }
 
 .hero-section-wrapper-2::before {
@@ -37,15 +38,17 @@
 	text-transform: uppercase;
 	letter-spacing: 1px;
 	position: relative;
-	padding-left: 20px;
+	text-align: center !important;
+	display: inline-block;
+	width: 100%;
 }
 
 .hero-section-wrapper-2 h4::before {
 	content: '';
 	position: absolute;
-	left: 0;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
 	top: 50%;
-	transform: translateY(-50%);
 	width: 4px;
 	height: 30px;
 	background: linear-gradient(180deg, #2F80ED 0%, #1E5FCC 100%);
@@ -62,6 +65,7 @@
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
+	text-align: center !important;
 }
 
 .hero-section-wrapper-2 p {
@@ -739,12 +743,12 @@ footer .footer-style-1 .footer-widget .links li a.border-button:hover {
 	align-items: center !important;
 	justify-content: center !important;
 	width: 100% !important;
-	height: 100% !important;
+	min-height: 100% !important;
 	padding: 40px 20px !important;
 }
 
 .hero-mascot .mascot-container {
-	max-width: calc(500px - 20px) !important;
+	max-width: calc(550px - 20px) !important;
 	width: 100% !important;
 	display: flex !important;
 	align-items: center !important;
@@ -754,8 +758,8 @@ footer .footer-style-1 .footer-widget .links li a.border-button:hover {
 }
 
 .hero-mascot .mascot-illustration {
-	max-width: calc(400px - 20px) !important;
-	width: calc(400px - 20px) !important;
+	max-width: calc(550px - 20px) !important;
+	width: calc(550px - 20px) !important;
 	height: auto !important;
 	display: block !important;
 	margin: 0 auto !important;

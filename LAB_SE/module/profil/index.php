@@ -14,8 +14,6 @@ if (!isset($base_path)) {
 $pesan = '';
 $data_edit = null;
 $semua_konten = [];
-// Pastikan $data_list didefinisikan sebagai array kosong jika tidak ada data yang diambil
-$data_list = [];
 // --- END DEFINISI ---
 
 // --- 2. KONFIGURASI MENU SIDEBAR ---
@@ -106,7 +104,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['page_key']) && isset(
     }
 }
 
-// --- 4. LOGIKA AMBIL DATA UNTUK EDIT (GET) ---
+// --- 4. LOGIKA HAPUS DATA (GET) ---
+if (isset($_GET['delete'])) {
+    $delete_key = $_GET['delete'];
+    // Jangan hapus visi_deskripsi dan misi_item_% dari sini (gunakan modal Visi-Misi)
+    if ($delete_key !== 'visi_deskripsi' && strpos($delete_key, 'misi_item_') !== 0) {
+        $query_delete = "DELETE FROM konten_page WHERE page_key = $1";
+        $result_delete = pg_query_params($koneksi, $query_delete, array($delete_key));
+        if ($result_delete) {
+            $pesan = "<div class='alert alert-success'>✅ Konten <b>" . htmlspecialchars($delete_key) . "</b> berhasil dihapus!</div>";
+        } else {
+            $pesan = "<div class='alert alert-danger'>❌ Gagal hapus: " . pg_last_error($koneksi) . "</div>";
+        }
+    } else {
+        $pesan = "<div class='alert alert-warning'>⚠️ Konten ini tidak bisa dihapus dari sini. Gunakan menu Kelola Visi & Misi untuk menghapus.</div>";
+    }
+}
+
+// --- 5. LOGIKA AMBIL DATA UNTUK EDIT (GET) ---
 $data_edit = null;
 if (isset($_GET['edit'])) {
     $edit_key = $_GET['edit'];
@@ -118,7 +133,65 @@ if (isset($_GET['edit'])) {
     }
 }
 
-// --- 5. LOGIKA CRUD VISI-MISI ---
+// --- 5. LOGIKA CRUD TENTANG KAMI ---
+$tentang_kami_data = null;
+
+// Ambil data Tentang Kami
+$query_tentang_kami = "SELECT page_key, title, content FROM konten_page WHERE page_key = 'tentang_kami'";
+$result_tentang_kami = pg_query($koneksi, $query_tentang_kami);
+if ($result_tentang_kami && pg_num_rows($result_tentang_kami) > 0) {
+    $tentang_kami_data = pg_fetch_assoc($result_tentang_kami);
+}
+
+// Handle: Update Tentang Kami
+if (isset($_POST['update_tentang_kami'])) {
+    $tentang_kami_title = trim($_POST['tentang_kami_title'] ?? '');
+    $tentang_kami_content = trim($_POST['tentang_kami_content'] ?? '');
+    if (empty($tentang_kami_content)) {
+        $pesan = "<div class='alert alert-danger'>❌ Konten Tentang Kami tidak boleh kosong!</div>";
+    } else {
+        // Cek apakah sudah ada
+        $cek_tentang_kami = "SELECT COUNT(*) FROM konten_page WHERE page_key = 'tentang_kami'";
+        $result_cek = pg_query($koneksi, $cek_tentang_kami);
+        $count = 0;
+        if ($result_cek) {
+            $row_cek = pg_fetch_row($result_cek);
+            $count = $row_cek[0];
+        }
+        
+        if ($count > 0) {
+            // Update
+            $update_tentang_kami = "UPDATE konten_page SET title = $1, content = $2, last_updated = NOW() WHERE page_key = 'tentang_kami'";
+            $result_update = pg_query_params($koneksi, $update_tentang_kami, array($tentang_kami_title ?: 'Tentang Kami', $tentang_kami_content));
+            if ($result_update) {
+                $pesan = "<div class='alert alert-success'>✅ Tentang Kami berhasil diperbarui!</div>";
+                // Refresh data
+                $result_tentang_kami = pg_query($koneksi, $query_tentang_kami);
+                if ($result_tentang_kami && pg_num_rows($result_tentang_kami) > 0) {
+                    $tentang_kami_data = pg_fetch_assoc($result_tentang_kami);
+                }
+            } else {
+                $pesan = "<div class='alert alert-danger'>❌ Gagal update Tentang Kami: " . pg_last_error($koneksi) . "</div>";
+            }
+        } else {
+            // Insert
+            $insert_tentang_kami = "INSERT INTO konten_page (page_key, title, content) VALUES ('tentang_kami', $1, $2)";
+            $result_insert = pg_query_params($koneksi, $insert_tentang_kami, array($tentang_kami_title ?: 'Tentang Kami', $tentang_kami_content));
+            if ($result_insert) {
+                $pesan = "<div class='alert alert-success'>✅ Tentang Kami berhasil ditambahkan!</div>";
+                // Refresh data
+                $result_tentang_kami = pg_query($koneksi, $query_tentang_kami);
+                if ($result_tentang_kami && pg_num_rows($result_tentang_kami) > 0) {
+                    $tentang_kami_data = pg_fetch_assoc($result_tentang_kami);
+                }
+            } else {
+                $pesan = "<div class='alert alert-danger'>❌ Gagal insert Tentang Kami: " . pg_last_error($koneksi) . "</div>";
+            }
+        }
+    }
+}
+
+// --- 6. LOGIKA CRUD VISI-MISI ---
 $visi_data = null;
 $misi_items = [];
 $misi_edit = null;
@@ -281,9 +354,9 @@ if (isset($_GET['hapus_misi'])) {
     }
 }
 
-// --- 6. AMBIL SEMUA DATA KONTEN LAINNYA ---
+// --- 7. AMBIL SEMUA DATA KONTEN LAINNYA ---
 $semua_konten = [];
-$query_all = "SELECT page_key, title, content, last_updated FROM konten_page WHERE page_key NOT IN ('visi_deskripsi') AND page_key NOT LIKE 'misi_item_%' ORDER BY page_key ASC";
+$query_all = "SELECT page_key, title, content, last_updated FROM konten_page WHERE page_key NOT IN ('visi_deskripsi', 'tentang_kami') AND page_key NOT LIKE 'misi_item_%' ORDER BY page_key ASC";
 $result_all = pg_query($koneksi, $query_all);
 
 if ($result_all) {
@@ -293,153 +366,13 @@ if ($result_all) {
 }
 
 // --- 6. TAMPILAN (VIEW) ---
-?>
-<!DOCTYPE html>
-<html class="no-js" lang="id">
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <title><?php echo isset($page_title) ? $page_title : 'Admin - Web Profile Laboratorium SE'; ?></title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    
-    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/bootstrap-5.0.0-alpha-2.min.css" />
-    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/LineIcons.2.0.css"/>
-    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/animate.css"/>
-    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/lindy-uikit.css"/>
-    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-layout.css"/>
-    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-dashboard.css"/>
-</head>
-<body>
-    
-    <?php
-
-// Sidebar sederhana untuk Mahasiswa
-if (!isset($base_path)) {
-    $base_path = '../../';
-}
-
-if (!isset($current_page)) {
-    $current_page = 'dashboard';
-}
-
-
+include __DIR__ . '/../../template/admin_header.php';
 ?>
 
-<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
-    <i class="lni lni-menu"></i>
-</button>
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+<!-- Sidebar -->
+<?php include __DIR__ . '/../../template/admin_sidebar.php'; ?>
 
-<aside class="admin-sidebar" id="adminSidebar">
-    <div class="sidebar-header">
-        <h4>Admin Panel</h4>
-        <p><i class="lni lni-user"></i> <?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : 'admin'; ?></p>
-    </div>
-    <ul class="sidebar-menu">
-        <?php foreach ($menu_items as $key => $item): ?>
-            <li>
-                <a href="<?php echo htmlspecialchars($item['link']); ?>" class="<?php echo $item['active'] ? 'active' : ''; ?>">
-                    <i class="<?php echo htmlspecialchars($item['icon']); ?>"></i>
-                    <span class="menu-text"><?php echo htmlspecialchars($item['title']); ?></span>
-                </a>
-            </li>
-        <?php endforeach; ?>
-    </ul>
-    
-    <div class="sidebar-divider"></div>
-    
-    <ul class="sidebar-menu">
-        <li>
-            <a href="<?php echo $base_path; ?>index.php" target="_blank">
-                <i class="lni lni-website"></i>
-                <span class="menu-text">Lihat Website</span>
-            </a>
-        </li>
-        <li>
-            <a href="<?php echo $base_path; ?>module/auth/logout.php" style="color:#e74c3c;">
-                <i class="lni lni-exit"></i>
-                <span class="menu-text">Logout</span>
-            </a>
-        </li>
-    </ul>
-</aside>
 <style>
-/* ------------------------------------------------ */
-/* STYLE UTAMA SIDEBAR (Dark, Kotak, Ikon Putih) */
-/* ------------------------------------------------ */
-.admin-sidebar { 
-    position: fixed; top: 0; left: 0; height: 100vh; width: 260px; 
-    /* WARNA BACKGROUND GELAP SESUAI GAMBAR */
-    background: #2c3e50; 
-    border-right: none; 
-    z-index: 1102; padding: 20px 16px; 
-    box-shadow: 2px 0 10px rgba(0,0,0,0.1); /* Shadow lebih gelap dari default Anda */
-    overflow-y: auto; 
-}
-.admin-sidebar .sidebar-header { margin-bottom: 16px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.admin-sidebar .sidebar-header h4 { margin: 0 0 6px 0; font-weight: 600; color: #ffffff; font-size: 18px; text-align: center; }
-.admin-sidebar .sidebar-header p { margin: 0; color: #bdc3c7; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
-
-.admin-sidebar .sidebar-menu { list-style: none; margin: 10px 0; padding: 0; }
-.admin-sidebar .sidebar-menu li { margin-bottom: 0; /* Menghilangkan margin antar item menu */ }
-
-/* Item Menu - Default */
-.admin-sidebar .sidebar-menu a { 
-    display: flex; align-items: center; gap: 10px; 
-    color: #ecf0f1; /* Teks default abu-abu terang */
-    text-decoration: none; 
-    padding: 15px 16px; /* Padding dibuat lebih besar agar full kotak */
-    border-radius: 0; /* PENTING: Menghilangkan sudut melengkung */
-    transition: background .15s ease, color .15s ease, transform .06s ease; 
-}
-/* Ikon - Dibuat Putih Solid */
-.admin-sidebar .sidebar-menu a i { 
-    color: #ffffff; /* PENTING: Ikon putih solid */
-    font-size: 20px; 
-}
-
-/* Hover Effect (Tidak bergeser, background transparan) */
-.admin-sidebar .sidebar-menu a:hover { 
-    background: rgba(255,255,255,0.1); /* Background transparan putih */
-    color: #ffffff; 
-    transform: none; /* PENTING: Menonaktifkan efek translateY(-1px) */
-}
-
-/* Item Menu AKTIF (Full Kotak & Biru Solid) */
-.admin-sidebar .sidebar-menu a.active { 
-    background: #2F80ED; /* PENTING: Warna biru solid */
-    color: #ffffff; 
-    font-weight: 600; 
-    border-radius: 0; /* PENTING: Tetap kotak */
-}
-/* Ikon Item AKTIF */
-.admin-sidebar .sidebar-menu a.active i { 
-    color: #ffffff !important; /* Pastikan ikon aktif tetap putih */
-}
-
-.admin-sidebar .sidebar-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 15px 0; }
-
-.sidebar-toggle { 
-    position: fixed; top: 14px; left: 14px; z-index: 1101; 
-    background: #2F80ED; /* Warna toggle biru */
-    color: #ffffff; 
-    border: none; border-radius: 5px; width: 38px; height: 38px; 
-    display: inline-flex; align-items: center; justify-content: center; 
-    box-shadow: 0 6px 16px rgba(0,0,0,0.2); 
-}
-.sidebar-toggle:hover { background: #1E5FCC; }
-
-/* Mobile */
-@media (max-width: 991px) {
-    .admin-sidebar { transform: translateX(-100%); transition: transform .2s ease; }
-    .admin-sidebar.active { transform: translateX(0); }
-    .admin-main-content { margin-left: 0; }
-}
-
-.admin-main-content { margin-left: 260px; transition: margin-left .2s ease; padding: 20px; }
-.sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; display: none; }
-.sidebar-overlay.active { display: block; }
-
 /* ------------------------------------------------ */
 /* STYLE KONTEN UTAMA (Dipertahankan) */
 /* ------------------------------------------------ */
@@ -522,37 +455,10 @@ table.custom-table th, table.custom-table td { padding: 12px; text-align: left; 
 table.custom-table th { background-color: #f8f9fa; font-weight: bold; }
 table.custom-table tr:hover { background-color: #f1f1f1; }
 </style>
-<script>
-function toggleSidebar() {
-    const sidebar = document.getElementById('adminSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    if (window.innerWidth <= 991) {
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-    }
-}
 
-document.getElementById('sidebarOverlay').addEventListener('click', function() {
-    if (window.innerWidth <= 991) {
-        const sidebar = document.getElementById('adminSidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-    }
-});
-
-window.addEventListener('resize', function() {
-    const sidebar = document.getElementById('adminSidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    if (window.innerWidth > 991) {
-        sidebar.classList.remove('active');
-        overlay.classList.remove('active');
-    }
-});
-</script>
-
-
-<div class="admin-main-content"> <div class="profil-container">
+<!-- Main Content -->
+<main class="admin-main-content">
+<div class="profil-container">
     
     <div class="header-content"> <h1>Kelola Teks Profil & Halaman</h1>
         <p>Kelola konten dinamis seperti Visi, Misi, Sejarah, dan Teks Sambutan</p>
@@ -666,14 +572,61 @@ window.addEventListener('resize', function() {
     </div>
     <!-- ========================= END MODAL: KELOLA VISI-MISI ========================= -->
 
-    <div class="card">
-        <h3 class="card-title-profile">
-            <?php echo $data_edit ? '✏️ Edit Konten: ' . htmlspecialchars($data_edit['page_key']) : '➕ Tambah Konten Baru'; ?>
+    <!-- ========================= MODAL: KELOLA TENTANG KAMI ========================= -->
+    <div class="modal fade" id="modalTentangKami" tabindex="-1" aria-labelledby="modalTentangKamiLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTentangKamiLabel">
+                        <i class="lni lni-information"></i> Kelola Tentang Kami
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?php echo $pesan; ?>
+
+                    <form method="POST" action="">
+                        <div class="form-group mb-3">
+                            <label for="tentang_kami_title">Judul:</label>
+                            <input type="text" name="tentang_kami_title" id="tentang_kami_title" class="form-control" 
+                                   value="<?php echo $tentang_kami_data ? htmlspecialchars($tentang_kami_data['title']) : 'Tentang Kami'; ?>" 
+                                   placeholder="Tentang Kami">
+                            <small class="text-muted">Judul untuk konten tentang kami</small>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="tentang_kami_content">Konten Tentang Kami:</label>
+                            <textarea name="tentang_kami_content" id="tentang_kami_content" class="form-control" rows="10" required><?php echo $tentang_kami_data ? htmlspecialchars($tentang_kami_data['content']) : ''; ?></textarea>
+                            <small class="text-muted">Masukkan deskripsi lengkap tentang laboratorium</small>
+                        </div>
+                        <button type="submit" name="update_tentang_kami" class="btn btn-primary">
+                            <i class="lni lni-save"></i> Simpan Tentang Kami
+                        </button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ========================= END MODAL: KELOLA TENTANG KAMI ========================= -->
+
+    <!-- ========================= SECTION: TAMBAH/EDIT KONTEN BARU ========================= -->
+    <div class="card mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="card-title-profile mb-0">
+                <i class="lni lni-add-files"></i> <?php echo $data_edit ? 'Edit Konten: ' . htmlspecialchars($data_edit['page_key']) : 'Tambah Konten Baru'; ?>
         </h3>
+            <?php if ($data_edit): ?>
+                <a href="index.php" class="btn btn-outline-secondary">
+                    <i class="lni lni-close"></i> Batal Edit
+                </a>
+            <?php endif; ?>
+        </div>
         <hr class="card-divider"/>
         
         <form method="POST" action="">
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label for="page_key">Page Key (ID Unik):</label>
                 <input type="text" name="page_key" id="page_key" class="form-control" 
                         value="<?php echo $data_edit ? htmlspecialchars($data_edit['page_key']) : ''; ?>" 
@@ -681,32 +634,45 @@ window.addEventListener('resize', function() {
                         required 
                         <?php echo $data_edit ? 'readonly class="form-control-readonly"' : ''; ?>>
                 <?php if (!$data_edit): ?>
-                <small class="text-muted-small">Gunakan huruf kecil tanpa spasi (gunakan underscore _).</small>
+                <small class="text-muted">Gunakan huruf kecil tanpa spasi (gunakan underscore _).</small>
                 <?php endif; ?>
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label for="title">Judul (Opsional):</label>
                 <input type="text" name="title" id="title" class="form-control" 
                         value="<?php echo $data_edit ? htmlspecialchars($data_edit['title']) : ''; ?>"
                         placeholder="Judul konten jika ada">
+                <small class="text-muted">Judul untuk konten ini (opsional)</small>
             </div>
 
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label for="content">Isi Konten:</label>
-                <textarea name="content" id="content" class="form-control" required><?php echo $data_edit ? htmlspecialchars($data_edit['content']) : ''; ?></textarea>
+                <textarea name="content" id="content" class="form-control" rows="8" required><?php echo $data_edit ? htmlspecialchars($data_edit['content']) : ''; ?></textarea>
+                <small class="text-muted">Masukkan isi konten yang ingin ditambahkan atau diedit</small>
             </div>
 
-            <button type="submit" class="btn btn-primary">💾 Simpan Konten</button>
-            
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="lni lni-save"></i> <?php echo $data_edit ? 'Simpan Perubahan' : 'Simpan Konten'; ?>
+                </button>
             <?php if ($data_edit): ?>
-                <a href="index.php" class="btn btn-danger" style="margin-left: 10px;">Batal Edit</a>
+                    <a href="index.php" class="btn btn-outline-danger">
+                        <i class="lni lni-close"></i> Batal
+                    </a>
             <?php endif; ?>
+            </div>
         </form>
     </div>
+    <!-- ========================= END SECTION: TAMBAH/EDIT KONTEN BARU ========================= -->
 
-    <div class="card">
-        <h3 class="card-title-profile">🗃️ Daftar Konten Tersimpan</h3>
+    <!-- ========================= SECTION: DAFTAR KONTEN TERSIMPAN ========================= -->
+    <div class="card mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="card-title-profile mb-0">
+                <i class="lni lni-files"></i> Daftar Konten Tersimpan
+            </h3>
+        </div>
         <hr class="card-divider"/>
         <div class="table-wrapper">
             <?php if (empty($semua_konten)): ?>
@@ -739,7 +705,7 @@ window.addEventListener('resize', function() {
                                 <a href="index.php?edit=<?php echo urlencode($row['page_key']); ?>" class="btn btn-sm btn-info" style="margin-right: 5px;">
                                     ✏️ Edit
                                 </a>
-                                <a href="delete.php?key=<?php echo urlencode($row['page_key']); ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus konten ini? Tindakan ini tidak bisa dibatalkan.');">
+                                <a href="index.php?delete=<?php echo urlencode($row['page_key']); ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus konten ini? Tindakan ini tidak bisa dibatalkan.');">
                                     🗑️ Hapus
                                 </a>
                             </td>
@@ -750,7 +716,21 @@ window.addEventListener('resize', function() {
             <?php endif; ?>
         </div>
     </div>
+    <!-- ========================= END SECTION: DAFTAR KONTEN TERSIMPAN ========================= -->
 
+    <!-- ========================= SECTION: KELOLA TENTANG KAMI ========================= -->
+    <div class="card mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="card-title-profile mb-0">
+                <i class="lni lni-information"></i> Kelola Tentang Kami
+            </h3>
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalTentangKami" onclick="openModalTentangKami(event)">
+                <i class="lni lni-information"></i> Kelola Tentang Kami
+            </button>
+        </div>
+        <p class="text-muted">Kelola konten tentang kami laboratorium. Klik tombol di atas untuk membuka halaman kelola tentang kami lengkap.</p>
+    </div>
+    <!-- ========================= END SECTION: KELOLA TENTANG KAMI ========================= -->
 
     <!-- ========================= SECTION: KELOLA VISI-MISI ========================= -->
     <div class="card mb-4">
@@ -763,7 +743,7 @@ window.addEventListener('resize', function() {
             </button>
         </div>
         <p class="text-muted">Kelola visi dan misi laboratorium. Klik tombol di atas untuk membuka halaman kelola visi-misi lengkap.</p>
-    </div>
+            </div>
     <!-- ========================= END SECTION: KELOLA VISI-MISI ========================= -->
 
     <!-- ========================= SECTION: KELOLA ROADMAP ========================= -->
@@ -774,18 +754,15 @@ window.addEventListener('resize', function() {
             </h3>
             <a href="kelola_roadmap.php" class="btn btn-secondary">
                 <i class="lni lni-map-marker"></i> Buka Halaman Roadmap
-            </a>
-        </div>
+            </a>
+        </div>
         <p class="text-muted">Kelola periode dan tugas roadmap laboratorium. Klik tombol di atas untuk membuka halaman kelola roadmap lengkap.</p>
-    </div>
+    </div>
     <!-- ========================= END SECTION: KELOLA ROADMAP ========================= -->
-
+    
 </div>
 </div>
-
-</body>
-</html>
-
+</main>
 
 
 <script>
@@ -846,6 +823,75 @@ function openModalVisiMisi(e) {
 // Fungsi untuk menutup modal Visi-Misi
 function closeModalVisiMisi() {
     var modalEl = document.getElementById('modalVisiMisi');
+    if (modalEl) {
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
+    
+    var backdrop = document.getElementById('modalBackdrop');
+    if (backdrop) {
+        backdrop.remove();
+    }
+}
+
+// Fungsi untuk membuka modal Tentang Kami
+function openModalTentangKami(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    var modalEl = document.getElementById('modalTentangKami');
+    if (!modalEl) {
+        console.error('Modal tentang-kami tidak ditemukan!');
+        return false;
+    }
+    
+    // Cek apakah Bootstrap tersedia
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        // Gunakan Bootstrap 5 API
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    } else {
+        // Fallback: buka modal secara manual
+        modalEl.style.display = 'block';
+        modalEl.classList.add('show');
+        document.body.classList.add('modal-open');
+        
+        // Hapus backdrop lama jika ada
+        var oldBackdrop = document.getElementById('modalBackdrop');
+        if (oldBackdrop) {
+            oldBackdrop.remove();
+        }
+        
+        // Buat backdrop baru
+        var backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'modalBackdrop';
+        backdrop.style.zIndex = '1050';
+        document.body.appendChild(backdrop);
+        
+        // Tutup modal saat klik backdrop
+        backdrop.addEventListener('click', function() {
+            closeModalTentangKami();
+        });
+        
+        // Tutup modal saat klik tombol close
+        var closeBtns = modalEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-close');
+        closeBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                closeModalTentangKami();
+            };
+        });
+    }
+    
+    return false;
+}
+
+// Fungsi untuk menutup modal Tentang Kami
+function closeModalTentangKami() {
+    var modalEl = document.getElementById('modalTentangKami');
     if (modalEl) {
         modalEl.style.display = 'none';
         modalEl.classList.remove('show');

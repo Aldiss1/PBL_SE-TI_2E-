@@ -12,7 +12,7 @@ if (!function_exists('ambil_konten')) {
         if ($result && pg_num_rows($result) > 0) {
             return pg_fetch_assoc($result);
         }
-        
+        return ['title' => '', 'content' => ''];
     }
 }
 
@@ -95,23 +95,16 @@ $misi_items = ambil_misi_items($koneksi, 3);
         <div class="row align-items-center justify-content-center">
           <div class="col-12 col-lg-10">
             <div class="row align-items-center">
-              <div class="col-lg-6">
-                <div class="text-center text-lg-left" style="padding: 60px 24px; margin-top: 150px; margin-bottom: 32px; padding-top: 150px;">
+              <div class="col-lg-6 d-flex align-items-center">
+                <div class="text-center w-100" style="padding: 60px 24px 100px 24px;">
                   <h4 style="color: #2F80ED; font-weight: 700; margin-bottom: 22px; font-size: 2rem;">Selamat Datang</h4>
                   <h2 style="font-size: 2.8rem; font-weight: 800; color: #22243e; margin-bottom: 22px; line-height: 1.2;">
                     Web Profile Laboratorium<br>Software Engineering
                   </h2>
-                  <p style="font-size: 1.15rem; color: #717791; margin-bottom: 40px;">
-                    Untuk mahasiswa yang ingin mengakses Laboratorium Software Engineering<br>silahkan klik tombol di bawah
-                  </p>
-                  <a href="<?php echo $labseHomeBase; ?>/pages/pendaftaran/daftar.php" 
-                     style="display: inline-block; font-weight: 600; color: #fff; background: #2F80ED; border-radius: 8px; padding: 12px 38px; font-size: 1.09rem; box-shadow: 0 2px 8px rgba(47,128,237,.07); text-decoration: none; transition: all 0.3s;">
-                    Daftar
-                  </a>
                 </div>
               </div>
-              <div class="col-lg-6">
-                <div class="hero-mascot wow fadeInRight" data-wow-delay=".4s">
+              <div class="col-lg-6 d-flex align-items-center">
+                <div class="hero-mascot wow fadeInRight w-100" data-wow-delay=".4s">
                   <div class="mascot-container">
                     <div class="mascot-bg-circle"></div>
                     <img src="assets/img/LAB SE_Outline.png" class="mascot-illustration" alt="Lab SE Mascot">
