@@ -63,6 +63,32 @@ $tentang_kami_preview = htmlspecialchars(substr($tentang_kami_data['content'] ??
 // Ambil data roadmap dari database (maksimal 2 periode terbaru untuk preview)
 $semua_periode = ambil_periode_roadmap($koneksi);
 $periode_preview = array_slice($semua_periode, 0, 2); // Ambil 2 periode pertama
+
+// Fungsi untuk mengambil item misi
+if (!function_exists('ambil_misi_items')) {
+    function ambil_misi_items($koneksi, $limit = 3) {
+        if (!$koneksi) {
+            return [];
+        }
+        $query = "SELECT content FROM konten_page WHERE page_key LIKE 'misi_item_%' ORDER BY page_key ASC LIMIT $1";
+        $result = pg_query_params($koneksi, $query, array($limit));
+        
+        $items = [];
+        if ($result !== false) {
+            while ($row = pg_fetch_assoc($result)) {
+                $items[] = $row;
+            }
+        }
+        return $items;
+    }
+}
+
+// Ambil data Visi
+$visi_data = ambil_konten($koneksi, 'visi_deskripsi');
+$visi_content = htmlspecialchars($visi_data['content'] ?? 'Menjadi pusat penelitian software engineering yang relevan dan berdaya guna bagi pengembangan teknologi informasi di Indonesia.');
+
+// Ambil data Misi (maksimal 3 untuk preview)
+$misi_items = ambil_misi_items($koneksi, 3);
 ?>
       <!-- ========================= hero-2 start ========================= -->
         <!-- Start of Selection -->
@@ -201,22 +227,35 @@ $periode_preview = array_slice($semua_periode, 0, 2); // Ambil 2 periode pertama
           <div class="col-lg-6 mb-4">
             <div class="single-feature wow fadeInUp" data-wow-delay=".2s" style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
               <h5 style="color: #2F80ED; margin-bottom: 15px;">Visi</h5>
-              <p>Menjadi pusat penelitian software engineering yang relevan dan berdaya guna bagi pengembangan teknologi informasi di Indonesia.</p>
+              <p><?php echo nl2br($visi_content); ?></p>
             </div>
           </div>
           <div class="col-lg-6 mb-4">
             <div class="single-feature wow fadeInUp" data-wow-delay=".3s" style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
               <h5 style="color: #2F80ED; margin-bottom: 15px;">Misi</h5>
-              <ul style="list-style: none; padding: 0;">
-                <li style="margin-bottom: 10px;"><i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>Melakukan penelitian berkualitas di bidang perangkat lunak</li>
-                <li style="margin-bottom: 10px;"><i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>Mendorong kolaborasi akademik dan industri</li>
-                <li><i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>Membina mahasiswa melalui proyek penelitian</li>
-              </ul>
+              <?php if (!empty($misi_items)): ?>
+                <ul style="list-style: none; padding: 0;">
+                  <?php foreach ($misi_items as $misi): ?>
+                  <li style="margin-bottom: 10px;">
+                    <i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>
+                    <?php echo htmlspecialchars($misi['content']); ?>
+                  </li>
+                  <?php endforeach; ?>
+                </ul>
+              <?php else: ?>
+                <p style="color: #999; font-style: italic;">Konten misi belum diatur di Admin Panel.</p>
+              <?php endif; ?>
             </div>
           </div>
         </div>
         <div class="text-center mt-4">
-          <a href="<?php echo $labseHomeBase; ?>/pages/profil/visi-misi.php" class="button button-sm radius-10">Lihat Selengkapnya</a>
+          <a href="<?php echo $labseHomeBase; ?>/pages/profil/visi-misi.php" class="button button-sm radius-10">
+            <?php if (!empty($misi_items) && count($misi_items) >= 3): ?>
+              Lihat Selengkapnya
+            <?php else: ?>
+              Lihat Selengkapnya
+            <?php endif; ?>
+          </a>
         </div>
       </div>
     </div>

@@ -67,10 +67,10 @@ $menu_items = [
 // --- 3. LOGIKA UPDATE / SIMPAN DATA (POST) ---
 $pesan = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $page_key = $_POST['page_key']; 
-    $title    = $_POST['title'];
-    $content  = $_POST['content']; 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['page_key']) && isset($_POST['content'])) {
+    $page_key = $_POST['page_key'] ?? ''; 
+    $title    = $_POST['title'] ?? '';
+    $content  = $_POST['content'] ?? ''; 
 
     if (empty($page_key) || empty($content)) {
         $pesan = "<div class='alert alert-danger'>❌ Error: Page Key dan Konten wajib diisi!</div>";
@@ -118,9 +118,172 @@ if (isset($_GET['edit'])) {
     }
 }
 
-// --- 5. AMBIL SEMUA DATA ---
+// --- 5. LOGIKA CRUD VISI-MISI ---
+$visi_data = null;
+$misi_items = [];
+$misi_edit = null;
+
+// Ambil data Visi
+$query_visi = "SELECT page_key, title, content FROM konten_page WHERE page_key = 'visi_deskripsi'";
+$result_visi = pg_query($koneksi, $query_visi);
+if ($result_visi && pg_num_rows($result_visi) > 0) {
+    $visi_data = pg_fetch_assoc($result_visi);
+}
+
+// Ambil semua item Misi
+$query_misi = "SELECT page_key, title, content FROM konten_page WHERE page_key LIKE 'misi_item_%' ORDER BY page_key ASC";
+$result_misi = pg_query($koneksi, $query_misi);
+if ($result_misi) {
+    while ($row = pg_fetch_assoc($result_misi)) {
+        $misi_items[] = $row;
+    }
+}
+
+// Handle: Update Visi
+if (isset($_POST['update_visi'])) {
+    $visi_content = trim($_POST['visi_content'] ?? '');
+    if (empty($visi_content)) {
+        $pesan = "<div class='alert alert-danger'>❌ Konten Visi tidak boleh kosong!</div>";
+    } else {
+        // Cek apakah sudah ada
+        $cek_visi = "SELECT COUNT(*) FROM konten_page WHERE page_key = 'visi_deskripsi'";
+        $result_cek = pg_query($koneksi, $cek_visi);
+        $count = 0;
+        if ($result_cek) {
+            $row_cek = pg_fetch_row($result_cek);
+            $count = $row_cek[0];
+        }
+        
+        if ($count > 0) {
+            // Update
+            $update_visi = "UPDATE konten_page SET content = $1, last_updated = NOW() WHERE page_key = 'visi_deskripsi'";
+            $result_update = pg_query_params($koneksi, $update_visi, array($visi_content));
+            if ($result_update) {
+                $pesan = "<div class='alert alert-success'>✅ Visi berhasil diperbarui!</div>";
+                // Refresh data
+                $result_visi = pg_query($koneksi, $query_visi);
+                if ($result_visi && pg_num_rows($result_visi) > 0) {
+                    $visi_data = pg_fetch_assoc($result_visi);
+                }
+            } else {
+                $pesan = "<div class='alert alert-danger'>❌ Gagal update Visi: " . pg_last_error($koneksi) . "</div>";
+            }
+        } else {
+            // Insert
+            $insert_visi = "INSERT INTO konten_page (page_key, title, content) VALUES ('visi_deskripsi', 'Visi Kami', $1)";
+            $result_insert = pg_query_params($koneksi, $insert_visi, array($visi_content));
+            if ($result_insert) {
+                $pesan = "<div class='alert alert-success'>✅ Visi berhasil ditambahkan!</div>";
+                // Refresh data
+                $result_visi = pg_query($koneksi, $query_visi);
+                if ($result_visi && pg_num_rows($result_visi) > 0) {
+                    $visi_data = pg_fetch_assoc($result_visi);
+                }
+            } else {
+                $pesan = "<div class='alert alert-danger'>❌ Gagal insert Visi: " . pg_last_error($koneksi) . "</div>";
+            }
+        }
+    }
+}
+
+// Handle: Tambah Misi
+if (isset($_POST['tambah_misi'])) {
+    $misi_content = trim($_POST['misi_content'] ?? '');
+    if (empty($misi_content)) {
+        $pesan = "<div class='alert alert-danger'>❌ Konten Misi tidak boleh kosong!</div>";
+    } else {
+        // Cari nomor terakhir
+        $max_num = 0;
+        foreach ($misi_items as $item) {
+            if (preg_match('/misi_item_(\d+)/', $item['page_key'], $matches)) {
+                $num = (int)$matches[1];
+                if ($num > $max_num) {
+                    $max_num = $num;
+                }
+            }
+        }
+        $new_key = 'misi_item_' . ($max_num + 1);
+        
+        $insert_misi = "INSERT INTO konten_page (page_key, title, content) VALUES ($1, 'Misi', $2)";
+        $result_insert = pg_query_params($koneksi, $insert_misi, array($new_key, $misi_content));
+        if ($result_insert) {
+            $pesan = "<div class='alert alert-success'>✅ Misi berhasil ditambahkan!</div>";
+            // Refresh data
+            $query_misi = "SELECT page_key, title, content FROM konten_page WHERE page_key LIKE 'misi_item_%' ORDER BY page_key ASC";
+            $result_misi = pg_query($koneksi, $query_misi);
+            $misi_items = [];
+            if ($result_misi) {
+                while ($row = pg_fetch_assoc($result_misi)) {
+                    $misi_items[] = $row;
+                }
+            }
+        } else {
+            $pesan = "<div class='alert alert-danger'>❌ Gagal tambah Misi: " . pg_last_error($koneksi) . "</div>";
+        }
+    }
+}
+
+// Handle: Edit Misi (GET)
+if (isset($_GET['edit_misi'])) {
+    $edit_key = $_GET['edit_misi'];
+    $query_edit = "SELECT page_key, title, content FROM konten_page WHERE page_key = $1";
+    $result_edit = pg_query_params($koneksi, $query_edit, array($edit_key));
+    if ($result_edit && pg_num_rows($result_edit) > 0) {
+        $misi_edit = pg_fetch_assoc($result_edit);
+    }
+}
+
+// Handle: Update Misi
+if (isset($_POST['update_misi'])) {
+    $misi_key = $_POST['misi_key'] ?? '';
+    $misi_content = trim($_POST['misi_content'] ?? '');
+    if (empty($misi_key) || empty($misi_content)) {
+        $pesan = "<div class='alert alert-danger'>❌ Data tidak valid!</div>";
+    } else {
+        $update_misi = "UPDATE konten_page SET content = $1, last_updated = NOW() WHERE page_key = $2";
+        $result_update = pg_query_params($koneksi, $update_misi, array($misi_content, $misi_key));
+        if ($result_update) {
+            $pesan = "<div class='alert alert-success'>✅ Misi berhasil diperbarui!</div>";
+            // Refresh data
+            $query_misi = "SELECT page_key, title, content FROM konten_page WHERE page_key LIKE 'misi_item_%' ORDER BY page_key ASC";
+            $result_misi = pg_query($koneksi, $query_misi);
+            $misi_items = [];
+            if ($result_misi) {
+                while ($row = pg_fetch_assoc($result_misi)) {
+                    $misi_items[] = $row;
+                }
+            }
+            $misi_edit = null; // Reset edit mode
+        } else {
+            $pesan = "<div class='alert alert-danger'>❌ Gagal update Misi: " . pg_last_error($koneksi) . "</div>";
+        }
+    }
+}
+
+// Handle: Hapus Misi
+if (isset($_GET['hapus_misi'])) {
+    $hapus_key = $_GET['hapus_misi'];
+    $delete_misi = "DELETE FROM konten_page WHERE page_key = $1";
+    $result_delete = pg_query_params($koneksi, $delete_misi, array($hapus_key));
+    if ($result_delete) {
+        $pesan = "<div class='alert alert-success'>✅ Misi berhasil dihapus!</div>";
+        // Refresh data
+        $query_misi = "SELECT page_key, title, content FROM konten_page WHERE page_key LIKE 'misi_item_%' ORDER BY page_key ASC";
+        $result_misi = pg_query($koneksi, $query_misi);
+        $misi_items = [];
+        if ($result_misi) {
+            while ($row = pg_fetch_assoc($result_misi)) {
+                $misi_items[] = $row;
+            }
+        }
+    } else {
+        $pesan = "<div class='alert alert-danger'>❌ Gagal hapus Misi: " . pg_last_error($koneksi) . "</div>";
+    }
+}
+
+// --- 6. AMBIL SEMUA DATA KONTEN LAINNYA ---
 $semua_konten = [];
-$query_all = "SELECT page_key, title, content, last_updated FROM konten_page ORDER BY page_key ASC";
+$query_all = "SELECT page_key, title, content, last_updated FROM konten_page WHERE page_key NOT IN ('visi_deskripsi') AND page_key NOT LIKE 'misi_item_%' ORDER BY page_key ASC";
 $result_all = pg_query($koneksi, $query_all);
 
 if ($result_all) {
@@ -396,6 +559,113 @@ window.addEventListener('resize', function() {
     </div>
     <?php echo $pesan; ?>
 
+    <!-- ========================= MODAL: KELOLA VISI-MISI ========================= -->
+    <div class="modal fade" id="modalVisiMisi" tabindex="-1" aria-labelledby="modalVisiMisiLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalVisiMisiLabel">
+                        <i class="lni lni-bullseye"></i> Kelola Visi & Misi
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <?php echo $pesan; ?>
+
+                    <!-- VISI -->
+                    <div class="mb-4 pb-4" style="border-bottom: 1px solid #f1f1f1;">
+                        <h5 style="color: #2F80ED; margin-bottom: 15px; font-weight: 600;">
+                            <i class="lni lni-bullseye"></i> Visi
+                        </h5>
+                        <form method="POST" action="">
+                            <div class="form-group">
+                                <label for="visi_content">Deskripsi Visi:</label>
+                                <textarea name="visi_content" id="visi_content" class="form-control" rows="4" required><?php echo $visi_data ? htmlspecialchars($visi_data['content']) : ''; ?></textarea>
+                                <small class="text-muted">Masukkan deskripsi visi laboratorium</small>
+                            </div>
+                            <button type="submit" name="update_visi" class="btn btn-primary">
+                                <i class="lni lni-save"></i> Simpan Visi
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- MISI -->
+                    <div>
+                        <h5 style="color: #27AE60; margin-bottom: 15px; font-weight: 600;">
+                            <i class="lni lni-target"></i> Misi
+                        </h5>
+                        
+                        <?php if ($misi_edit): ?>
+                            <!-- Form Edit Misi -->
+                            <div class="alert alert-info mb-3">
+                                <strong>Edit Misi:</strong> Mengedit item misi dengan key <code><?php echo htmlspecialchars($misi_edit['page_key']); ?></code>
+                            </div>
+                            <form method="POST" action="">
+                                <input type="hidden" name="misi_key" value="<?php echo htmlspecialchars($misi_edit['page_key']); ?>">
+                                <div class="form-group">
+                                    <label for="misi_content_edit">Konten Misi:</label>
+                                    <textarea name="misi_content" id="misi_content_edit" class="form-control" rows="3" required><?php echo htmlspecialchars($misi_edit['content']); ?></textarea>
+                                </div>
+                                <button type="submit" name="update_misi" class="btn btn-success">
+                                    <i class="lni lni-save"></i> Simpan Perubahan
+                                </button>
+                                <a href="index.php" class="btn btn-secondary">Batal</a>
+                            </form>
+                        <?php else: ?>
+                            <!-- Form Tambah Misi -->
+                            <form method="POST" action="" class="mb-4">
+                                <div class="form-group">
+                                    <label for="misi_content">Tambah Misi Baru:</label>
+                                    <textarea name="misi_content" id="misi_content" class="form-control" rows="3" placeholder="Masukkan deskripsi misi baru..." required></textarea>
+                                </div>
+                                <button type="submit" name="tambah_misi" class="btn btn-success">
+                                    <i class="lni lni-plus"></i> Tambah Misi
+                                </button>
+                            </form>
+
+                            <!-- Daftar Misi -->
+                            <?php if (!empty($misi_items)): ?>
+                                <div class="table-wrapper" style="max-height: 400px; overflow-y: auto;">
+                                    <table class="custom-table">
+                                        <thead>
+                                            <tr>
+                                                <th width="50">No</th>
+                                                <th>Konten Misi</th>
+                                                <th width="150">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($misi_items as $index => $item): ?>
+                                            <tr>
+                                                <td><?php echo $index + 1; ?></td>
+                                                <td><?php echo htmlspecialchars($item['content']); ?></td>
+                                                <td>
+                                                    <a href="index.php?edit_misi=<?php echo urlencode($item['page_key']); ?>" class="btn btn-sm btn-info" style="margin-right: 5px;">
+                                                        <i class="lni lni-pencil"></i> Edit
+                                                    </a>
+                                                    <a href="index.php?hapus_misi=<?php echo urlencode($item['page_key']); ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus misi ini?');">
+                                                        <i class="lni lni-trash"></i> Hapus
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php else: ?>
+                                <p class="text-muted">Belum ada misi yang ditambahkan. Silakan tambahkan misi pertama.</p>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ========================= END MODAL: KELOLA VISI-MISI ========================= -->
+
     <div class="card">
         <h3 class="card-title-profile">
             <?php echo $data_edit ? '✏️ Edit Konten: ' . htmlspecialchars($data_edit['page_key']) : '➕ Tambah Konten Baru'; ?>
@@ -482,38 +752,33 @@ window.addEventListener('resize', function() {
     </div>
 
 
-    <div class="container-fluid">
-    
-    <div class="row align-items-center mb-4">
-        <div class="col-6">
-            </div>
-        <div class="col-6 d-flex justify-content-end"> 
-            <a href="kelola_roadmap.php" class="btn btn-secondary" style="white-space: nowrap;">
-                <i class="lni lni-map-marker mr-2"></i> Kelola Roadmap
-            </a>
-        </div>
-    </div>
-    
-    <div class="card p-4">
-        <table class="table table-striped">
-            
-            <tbody>
-                <?php foreach ($data_list as $d): ?>
-                <tr>
-                    <td><?php echo htmlspecialchars($d['id']); ?></td>
-                    <td><?php echo htmlspecialchars($d['judul_konten']); ?></td>
-                    
-                    <td class="text-end"> 
-                        <a href="kelola_teks_umum.php?id=<?php echo $d['id']; ?>" class="btn btn-sm btn-primary">Kelola Konten</a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+    <!-- ========================= SECTION: KELOLA VISI-MISI ========================= -->
+    <div class="card mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="card-title-profile mb-0">
+                <i class="lni lni-bullseye"></i> Kelola Visi & Misi
+            </h3>
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalVisiMisi" onclick="openModalVisiMisi(event)">
+                <i class="lni lni-bullseye"></i> Kelola Visi & Misi
+            </button>
+        </div>
+        <p class="text-muted">Kelola visi dan misi laboratorium. Klik tombol di atas untuk membuka halaman kelola visi-misi lengkap.</p>
+    </div>
+    <!-- ========================= END SECTION: KELOLA VISI-MISI ========================= -->
 
-        </div>
-    
-</div>
+    <!-- ========================= SECTION: KELOLA ROADMAP ========================= -->
+    <div class="card mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="card-title-profile mb-0">
+                <i class="lni lni-map-marker"></i> Kelola Roadmap
+            </h3>
+            <a href="kelola_roadmap.php" class="btn btn-secondary">
+                <i class="lni lni-map-marker"></i> Buka Halaman Roadmap
+            </a>
+        </div>
+        <p class="text-muted">Kelola periode dan tugas roadmap laboratorium. Klik tombol di atas untuk membuka halaman kelola roadmap lengkap.</p>
+    </div>
+    <!-- ========================= END SECTION: KELOLA ROADMAP ========================= -->
 
 </div>
 </div>
@@ -522,6 +787,77 @@ window.addEventListener('resize', function() {
 </html>
 
 
+
+<script>
+// Fungsi untuk membuka modal Visi-Misi
+function openModalVisiMisi(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    var modalEl = document.getElementById('modalVisiMisi');
+    if (!modalEl) {
+        console.error('Modal visi-misi tidak ditemukan!');
+        return false;
+    }
+    
+    // Cek apakah Bootstrap tersedia
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        // Gunakan Bootstrap 5 API
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    } else {
+        // Fallback: buka modal secara manual
+        modalEl.style.display = 'block';
+        modalEl.classList.add('show');
+        document.body.classList.add('modal-open');
+        
+        // Hapus backdrop lama jika ada
+        var oldBackdrop = document.getElementById('modalBackdrop');
+        if (oldBackdrop) {
+            oldBackdrop.remove();
+        }
+        
+        // Buat backdrop baru
+        var backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.id = 'modalBackdrop';
+        backdrop.style.zIndex = '1050';
+        document.body.appendChild(backdrop);
+        
+        // Tutup modal saat klik backdrop
+        backdrop.addEventListener('click', function() {
+            closeModalVisiMisi();
+        });
+        
+        // Tutup modal saat klik tombol close
+        var closeBtns = modalEl.querySelectorAll('[data-bs-dismiss="modal"], .btn-close');
+        closeBtns.forEach(function(btn) {
+            btn.onclick = function() {
+                closeModalVisiMisi();
+            };
+        });
+    }
+    
+    return false;
+}
+
+// Fungsi untuk menutup modal Visi-Misi
+function closeModalVisiMisi() {
+    var modalEl = document.getElementById('modalVisiMisi');
+    if (modalEl) {
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
+    
+    var backdrop = document.getElementById('modalBackdrop');
+    if (backdrop) {
+        backdrop.remove();
+    }
+}
+</script>
 
 <?php 
 // Tambahkan footer di akhir file
