@@ -43,18 +43,6 @@
 	width: 100%;
 }
 
-.hero-section-wrapper-2 h4::before {
-	content: '';
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%) translateY(-50%);
-	top: 50%;
-	width: 4px;
-	height: 30px;
-	background: linear-gradient(180deg, #2F80ED 0%, #1E5FCC 100%);
-	border-radius: 2px;
-}
-
 .hero-section-wrapper-2 h2 {
 	font-size: 3rem !important;
 	font-weight: 800 !important;
@@ -66,6 +54,32 @@
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
 	text-align: center !important;
+}
+
+/* Hero Text Container */
+.hero-section-wrapper-2 .text-center {
+	padding: 60px 24px 100px 24px !important;
+}
+
+.hero-section-wrapper-2 .text-center h4 {
+	color: #2F80ED !important;
+	font-weight: 700 !important;
+	margin-bottom: 22px !important;
+	font-size: 2rem !important;
+	text-transform: uppercase !important;
+	letter-spacing: 1px !important;
+	position: relative !important;
+	text-align: center !important;
+	display: block !important;
+	width: 100% !important;
+}
+
+.hero-section-wrapper-2 .text-center h2 {
+	font-size: 2.8rem !important;
+	font-weight: 800 !important;
+	color: #22243e !important;
+	margin-bottom: 22px !important;
+	line-height: 1.2 !important;
 }
 
 .hero-section-wrapper-2 p {
@@ -284,10 +298,35 @@
 	flex-shrink: 0;
 }
 
-/* ========================= Roadmap Cards ========================= */
+#visi .single-feature {
+	background: #fff !important;
+	padding: 30px !important;
+	border-radius: 10px !important;
+	box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
+}
+
+#visi .single-feature h5 {
+	color: #2F80ED !important;
+	margin-bottom: 15px !important;
+}
+
+#visi .single-feature p.empty-state {
+	color: #999 !important;
+	font-style: italic !important;
+}
+
+/* ========================= Roadmap Section ========================= */
+#roadmap {
+	background: #f8f9fa !important;
+}
+
 #roadmap .single-feature {
 	text-align: left !important;
 	padding: 30px !important;
+	background: #fff !important;
+	border-radius: 10px !important;
+	box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
+	height: 100% !important;
 }
 
 #roadmap .single-feature h5 {
@@ -320,10 +359,33 @@
 }
 
 #roadmap .single-feature ul li i {
+	color: #27AE60 !important;
 	margin-right: 10px !important;
 	margin-top: 2px;
 	font-size: 16px;
 	flex-shrink: 0;
+}
+
+#roadmap .single-feature p.empty-state {
+	color: #999 !important;
+	font-size: 0.9rem !important;
+	font-style: italic !important;
+}
+
+#roadmap .text-center.empty-state-box {
+	background: #fff !important;
+	padding: 40px !important;
+	border-radius: 10px !important;
+	box-shadow: 0 2px 10px rgba(0,0,0,0.05) !important;
+}
+
+#roadmap .text-center.empty-state-box p {
+	color: #717791 !important;
+	margin-bottom: 20px !important;
+}
+
+#roadmap .text-center.empty-state-box a {
+	color: #2F80ED !important;
 }
 
 /* ========================= Button Styling ========================= */
@@ -341,6 +403,53 @@
 	box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3) !important;
 	position: relative;
 	overflow: hidden;
+}
+
+/* EXCLUDE NAVBAR DROPDOWN - Button style tidak berlaku di navbar dropdown */
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.button,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a[class*="button"],
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.dropdown-toggle,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.page-scroll {
+	display: inline-block !important;
+	padding: 10px 0px !important;
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	color: #585978 !important;
+	border-radius: 0 !important;
+	font-weight: 500 !important;
+	font-size: 16px !important;
+	text-decoration: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	width: auto !important;
+	height: auto !important;
+	transform: none !important;
+	position: relative !important;
+	overflow: visible !important;
+}
+
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown:hover > a,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a:hover,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.button:hover,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a[class*="button"]:hover,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.dropdown-toggle:hover,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.page-scroll:hover {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	color: #2F80ED !important;
+	transform: none !important;
+	box-shadow: none !important;
+	padding: 10px 0px !important;
+}
+
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a::before,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.button::before,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a[class*="button"]::before {
+	display: none !important;
+	content: none !important;
 }
 
 /* EXCLUDE FOOTER - Button style tidak berlaku di footer */
@@ -567,6 +676,92 @@ footer .footer-style-1 .footer-widget .links li a.border-button:hover {
 .blog-card-item .content > div .button {
 	padding: 6px 18px !important;
 	font-size: 12px !important;
+}
+
+.blog-card-item .content {
+	padding: 20px !important;
+}
+
+.blog-card-item .content .category-badge {
+	color: #2F80ED !important;
+	font-size: 12px !important;
+	font-weight: 600 !important;
+	text-transform: uppercase !important;
+}
+
+.blog-card-item .content h5 {
+	margin-top: 10px !important;
+	margin-bottom: 10px !important;
+	color: #2c3e50 !important;
+	min-height: 60px !important;
+}
+
+.blog-card-item .content h5 a {
+	color: #2c3e50 !important;
+	text-decoration: none !important;
+	display: -webkit-box !important;
+	-webkit-line-clamp: 2 !important;
+	line-clamp: 2 !important;
+	-webkit-box-orient: vertical !important;
+	overflow: hidden !important;
+}
+
+.blog-card-item .content p {
+	color: #6c757d !important;
+	font-size: 14px !important;
+	margin-bottom: 15px !important;
+	display: -webkit-box !important;
+	-webkit-line-clamp: 3 !important;
+	line-clamp: 3 !important;
+	-webkit-box-orient: vertical !important;
+	overflow: hidden !important;
+	min-height: 60px !important;
+}
+
+.blog-card-item .content .blog-meta {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	margin-top: 15px !important;
+	padding-top: 15px !important;
+	border-top: 1px solid #f0f0f0 !important;
+}
+
+.blog-card-item .content .blog-meta span {
+	color: #999 !important;
+	font-size: 12px !important;
+}
+
+.blog-card-item .content .blog-meta .button {
+	padding: 5px 15px !important;
+	font-size: 12px !important;
+}
+
+/* Empty State Messages */
+.empty-state-message {
+	color: #717791 !important;
+	margin-bottom: 20px !important;
+}
+
+.empty-state-message a {
+	color: #2F80ED !important;
+}
+
+/* Section Backgrounds */
+#focus {
+	background: #f8f9fa !important;
+}
+
+#blog {
+	background: #f8f9fa !important;
+}
+
+/* Button Styles */
+.btn-primary-custom {
+	background: #2F80ED !important;
+	border-color: #2F80ED !important;
+	padding: 10px 25px !important;
+	font-weight: 600 !important;
 }
 
 /* ========================= Contact Section ========================= */

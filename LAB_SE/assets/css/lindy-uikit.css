@@ -365,6 +365,69 @@ p {
   font-weight: 400;
 }
 
+/* EXCLUDE NAVBAR DROPDOWN - Button style tidak berlaku di navbar dropdown */
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.button,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.dropdown-toggle,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.page-scroll,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.button,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.dropdown-toggle,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.page-scroll {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 10px 0px !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: #585978 !important;
+  display: inline-block !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: auto !important;
+  line-height: normal !important;
+  font-weight: 500 !important;
+  font-size: 16px !important;
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown:hover > a,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a:hover,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.button:hover,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.dropdown-toggle:hover,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.page-scroll:hover,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown:hover > a,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a:hover,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.button:hover,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.dropdown-toggle:hover,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.page-scroll:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #2F80ED !important;
+  padding: 10px 0px !important;
+}
+
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a::before,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.button::before,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.dropdown-toggle::before,
+#fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.page-scroll::before,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a::before,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.button::before,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.dropdown-toggle::before,
+html body #fixed-navbar .navbar-menu-new .navbar-nav .nav-item.dropdown > a.page-scroll::before {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* ============================= 
     HEADER-2 CSS
 ================================ */

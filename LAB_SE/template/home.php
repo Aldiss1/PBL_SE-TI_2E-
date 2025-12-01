@@ -96,9 +96,9 @@ $misi_items = ambil_misi_items($koneksi, 3);
           <div class="col-12 col-lg-10">
             <div class="row align-items-center">
               <div class="col-lg-6 d-flex align-items-center">
-                <div class="text-center w-100" style="padding: 60px 24px 100px 24px;">
-                  <h4 style="color: #2F80ED; font-weight: 700; margin-bottom: 22px; font-size: 2rem;">Selamat Datang</h4>
-                  <h2 style="font-size: 2.8rem; font-weight: 800; color: #22243e; margin-bottom: 22px; line-height: 1.2;">
+                <div class="text-center w-100">
+                  <h4>Selamat Datang</h4>
+                  <h2>
                     Web Profile Laboratorium<br>Software Engineering
                   </h2>
                 </div>
@@ -140,8 +140,7 @@ $misi_items = ambil_misi_items($koneksi, 3);
 
                 <div class="mt-4 wow fadeInUp" data-wow-delay=".5s">
                     <a href="<?php echo $labseHomeBase; ?>/pages/profil/tentang-kami.php" 
-                       class="btn btn-primary btn-sm radius-10" 
-                       style="background: #2F80ED; border-color: #2F80ED; padding: 10px 25px; font-weight: 600;">
+                       class="btn btn-primary btn-sm radius-10 btn-primary-custom">
                         Selengkapnya <i class="lni lni-arrow-right"></i>
                     </a>
                 </div>
@@ -159,7 +158,7 @@ $misi_items = ambil_misi_items($koneksi, 3);
 <!-- ========================= about style-3 end ========================= -->
 
 <!-- ========================= Focus & Scope Section ========================= -->
-<section id="focus" class="feature-section feature-style-2 pt-100 pb-70" style="background: #f8f9fa;">
+<section id="focus" class="feature-section feature-style-2 pt-100 pb-70">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8">
@@ -218,25 +217,25 @@ $misi_items = ambil_misi_items($koneksi, 3);
         </div>
         <div class="row">
           <div class="col-lg-6 mb-4">
-            <div class="single-feature wow fadeInUp" data-wow-delay=".2s" style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-              <h5 style="color: #2F80ED; margin-bottom: 15px;">Visi</h5>
+            <div class="single-feature wow fadeInUp" data-wow-delay=".2s">
+              <h5>Visi</h5>
               <p><?php echo nl2br($visi_content); ?></p>
             </div>
           </div>
           <div class="col-lg-6 mb-4">
-            <div class="single-feature wow fadeInUp" data-wow-delay=".3s" style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-              <h5 style="color: #2F80ED; margin-bottom: 15px;">Misi</h5>
+            <div class="single-feature wow fadeInUp" data-wow-delay=".3s">
+              <h5>Misi</h5>
               <?php if (!empty($misi_items)): ?>
-                <ul style="list-style: none; padding: 0;">
+                <ul>
                   <?php foreach ($misi_items as $misi): ?>
-                  <li style="margin-bottom: 10px;">
-                    <i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>
+                  <li>
+                    <i class="lni lni-checkmark-circle"></i>
                     <?php echo htmlspecialchars($misi['content']); ?>
                   </li>
                   <?php endforeach; ?>
                 </ul>
               <?php else: ?>
-                <p style="color: #999; font-style: italic;">Konten misi belum diatur di Admin Panel.</p>
+                <p class="empty-state">Konten misi belum diatur di Admin Panel.</p>
               <?php endif; ?>
             </div>
           </div>
@@ -257,7 +256,7 @@ $misi_items = ambil_misi_items($koneksi, 3);
 <!-- ========================= Visi & Misi Preview End ========================= -->
 
 <!-- ========================= Roadmap Preview Section ========================= -->
-<section id="roadmap" class="feature-section feature-style-2 pt-100 pb-70" style="background: #f8f9fa;">
+<section id="roadmap" class="feature-section feature-style-2 pt-100 pb-70">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10">
@@ -273,20 +272,20 @@ $misi_items = ambil_misi_items($koneksi, 3);
               $items_tugas = ambil_item_roadmap($koneksi, $periode['id']);
             ?>
             <div class="col-lg-6 mb-4">
-              <div class="single-feature wow fadeInUp" data-wow-delay="<?php echo $delay; ?>s" style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 100%;">
-                <h5 style="color: #2F80ED; margin-bottom: 10px;"><?php echo htmlspecialchars($periode['judul_fase']); ?></h5>
-                <p style="color: #999; font-size: 0.9rem; margin-bottom: 15px;"><?php echo htmlspecialchars($periode['tahun_periode']); ?></p>
+              <div class="single-feature wow fadeInUp" data-wow-delay="<?php echo $delay; ?>s">
+                <h5><?php echo htmlspecialchars($periode['judul_fase']); ?></h5>
+                <p><?php echo htmlspecialchars($periode['tahun_periode']); ?></p>
                 <?php if (!empty($items_tugas)): ?>
-                <ul style="list-style: none; padding: 0;">
+                <ul>
                   <?php foreach ($items_tugas as $tugas): ?>
-                  <li style="margin-bottom: 8px;">
-                    <i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>
+                  <li>
+                    <i class="lni lni-checkmark-circle"></i>
                     <?php echo htmlspecialchars($tugas['deskripsi_tugas']); ?>
                   </li>
                   <?php endforeach; ?>
                 </ul>
                 <?php else: ?>
-                <p style="color: #999; font-size: 0.9rem; font-style: italic;">Belum ada tugas yang ditambahkan untuk periode ini.</p>
+                <p class="empty-state">Belum ada tugas yang ditambahkan untuk periode ini.</p>
                 <?php endif; ?>
               </div>
             </div>
@@ -295,10 +294,10 @@ $misi_items = ambil_misi_items($koneksi, 3);
             endforeach; ?>
           <?php else: ?>
             <div class="col-12">
-              <div class="text-center" style="background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                <p style="color: #717791; margin-bottom: 20px;">
+              <div class="text-center empty-state-box">
+                <p class="empty-state-message">
                   Roadmap belum diatur di Admin Panel.
-                  <br><small>Silakan tambahkan roadmap melalui <a href="<?php echo $labseHomeBase; ?>/module/auth/login.php" style="color: #2F80ED;">admin panel</a>.</small>
+                  <br><small>Silakan tambahkan roadmap melalui <a href="<?php echo $labseHomeBase; ?>/module/auth/login.php">admin panel</a>.</small>
                 </p>
               </div>
             </div>
@@ -388,10 +387,10 @@ $misi_items = ambil_misi_items($koneksi, 3);
       } else {
       ?>
       <div class="col-12 text-center">
-        <p style="color: #717791; margin-bottom: 20px;">
+        <p class="empty-state-message">
           <?php if (isset($total_data) && $total_data > 0): ?>
             Data ada di database (<?php echo $total_data; ?> anggota), tapi tidak sesuai filter. 
-            <br><small>Silakan cek data di <a href="<?php echo $labseHomeBase; ?>/pages/profil/personil.php" style="color: #2F80ED;">halaman personil</a> atau tambahkan data melalui admin.</small>
+            <br><small>Silakan cek data di <a href="<?php echo $labseHomeBase; ?>/pages/profil/personil.php">halaman personil</a> atau tambahkan data melalui admin.</small>
           <?php else: ?>
             Belum ada data anggota di database. 
             <br><small>Silakan jalankan file <code>database.sql</code> bagian INSERT anggota, atau tambahkan data melalui admin.</small>
@@ -408,7 +407,7 @@ $misi_items = ambil_misi_items($koneksi, 3);
 <!-- ========================= Galeri Dosen End ========================= -->
 
 <!-- ========================= Blog Section ========================= -->
-<section id="blog" class="feature-section feature-style-2 pt-100 pb-70" style="background: #f8f9fa;">
+<section id="blog" class="feature-section feature-style-2 pt-100 pb-70">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-8">
@@ -456,29 +455,29 @@ $misi_items = ambil_misi_items($koneksi, 3);
           $blog_date = $blog_item['published_at'] ? date('d F Y', strtotime($blog_item['published_at'])) : date('d F Y', strtotime($blog_item['created_at']));
       ?>
       <div class="col-lg-4 col-md-6 mb-4">
-        <div class="single-feature blog-card-item wow fadeInUp" data-wow-delay=".2s" style="background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: all 0.3s ease; height: 100%;">
-          <div class="image" style="height: 200px; overflow: hidden; position: relative;">
-            <img src="<?php echo htmlspecialchars($blog_image); ?>" alt="<?php echo htmlspecialchars($blog_item['title']); ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
+        <div class="single-feature blog-card-item wow fadeInUp" data-wow-delay=".2s">
+          <div class="image">
+            <img src="<?php echo htmlspecialchars($blog_image); ?>" alt="<?php echo htmlspecialchars($blog_item['title']); ?>">
           </div>
-          <div class="content" style="padding: 20px;">
+          <div class="content">
             <?php if ($blog_item['category']): ?>
-            <span style="color: #2F80ED; font-size: 12px; font-weight: 600; text-transform: uppercase;"><?php echo htmlspecialchars($blog_item['category']); ?></span>
+            <span class="category-badge"><?php echo htmlspecialchars($blog_item['category']); ?></span>
             <?php endif; ?>
-            <h5 style="margin-top: 10px; margin-bottom: 10px; color: #2c3e50; min-height: 60px;">
-              <a href="<?php echo $blog_link; ?>" style="color: #2c3e50; text-decoration: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            <h5>
+              <a href="<?php echo $blog_link; ?>">
                 <?php echo htmlspecialchars($blog_item['title']); ?>
               </a>
             </h5>
             <?php if ($blog_excerpt): ?>
-            <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-height: 60px;">
+            <p>
               <?php echo $blog_excerpt; ?>
             </p>
             <?php endif; ?>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f0f0f0;">
-              <span style="color: #999; font-size: 12px;">
+            <div class="blog-meta">
+              <span>
                 <i class="lni lni-calendar"></i> <?php echo $blog_date; ?>
               </span>
-              <a href="<?php echo $blog_link; ?>" class="button button-sm radius-10" style="padding: 5px 15px; font-size: 12px;">Baca</a>
+              <a href="<?php echo $blog_link; ?>" class="button button-sm radius-10">Baca</a>
             </div>
           </div>
         </div>
@@ -488,7 +487,7 @@ $misi_items = ambil_misi_items($koneksi, 3);
       } else {
       ?>
       <div class="col-12 text-center">
-        <p style="color: #717791; margin-bottom: 20px;">
+        <p class="empty-state-message">
           Belum ada artikel blog yang dipublikasikan.
           <br><small>Silakan tambahkan blog melalui admin panel dan pastikan statusnya "Published".</small>
         </p>

@@ -987,16 +987,8 @@ window.addEventListener('load', function() {
     });
 })();
 
-/* Debug helper: show console log if jQuery missing (not fatal) */
-// jQuery check removed - Bootstrap 5 does not require jQuery
 </script>
 
-<?php
-// Optional: close DB connection (not strictly necessary in PHP but okay)
-if (isset($koneksi) && $koneksi) {
-    // pg_close($koneksi); // Uncomment only if you want to close explicitly
-}
-?>
 </body>
 </html>
 

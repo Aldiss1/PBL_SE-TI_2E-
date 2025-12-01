@@ -78,7 +78,8 @@
         
         // Toggle mobile menu
         if (toggleBtn && navbarMenu) {
-            toggleBtn.addEventListener('click', function() {
+            toggleBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
                 navbarMenu.classList.toggle('active');
                 toggleBtn.classList.toggle('active');
             });
@@ -90,9 +91,84 @@
                     toggleBtn.classList.remove('active');
                 }
             });
+            
+            // Handle dropdown toggle on mobile
+            var dropdownToggles = navbarMenu.querySelectorAll('.dropdown-toggle');
+            dropdownToggles.forEach(function(toggle) {
+                toggle.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 991) {
+                        e.preventDefault();
+                        var dropdown = this.parentElement;
+                        var dropdownMenu = dropdown.querySelector('.dropdown-menu');
+                        
+                        // Pastikan parent item tidak memiliki style button
+                        this.style.background = 'transparent';
+                        this.style.backgroundColor = 'transparent';
+                        this.style.border = 'none';
+                        this.style.borderRadius = '0';
+                        this.style.boxShadow = 'none';
+                        this.style.padding = '10px 0px';
+                        
+                        // Close other dropdowns
+                        dropdownToggles.forEach(function(otherToggle) {
+                            if (otherToggle !== toggle) {
+                                var otherDropdown = otherToggle.parentElement;
+                                var otherMenu = otherDropdown.querySelector('.dropdown-menu');
+                                if (otherMenu) {
+                                    otherMenu.style.display = 'none';
+                                }
+                                // Pastikan parent item lain juga tidak memiliki style button
+                                otherToggle.style.background = 'transparent';
+                                otherToggle.style.backgroundColor = 'transparent';
+                                otherToggle.style.border = 'none';
+                                otherToggle.style.borderRadius = '0';
+                                otherToggle.style.boxShadow = 'none';
+                            }
+                        });
+                        
+                        // Toggle current dropdown
+                        if (dropdownMenu) {
+                            if (dropdownMenu.style.display === 'block') {
+                                dropdownMenu.style.display = 'none';
+                            } else {
+                                dropdownMenu.style.display = 'block';
+                            }
+                        }
+                    }
+                });
+                
+                // Pastikan dropdown toggle tidak memiliki style button saat hover
+                toggle.addEventListener('mouseenter', function() {
+                    this.style.background = 'transparent';
+                    this.style.backgroundColor = 'transparent';
+                    this.style.border = 'none';
+                    this.style.borderRadius = '0';
+                    this.style.boxShadow = 'none';
+                });
+            });
+            
+            // Pastikan semua dropdown toggle tidak memiliki style button
+            var allDropdownToggles = document.querySelectorAll('#fixed-navbar .dropdown-toggle');
+            allDropdownToggles.forEach(function(toggle) {
+                toggle.style.background = 'transparent';
+                toggle.style.backgroundColor = 'transparent';
+                toggle.style.border = 'none';
+                toggle.style.borderRadius = '0';
+                toggle.style.boxShadow = 'none';
+                toggle.style.padding = '10px 0px';
+            });
+            
+            // Close menu when clicking on a link
+            var menuLinks = navbarMenu.querySelectorAll('a');
+            menuLinks.forEach(function(link) {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 991) {
+                        navbarMenu.classList.remove('active');
+                        toggleBtn.classList.remove('active');
+                    }
+                });
+            });
         }
-        
-        // Navbar sudah fixed via CSS, tidak perlu JavaScript lagi
         
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -102,12 +178,24 @@
                     e.preventDefault();
                     const target = document.querySelector(href);
                     if (target) {
-                        const offset = 80; // Navbar height
+                        var offset = 80;
+                        if (window.innerWidth <= 991) {
+                            offset = 70;
+                        }
+                        if (window.innerWidth <= 575) {
+                            offset = 65;
+                        }
                         const targetPosition = target.offsetTop - offset;
                         window.scrollTo({
                             top: targetPosition,
                             behavior: 'smooth'
                         });
+                        
+                        // Close mobile menu if open
+                        if (navbarMenu && navbarMenu.classList.contains('active')) {
+                            navbarMenu.classList.remove('active');
+                            if (toggleBtn) toggleBtn.classList.remove('active');
+                        }
                     }
                 }
             });

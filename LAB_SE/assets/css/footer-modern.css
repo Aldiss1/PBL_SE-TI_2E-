@@ -26,6 +26,19 @@
 	z-index: 0;
 }
 
+/* Pastikan background biru tidak terlihat di bawah copyright */
+.footer-style-1::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 100px;
+	background: #f8f9fa !important;
+	z-index: 1;
+	pointer-events: none;
+}
+
 .footer-style-1 .container {
 	position: relative;
 	z-index: 1;
@@ -416,9 +429,11 @@ body .footer-style-1 .footer-widget .links li a.button:hover {
 .footer-style-1 .copyright-wrapper {
 	border-top: 1px solid rgba(47, 128, 237, 0.1);
 	padding: 25px 0;
-	background: #f8f9fa;
+	background: #f8f9fa !important;
 	margin-top: 30px;
 	position: relative;
+	z-index: 2;
+	overflow: hidden;
 }
 
 .footer-style-1 .copyright-wrapper::before {
@@ -429,7 +444,9 @@ body .footer-style-1 .footer-widget .links li a.button:hover {
 	right: 0;
 	height: 1px;
 	background: linear-gradient(90deg, transparent 0%, rgba(47, 128, 237, 0.2) 50%, transparent 100%);
+	z-index: 1;
 }
+
 
 .footer-style-1 .copyright-wrapper p {
 	font-size: 13px;

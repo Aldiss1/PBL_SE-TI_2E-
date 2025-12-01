@@ -97,10 +97,4 @@ if ($result_misi) {
                 
             </div> </div> </div> </section>
 
-<?php 
-// Tutup koneksi database di akhir file (disarankan)
-if (isset($koneksi) && $koneksi) {
-    pg_close($koneksi);
-}
-?>
 <?php include __DIR__ . '/../../template/footer.php'; ?>
