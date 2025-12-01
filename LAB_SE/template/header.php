@@ -126,6 +126,14 @@ if (!isset($koneksi)) {
     <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/personil.css?<?php echo time(); ?>" />
     <?php endif; ?>
     
+    <?php 
+    // Deteksi halaman detail-personil
+    if (strpos($current_page, 'detail-personil') !== false):
+    ?>
+    <!-- Load detail-personil.css SETELAH semua CSS lain untuk override -->
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/detail-personil.css?<?php echo time(); ?>" />
+    <?php endif; ?>
+    
   </head>
   <body>
 
