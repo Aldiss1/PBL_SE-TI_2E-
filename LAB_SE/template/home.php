@@ -1,4 +1,27 @@
-<?php $labseHomeBase = defined('LABSE_BASE_PATH') ? LABSE_BASE_PATH : ''; ?>
+<?php $labseHomeBase = defined('LABSE_BASE_PATH') ? LABSE_BASE_PATH : ''; 
+if (!function_exists('ambil_konten')) {
+    function ambil_konten($koneksi, $key) {
+        if (!$koneksi) {
+            return ['title' => 'Error', 'content' => 'Koneksi database gagal.'];
+        }
+        
+        // Menggunakan pg_query_params untuk keamanan
+        $query = "SELECT title, content FROM konten_page WHERE page_key = $1";
+        $result = pg_query_params($koneksi, $query, array($key));
+        
+        if ($result && pg_num_rows($result) > 0) {
+            return pg_fetch_assoc($result);
+        }
+        
+    }
+}
+
+// Ambil data konten 'Tentang Kami' dari database
+$tentang_kami_data = ambil_konten($koneksi, 'tentang_kami');
+$tentang_kami_judul = htmlspecialchars($tentang_kami_data['title'] ?? 'Tentang Kami');
+// Gunakan substr untuk preview singkat
+$tentang_kami_preview = htmlspecialchars(substr($tentang_kami_data['content'] ?? '', 0, 15000)) . '...';
+?>
       <!-- ========================= hero-2 start ========================= -->
         <!-- Start of Selection -->
         <div class="row align-items-center justify-content-center">
@@ -37,26 +60,41 @@
     <!-- ========================= hero-section-wrapper-2 end ========================= -->
 
 <!-- ========================= feature style-2 start ========================= -->
+<?php $labseHomeBase = defined('LABSE_BASE_PATH') ? LABSE_BASE_PATH : ''; ?>
 <section id="services" class="feature-section feature-style-2 pt-100 pb-70">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="row justify-content-center">
-          <div class="col-xl-10 col-lg-12 col-md-12">
-            <div class="section-surface mb-60 text-center">
-              <div class="section-title mb-0">
-                <h3 class="mb-15 wow fadeInUp gradient-text" data-wow-delay=".2s">Tentang Kami</h3>
-                <p class="wow fadeInUp" data-wow-delay=".4s">
-                  Lab SE adalah laboratorium penelitian bagi mahasiswa dan dosen yang fokus pada rekayasa perangkat lunak, quality assurance, dan HCI.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="row justify-content-center">
+          <div class="col-xl-10 col-lg-12 col-md-12">
+            <div class="section-surface mb-60 text-center">
+              <div class="section-title mb-0">
+                                <h3 class="mb-15 wow fadeInUp gradient-text" data-wow-delay=".2s">
+                    <?php echo $tentang_kami_judul; ?>
+                </h3>
+                
+                                <p class="wow fadeInUp" data-wow-delay=".4s">
+                    <?php echo $tentang_kami_preview; ?>
+                </p>
+
+                <div class="mt-4 wow fadeInUp" data-wow-delay=".5s">
+                    <a href="<?php echo $labseHomeBase; ?>/pages/profil/tentang-kami.php" 
+                       class="btn btn-primary btn-sm radius-10" 
+                       style="background: #2F80ED; border-color: #2F80ED; padding: 10px 25px; font-weight: 600;">
+                        Selengkapnya <i class="lni lni-arrow-right"></i>
+                    </a>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
+
+
 <!-- ========================= about style-3 end ========================= -->
 
 <!-- ========================= Focus & Scope Section ========================= -->
