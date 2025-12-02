@@ -41,6 +41,18 @@
 		}
     };
 
+    // Scroll to top functionality
+    var scrollTopBtn = document.querySelector(".scroll-top");
+    if (scrollTopBtn) {
+        scrollTopBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
     // section menu active
 	function onScroll(event) {
 		var sections = document.querySelectorAll('.page-scroll');
@@ -49,7 +61,39 @@
 		for (var i = 0; i < sections.length; i++) {
 			var currLink = sections[i];
 			var val = currLink.getAttribute('href');
-			var refElement = val ? document.querySelector(val) : null;
+			
+			// Ekstrak hanya hash (#section) dari href, abaikan path
+			var hash = '';
+			if (val) {
+				// Jika href dimulai dengan #, gunakan langsung
+				if (val.indexOf('#') === 0) {
+					hash = val;
+				} 
+				// Jika href mengandung #, ambil bagian setelah #
+				else if (val.indexOf('#') > 0) {
+					hash = '#' + val.split('#')[1];
+				}
+				// Jika href adalah # saja atau #0, skip
+				else if (val === '#' || val === '#0') {
+					continue;
+				}
+			}
+			
+			// Validasi hash adalah selector yang valid
+			if (!hash || hash === '#' || hash === '#0') {
+				continue;
+			}
+			
+			// Coba query selector dengan hash
+			var refElement = null;
+			try {
+				refElement = document.querySelector(hash);
+			} catch (e) {
+				// Jika selector tidak valid, skip
+				console.warn('Invalid selector:', hash);
+				continue;
+			}
+			
 			if (!refElement) continue;
 			var scrollTopMinus = scrollPos + 73;
 			if (refElement.offsetTop <= scrollTopMinus && (refElement.offsetTop + refElement.offsetHeight > scrollTopMinus)) {

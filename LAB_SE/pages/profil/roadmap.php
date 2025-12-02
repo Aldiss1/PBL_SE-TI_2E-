@@ -64,8 +64,6 @@ function ambil_item_roadmap($koneksi, $id_periode) {
 // 1. Ambil semua data periode utama
 $semua_periode = ambil_periode_roadmap($koneksi);
 
-// Tutup koneksi (Opsional, bisa juga di akhir file)
-// pg_close($koneksi); 
 ?>
 
 <?php include __DIR__ . '/../../template/header.php'; ?>
@@ -135,10 +133,4 @@ $semua_periode = ambil_periode_roadmap($koneksi);
     </div>
 </section>
 
-<?php 
-// Tutup koneksi database di akhir file (disarankan)
-if (isset($koneksi) && $koneksi) {
-    pg_close($koneksi);
-}
-?>
 <?php include __DIR__ . '/../../template/footer.php'; ?>

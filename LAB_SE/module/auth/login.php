@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Login</title>
     
     <link rel="stylesheet" href="../../assets/css/bootstrap-5.0.0-alpha-2.min.css" />
-    <link rel="stylesheet" href="../../assets/css/Linelcons.2.0.css" /> 
+    <link rel="stylesheet" href="../../assets/css/LineIcons.2.0.css" /> 
     
     <link rel="stylesheet" href="../../assets/css/login.css" />
     

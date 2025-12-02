@@ -1,6 +1,8 @@
 /**
  * AdminSidebar - Kelas untuk mengelola sidebar admin (toggle, overlay)
  */
+// Cek apakah class sudah dideklarasikan untuk mencegah duplikasi
+if (typeof AdminSidebar === 'undefined') {
 class AdminSidebar {
     constructor() {
         this.sidebar = null;
@@ -92,9 +94,10 @@ class AdminSidebar {
         }
     }
 }
+} // End if typeof AdminSidebar === 'undefined'
 
-// Initialize AdminSidebar
-if (typeof window !== 'undefined') {
+// Initialize AdminSidebar (hanya jika belum ada instance)
+if (typeof window !== 'undefined' && typeof AdminSidebar !== 'undefined' && !window.adminSidebar) {
     window.adminSidebar = new AdminSidebar();
 }
 

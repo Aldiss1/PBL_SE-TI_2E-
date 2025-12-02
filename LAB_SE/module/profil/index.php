@@ -645,6 +645,36 @@ table.custom-table tr:hover { background-color: #f1f1f1; }
 /* Base styles yang sudah ada */
 .profil-container { padding: 20px; }
 .card { background: #fff; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px; }
+
+/* Alignment untuk button di card kelola profil */
+.card .d-flex.justify-content-between.align-items-center {
+	align-items: center !important;
+}
+
+.card .d-flex.justify-content-between h3.card-title-profile {
+	flex: 1;
+	margin: 0;
+	padding-right: 20px;
+	line-height: 1.4;
+	display: flex;
+	align-items: center;
+}
+
+.card .d-flex.justify-content-between .btn,
+.card .d-flex.justify-content-between a.btn {
+	flex-shrink: 0;
+	white-space: nowrap;
+	height: 38px;
+	min-height: 38px;
+	max-height: 38px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px 16px;
+	margin: 0;
+	vertical-align: middle;
+	line-height: 1;
+}
 .form-group { margin-bottom: 15px; }
 .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
 .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }

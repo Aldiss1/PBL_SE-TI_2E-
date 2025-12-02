@@ -126,5 +126,3 @@ foreach ($menu_items as $key => $item) {
     </ul>
 </aside>
 
-<script src="<?php echo isset($base_path) ? $base_path : '../../'; ?>assets/js/classes/AdminSidebar.js"></script>
-
