@@ -1,86 +1,357 @@
-.visi-misi-hero {
-	background-color: #ffffff;
-	padding: 60px 0;
-	text-align: center;
-	border-bottom: 2px solid #f0f0f0;
-	margin-top: 80px;
-}
-.visi-misi-hero h2 {
-	font-size: 2rem;
-	color: #2F80ED;
-	font-weight: 600;
-	margin-bottom: 20px;
-}
-.visi-misi-hero p { color: #585978; font-size: 1rem; }
+/* ============================================
+   VISI MISI PAGE - SAMA PERSIS DENGAN PERSONIL & DAFTAR
+   ============================================ */
 
-.visi-misi-content { padding: 60px 0; background: #f4f7fb; }
+/* ============================================
+   SECTION HEADER - SAMA PERSIS DENGAN PERSONIL
+   ============================================ */
 
-.vision-card, .mission-card {
-	background: #fff;
-	border-radius: 15px;
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-	margin-bottom: 30px;
-	padding: 30px;
-	transition: all 0.3s ease;
-	border-left: 4px solid #2F80ED;
+/* Section Header Background - Fresh Gradient */
+section.pt-150.pb-50 {
+	background: linear-gradient(180deg, #f8fbff 0%, #ffffff 20%, #ffffff 80%, #f8fbff 100%) !important;
+	position: relative;
+	overflow: hidden;
+	margin-top: 80px !important;
+	padding: 120px 0 80px !important;
 }
-.vision-card:hover, .mission-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); }
-.mission-card { border-left-color: #27AE60; }
 
-.card-header-custom {
-	display: flex;
-	align-items: center;
-	margin-bottom: 20px;
-	padding-bottom: 15px;
-	border-bottom: 1px solid #eee;
+/* Pattern Background - Subtle Lines */
+section.pt-150.pb-50::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-image: 
+		repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 1px,
+			rgba(47, 128, 237, 0.02) 1px,
+			rgba(47, 128, 237, 0.02) 2px
+		);
+	pointer-events: none;
+	z-index: 0;
+	opacity: 0.5;
 }
-.card-icon {
-	width: 50px;
-	height: 50px;
-	background: #2F80ED;
-	border-radius: 10px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: white;
-	font-size: 1.5rem;
-	margin-right: 15px;
-}
-.mission-card .card-icon { background: #27AE60; }
-.card-title-custom { font-size: 1.6rem; font-weight: 600; color: #2F80ED; margin: 0; }
-.mission-card .card-title-custom { color: #27AE60; }
-.vision-text { font-size: 1rem; line-height: 1.7; color: #515e7b; margin: 0; }
 
-.mission-list { list-style: none; padding: 0; margin: 0; }
-.mission-item {
-	display: flex;
-	align-items: flex-start;
-	padding: 15px 0;
-	border-bottom: 1px solid #eee;
-	transition: all 0.3s ease;
-}
-.mission-item:last-child { border-bottom: none; }
-.mission-item:hover { padding-left: 10px; }
-.mission-number {
-	width: 30px;
-	height: 30px;
-	background: #27AE60;
-	color: white;
+/* Decorative Circles */
+section.pt-150.pb-50::after {
+	content: '';
+	position: absolute;
+	top: -100px;
+	right: -100px;
+	width: 400px;
+	height: 400px;
+	background: radial-gradient(circle, rgba(47, 128, 237, 0.05) 0%, transparent 70%);
 	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-weight: 600;
-	font-size: 0.9rem;
-	margin-right: 15px;
-	flex-shrink: 0;
-}
-.mission-text { font-size: 1rem; line-height: 1.7; color: #515e7b; flex: 1; margin: 0; }
-
-@media (max-width: 768px) {
-	.visi-misi-hero h2 { font-size: 1.75rem; }
-	.vision-card, .mission-card { padding: 20px; }
-	.card-icon { width: 45px; height: 45px; font-size: 1.3rem; }
-	.card-title-custom { font-size: 1.4rem; }
+	pointer-events: none;
+	z-index: 0;
+	animation: float 6s ease-in-out infinite;
 }
 
+@keyframes float {
+	0%, 100% {
+		transform: translateY(0) translateX(0);
+	}
+	50% {
+		transform: translateY(-20px) translateX(-10px);
+	}
+}
+
+section.pt-150.pb-50 .container {
+	position: relative;
+	z-index: 1;
+}
+
+/* Section Title - Fresh Design */
+section.pt-150.pb-50 .section-title {
+	text-align: center;
+	position: relative;
+	animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInDown {
+	from {
+		opacity: 0;
+		transform: translateY(-30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+section.pt-150.pb-50 .section-title h2 {
+	font-size: 3rem !important;
+	font-weight: 900 !important;
+	line-height: 1.2 !important;
+	position: relative;
+	display: inline-block;
+	margin-bottom: 20px !important;
+	letter-spacing: -0.5px !important;
+}
+
+/* Two-tone Text Effect */
+section.pt-150.pb-50 .section-title h2 {
+	background: none !important;
+	-webkit-background-clip: unset !important;
+	-webkit-text-fill-color: unset !important;
+	background-clip: unset !important;
+}
+
+/* Style untuk kata "Visi &" */
+section.pt-150.pb-50 .section-title h2 {
+	color: #22243e !important;
+}
+
+/* Style untuk kata "Misi" - akan di-handle dengan span di HTML */
+section.pt-150.pb-50 .section-title h2 span {
+	color: #2F80ED !important;
+	position: relative;
+}
+
+/* Underline Animation */
+section.pt-150.pb-50 .section-title h2::after {
+	content: '';
+	position: absolute;
+	bottom: -12px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 4px;
+	background: linear-gradient(90deg, #2F80ED 0%, #1E5FCC 50%, #2F80ED 100%);
+	border-radius: 2px;
+	animation: underlineExpand 1s ease-out 0.5s forwards;
+	box-shadow: 0 2px 8px rgba(47, 128, 237, 0.3);
+}
+
+@keyframes underlineExpand {
+	from {
+		width: 0;
+	}
+	to {
+		width: 120px;
+	}
+}
+
+/* Decorative dots around underline */
+section.pt-150.pb-50 .section-title h2::before {
+	content: '';
+	position: absolute;
+	bottom: -10px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 140px;
+	height: 4px;
+	background: 
+		radial-gradient(circle, #2F80ED 2px, transparent 2px),
+		radial-gradient(circle, #2F80ED 2px, transparent 2px);
+	background-size: 20px 4px;
+	background-position: 0 0, 120px 0;
+	opacity: 0.3;
+	animation: fadeIn 1s ease-out 1s forwards;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+/* Subtitle - Fresh Design */
+section.pt-150.pb-50 .section-title p {
+	font-size: 1.15rem !important;
+	color: #6c757d !important;
+	margin-top: 30px !important;
+	line-height: 1.8 !important;
+	font-weight: 400 !important;
+	letter-spacing: 0.3px !important;
+	animation: fadeInUp 0.8s ease-out 0.3s both;
+	max-width: 700px;
+	margin-left: auto !important;
+	margin-right: auto !important;
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Content Section - Sama dengan Personil */
+#visi-misi-content {
+	background: linear-gradient(180deg, #f8fbff 0%, #ffffff 10%, #fafbfc 30%, #f8f9fa 50%, #fafbfc 70%, #ffffff 90%, #f8fbff 100%) !important;
+	padding: 80px 0 70px !important;
+	position: relative;
+	margin-top: 0 !important;
+}
+
+/* Cards - Sama dengan Personil Card */
+#visi-misi-content .vision-card,
+#visi-misi-content .mission-card {
+	background: #ffffff !important;
+	border-radius: 16px !important;
+	padding: 40px 30px !important;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+	border: 1px solid rgba(47, 128, 237, 0.1) !important;
+	position: relative;
+	overflow: hidden;
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	margin-bottom: 30px !important;
+}
+
+#visi-misi-content .vision-card::before,
+#visi-misi-content .mission-card::before {
+	content: '' !important;
+	position: absolute !important;
+	top: 0 !important;
+	left: 0 !important;
+	right: 0 !important;
+	height: 4px !important;
+	background: linear-gradient(90deg, #2F80ED 0%, #1E5FCC 50%, #2F80ED 100%) !important;
+	opacity: 0 !important;
+	transition: opacity 0.4s ease !important;
+}
+
+#visi-misi-content .mission-card::before {
+	background: linear-gradient(90deg, #27AE60 0%, #229954 50%, #27AE60 100%) !important;
+}
+
+#visi-misi-content .vision-card:hover,
+#visi-misi-content .mission-card:hover {
+	transform: translateY(-10px) !important;
+	box-shadow: 0 12px 40px rgba(47, 128, 237, 0.2) !important;
+	border-color: rgba(47, 128, 237, 0.3) !important;
+}
+
+#visi-misi-content .mission-card:hover {
+	box-shadow: 0 12px 40px rgba(39, 174, 96, 0.2) !important;
+	border-color: rgba(39, 174, 96, 0.3) !important;
+}
+
+#visi-misi-content .vision-card:hover::before,
+#visi-misi-content .mission-card:hover::before {
+	opacity: 1 !important;
+}
+
+/* Card Header */
+#visi-misi-content .card-header-custom {
+	display: flex !important;
+	align-items: center !important;
+	margin-bottom: 25px !important;
+	padding-bottom: 20px !important;
+	border-bottom: 1px solid rgba(47, 128, 237, 0.1) !important;
+}
+
+#visi-misi-content .card-icon {
+	width: 50px !important;
+	height: 50px !important;
+	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+	border-radius: 12px !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	color: #ffffff !important;
+	font-size: 1.5rem !important;
+	margin-right: 15px !important;
+	box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3) !important;
+}
+
+#visi-misi-content .mission-card .card-icon {
+	background: linear-gradient(135deg, #27AE60 0%, #229954 100%) !important;
+	box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3) !important;
+}
+
+#visi-misi-content .card-title-custom {
+	font-size: 1.8rem !important;
+	font-weight: 700 !important;
+	color: #22243e !important;
+	margin: 0 !important;
+}
+
+/* Vision Text */
+#visi-misi-content .vision-text {
+	font-size: 1rem !important;
+	line-height: 1.8 !important;
+	color: #6c757d !important;
+	margin: 0 !important;
+}
+
+/* Mission List */
+#visi-misi-content .mission-list {
+	list-style: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+#visi-misi-content .mission-list li {
+	padding: 15px 0 !important;
+	border-bottom: 1px solid rgba(47, 128, 237, 0.1) !important;
+	transition: all 0.3s ease !important;
+}
+
+#visi-misi-content .mission-list li:last-child {
+	border-bottom: none !important;
+}
+
+#visi-misi-content .mission-list li:hover {
+	padding-left: 10px !important;
+	background: rgba(47, 128, 237, 0.02) !important;
+	border-radius: 8px !important;
+}
+
+#visi-misi-content .mission-text {
+	font-size: 1rem !important;
+	line-height: 1.8 !important;
+	color: #6c757d !important;
+	margin: 0 !important;
+}
+
+/* Responsive - SAMA PERSIS dengan Personil */
+@media (max-width: 991px) {
+	section.pt-150.pb-50 {
+		padding: 80px 0 50px !important;
+	}
+	
+	section.pt-150.pb-50 .section-title h2 {
+		font-size: 2rem !important;
+	}
+	
+	#visi-misi-content {
+		padding: 60px 0 50px !important;
+	}
+	
+	#visi-misi-content .vision-card,
+	#visi-misi-content .mission-card {
+		padding: 30px 20px !important;
+	}
+}
+
+@media (max-width: 767px) {
+	section.pt-150.pb-50 {
+		padding: 60px 0 40px !important;
+	}
+	
+	section.pt-150.pb-50 .section-title h2 {
+		font-size: 1.75rem !important;
+	}
+	
+	section.pt-150.pb-50 .section-title p {
+		font-size: 1rem !important;
+	}
+	
+	#visi-misi-content {
+		padding: 50px 0 40px !important;
+	}
+	
+	#visi-misi-content .vision-card,
+	#visi-misi-content .mission-card {
+		padding: 25px 20px !important;
+	}
+}

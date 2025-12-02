@@ -1,54 +1,459 @@
-.single-input {
+/* ============================================
+   HALAMAN PENDAFTARAN - SAMA PERSIS DENGAN PERSONIL
+   ============================================ */
+
+/* Section Background - SAMA PERSIS dengan Personil */
+#daftar.contact-section {
+	background: linear-gradient(180deg, #f8fbff 0%, #ffffff 20%, #ffffff 80%, #f8fbff 100%) !important;
 	position: relative;
-	margin-bottom: 25px;
+	overflow: hidden;
+	margin-top: 80px !important;
+	padding: 120px 0 80px !important;
 }
 
-.single-input label {
+/* Pattern Background - Subtle Lines - SAMA dengan Personil */
+#daftar.contact-section::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-image: 
+		repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 1px,
+			rgba(47, 128, 237, 0.02) 1px,
+			rgba(47, 128, 237, 0.02) 2px
+		);
+	pointer-events: none;
+	z-index: 0;
+	opacity: 0.5;
+}
+
+/* Decorative Circles - SAMA dengan Personil */
+#daftar.contact-section::after {
+	content: '';
+	position: absolute;
+	top: -100px;
+	right: -100px;
+	width: 400px;
+	height: 400px;
+	background: radial-gradient(circle, rgba(47, 128, 237, 0.05) 0%, transparent 70%);
+	border-radius: 50%;
+	pointer-events: none;
+	z-index: 0;
+	animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+	0%, 100% {
+		transform: translateY(0) translateX(0);
+	}
+	50% {
+		transform: translateY(-20px) translateX(-10px);
+	}
+}
+
+#daftar.contact-section .container {
 	position: relative;
 	z-index: 1;
 }
 
-.single-input .form-input {
+/* Section Title - SAMA PERSIS dengan Personil */
+#daftar .section-title {
+	text-align: center;
+	position: relative;
+	animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInDown {
+	from {
+		opacity: 0;
+		transform: translateY(-30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+#daftar .section-title h3.gradient-text {
+	background: none !important;
+	-webkit-background-clip: unset !important;
+	-webkit-text-fill-color: unset !important;
+	background-clip: unset !important;
+	font-size: 3rem !important;
+	font-weight: 900 !important;
+	line-height: 1.2 !important;
+	position: relative;
+	display: inline-block;
+	margin-bottom: 20px !important;
+	letter-spacing: -0.5px !important;
+	color: #22243e !important;
+}
+
+/* Two-tone Text Effect - SAMA dengan Personil */
+#daftar .section-title h3.gradient-text span {
+	color: #2F80ED !important;
 	position: relative;
 }
 
-.single-input i {
+/* Underline Animation - SAMA dengan Personil */
+#daftar .section-title h3.gradient-text::after {
+	content: '';
 	position: absolute;
-	left: 15px;
-	top: 38px;
-	color: #2F80ED;
-	font-size: 1.1rem;
-	z-index: 2;
-	pointer-events: none;
+	bottom: -12px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 4px;
+	background: linear-gradient(90deg, #2F80ED 0%, #1E5FCC 50%, #2F80ED 100%);
+	border-radius: 2px;
+	animation: underlineExpand 1s ease-out 0.5s forwards;
+	box-shadow: 0 2px 8px rgba(47, 128, 237, 0.3);
 }
 
-.single-input .form-input:focus {
-	outline: none;
-	border-color: #2F80ED;
-	box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.1);
+@keyframes underlineExpand {
+	from {
+		width: 0;
+	}
+	to {
+		width: 120px;
+	}
 }
 
-.single-input .form-input:hover {
-	border-color: #2F80ED;
+/* Decorative dots around underline - SAMA dengan Personil */
+#daftar .section-title h3.gradient-text::before {
+	content: '';
+	position: absolute;
+	bottom: -10px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 140px;
+	height: 4px;
+	background: 
+		radial-gradient(circle, #2F80ED 2px, transparent 2px),
+		radial-gradient(circle, #2F80ED 2px, transparent 2px);
+	background-size: 20px 4px;
+	background-position: 0 0, 120px 0;
+	opacity: 0.3;
+	animation: fadeIn 1s ease-out 1s forwards;
 }
 
-.button:hover {
-	background: rgba(47, 128, 237, 0.9) !important;
-	transform: translateY(-2px);
-	box-shadow: 0 4px 12px rgba(47,128,237,.15) !important;
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
 }
 
-.gradient-text {
-	background: linear-gradient(135deg, #2F80ED 0%, #6C63FF 100%);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
-	font-weight: 700;
-	font-size: 2.5rem;
+/* Subtitle - SAMA PERSIS dengan Personil */
+#daftar .section-title p {
+	font-size: 1.15rem !important;
+	color: #6c757d !important;
+	margin-top: 30px !important;
+	line-height: 1.8 !important;
+	font-weight: 400 !important;
+	letter-spacing: 0.3px !important;
+	animation: fadeInUp 0.8s ease-out 0.3s both;
+	max-width: 700px;
+	margin-left: auto !important;
+	margin-right: auto !important;
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Form Wrapper - Sama dengan Card Personil */
+#daftar .contact-form-wrapper {
+	background: #ffffff !important;
+	padding: 40px 30px !important;
+	border-radius: 16px !important;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+	border: 1px solid rgba(47, 128, 237, 0.1) !important;
+	position: relative;
+	overflow: hidden;
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+#daftar .contact-form-wrapper::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 4px;
+	background: linear-gradient(90deg, #2F80ED 0%, #1E5FCC 50%, #2F80ED 100%);
+	opacity: 0;
+	transition: opacity 0.4s ease;
+}
+
+#daftar .contact-form-wrapper:hover {
+	box-shadow: 0 12px 40px rgba(47, 128, 237, 0.2) !important;
+	border-color: rgba(47, 128, 237, 0.3) !important;
+	transform: translateY(-10px) !important;
+}
+
+#daftar .contact-form-wrapper:hover::before {
+	opacity: 1;
+}
+
+/* Form Inputs */
+#daftar .single-input {
+	position: relative;
+	margin-bottom: 25px;
+}
+
+#daftar .single-input label {
+	color: #22243e !important;
+	font-weight: 600 !important;
+	margin-bottom: 8px !important;
+	display: block !important;
+	font-size: 15px !important;
+}
+
+#daftar .single-input .form-input {
+	width: 100% !important;
+	padding: 12px 15px 12px 45px !important;
+	border: 1px solid #e0e0e0 !important;
+	border-radius: 8px !important;
+	font-size: 1rem !important;
+	transition: all 0.3s ease !important;
+	background: #ffffff !important;
+	color: #2c3e50 !important;
+	font-family: inherit !important;
+}
+
+#daftar .single-input .form-input::placeholder {
+	color: #999 !important;
+	font-size: 0.95rem !important;
+}
+
+#daftar .single-input .form-input:focus {
+	outline: none !important;
+	border-color: #2F80ED !important;
+	box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.1) !important;
+}
+
+#daftar .single-input .form-input:hover {
+	border-color: #2F80ED !important;
+}
+
+/* File Input */
+#daftar .single-input input[type="file"] {
+	padding: 10px 12px !important;
+	cursor: pointer;
+	background: #fff !important;
+}
+
+#daftar .single-input input[type="file"]:focus {
+	border-color: #2F80ED !important;
+	box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.1) !important;
+}
+
+/* Icons - Perfect Vertical Centering - Override lindy-uikit.css dengan AGGRESIF */
+html body #daftar.contact-section.contact-style-6 .contact-form-wrapper form .single-input,
+html body #daftar .single-input {
+	position: relative !important;
+}
+
+/* Override lindy-uikit.css yang set right: 21px dan top: 53.5px - AGGRESIF */
+html body #daftar.contact-section.contact-style-6 .contact-form-wrapper form .single-input i,
+html body #daftar .single-input i,
+html body #daftar.contact-section .contact-form-wrapper .single-input i {
+	position: absolute !important;
+	left: 15px !important;
+	right: auto !important; /* Override right dari lindy-uikit.css */
+	top: auto !important; /* Reset top dari lindy-uikit.css */
+	bottom: auto !important;
+	/* Simplified calculation: label (18px) + margin (8px) + input padding-top (12px) + half input height (18px) = 56px, minus half icon (10px) = 46px */
+	top: 46px !important;
+	color: #2F80ED !important;
+	font-size: 1.1rem !important;
+	z-index: 10 !important;
+	pointer-events: none !important;
+	transition: all 0.3s ease !important;
+	line-height: 1 !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 20px !important;
+	height: 20px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	transform: none !important;
+}
+
+html body #daftar.contact-section.contact-style-6 .contact-form-wrapper form .single-input .form-input:focus + i,
+html body #daftar.contact-section.contact-style-6 .contact-form-wrapper form .single-input:hover i,
+html body #daftar .single-input .form-input:focus + i,
+html body #daftar .single-input:hover i {
+	color: #1E5FCC !important;
+}
+
+/* Button - Sama dengan Landing Page Button */
+#daftar .form-button {
+	margin-top: 30px !important;
+	text-align: center !important;
+}
+
+#daftar .form-button .button {
+	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+	color: #ffffff !important;
+	border: none !important;
+	padding: 12px 30px !important;
+	border-radius: 10px !important;
+	font-weight: 600 !important;
+	font-size: 15px !important;
+	box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3) !important;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	position: relative;
+	overflow: hidden;
+	cursor: pointer;
+	display: inline-block !important;
+}
+
+#daftar .form-button .button::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+	transition: left 0.5s ease;
+}
+
+#daftar .form-button .button:hover {
+	transform: translateY(-2px) !important;
+	box-shadow: 0 6px 20px rgba(47, 128, 237, 0.4) !important;
+}
+
+#daftar .form-button .button:hover::before {
+	left: 100%;
+}
+
+/* Alert Messages */
+#daftar .alert {
+	padding: 15px 20px !important;
+	border-radius: 12px !important;
+	margin-bottom: 30px !important;
+	border: none !important;
+	font-size: 15px !important;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+}
+
+#daftar .alert-success {
+	background: linear-gradient(135deg, rgba(39, 174, 96, 0.1) 0%, rgba(39, 174, 96, 0.05) 100%) !important;
+	color: #27AE60 !important;
+	border-left: 4px solid #27AE60 !important;
+}
+
+#daftar .alert-error,
+#daftar .alert-danger {
+	background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(231, 76, 60, 0.05) 100%) !important;
+	color: #E74C3C !important;
+	border-left: 4px solid #E74C3C !important;
+}
+
+/* Responsive - Sama dengan Personil */
+@media (max-width: 991px) {
+	#daftar.contact-section {
+		padding: 80px 0 50px !important;
+	}
+	
+	#daftar .section-title h3.gradient-text {
+		font-size: 2rem !important;
+	}
+	
+	#daftar .contact-form-wrapper {
+		padding: 30px 20px !important;
+	}
 }
 
 @media (max-width: 767px) {
-	.gradient-text { font-size: 2rem; }
-	.contact-form-wrapper { padding: 30px 20px !important; }
+	#daftar.contact-section {
+		padding: 60px 0 40px !important;
+	}
+	
+	#daftar .section-title h3.gradient-text {
+		font-size: 1.75rem !important;
+	}
+	
+	#daftar .section-title p {
+		font-size: 1rem !important;
+	}
+	
+	#daftar .contact-form-wrapper {
+		padding: 25px 20px !important;
+	}
+	
+	#daftar .single-input {
+		margin-bottom: 25px;
+	}
+	
+	#daftar .single-input .form-input {
+		padding: 12px 15px 12px 45px !important;
+		font-size: 0.95rem !important;
+	}
+	
+	#daftar .single-input i {
+		top: 38px;
+		font-size: 1rem;
+	}
+	
+	#daftar .form-button .button {
+		padding: 12px 28px !important;
+		font-size: 14px !important;
+		width: 100%;
+	}
 }
 
+/* EXCLUDE FOOTER - Button style tidak berlaku di footer */
+.footer-style-1 .footer-widget .links li a.button,
+.footer-style-1 .footer-widget .links li a[class*="button"],
+.footer-style-1 .footer-widget .links li a[href*="pendaftaran"],
+.footer-style-1 .footer-widget .links li a[href*="daftar"],
+footer .footer-style-1 .footer-widget .links li a.button,
+footer .footer-style-1 .footer-widget .links li a[href*="pendaftaran"],
+footer .footer-style-1 .footer-widget .links li a[href*="daftar"] {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	border: none !important;
+	border-width: 0 !important;
+	padding: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+	color: #6c757d !important;
+	font-weight: 400 !important;
+	font-size: 14px !important;
+	width: auto !important;
+	height: auto !important;
+	transform: none !important;
+}
+
+.footer-style-1 .footer-widget .links li a.button:hover,
+.footer-style-1 .footer-widget .links li a[class*="button"]:hover,
+.footer-style-1 .footer-widget .links li a[href*="pendaftaran"]:hover,
+.footer-style-1 .footer-widget .links li a[href*="daftar"]:hover,
+footer .footer-style-1 .footer-widget .links li a.button:hover,
+footer .footer-style-1 .footer-widget .links li a[href*="pendaftaran"]:hover,
+footer .footer-style-1 .footer-widget .links li a[href*="daftar"]:hover {
+	background: transparent !important;
+	background-color: transparent !important;
+	background-image: none !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #2F80ED !important;
+	transform: translateX(2px) !important;
+	padding: 0 !important;
+}

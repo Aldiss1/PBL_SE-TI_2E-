@@ -40,16 +40,20 @@ if ($result_misi) {
 
 <?php include __DIR__ . '/../../template/header.php'; ?>
 
-<link rel="stylesheet" href="../../assets/css/visi-misi.css" />
-
-<section class="visi-misi-hero">
+<section class="pt-150 pb-50">
     <div class="container">
-        <h2 class="wow fadeInUp" data-wow-delay=".2s">Visi &amp; Misi</h2>
-        <p class="wow fadeInUp" data-wow-delay=".3s">Arah dan komitmen Laboratorium Software Engineering</p>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section-title text-center mb-30">
+                    <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Visi &amp; <span>Misi</span></h2>
+                    <p class="wow fadeInUp" data-wow-delay=".4s">Arah dan komitmen Laboratorium Software Engineering</p>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<section class="visi-misi-content">
+<section id="visi-misi-content" class="pt-100 pb-70">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10">

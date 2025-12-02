@@ -73,18 +73,23 @@ if (empty($blogs) && $koneksi) {
 ?>
 <?php include __DIR__ . '/../../template/header.php'; ?>
 
-<link rel="stylesheet" href="../../assets/css/blog-list.css" />
+<link rel="stylesheet" href="../../assets/css/blog-list.css?<?php echo time(); ?>" />
 
-<section class="pt-150 pb-100" style="margin-top: 80px; background: #f8f9fa;">
+<section class="pt-150 pb-50">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <div class="section-title text-center mb-60">
-                    <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Blog & Artikel</h2>
+                <div class="section-title text-center mb-30">
+                    <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Blog & <span>Artikel</span></h2>
                     <p class="wow fadeInUp" data-wow-delay=".4s">Artikel dan berita terkini dari Laboratorium Software Engineering</p>
                 </div>
             </div>
         </div>
+    </div>
+</section>
+
+<section id="blog-list" class="pt-100 pb-70">
+    <div class="container">
 
         <div class="row">
             <?php if (!empty($blogs)): ?>

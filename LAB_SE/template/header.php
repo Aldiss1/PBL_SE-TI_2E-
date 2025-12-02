@@ -88,14 +88,50 @@ if (!isset($koneksi)) {
     <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/home.css"/>
     <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/fixed-navbar.css"/>
     <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/dosen-pengampu.css"/>
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/landing-page.css"/>
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/footer-modern.css"/>
     
     <?php 
-    // Deteksi halaman tentang-kami dan inject CSS fix navbar
+    // Deteksi halaman dan inject CSS styling
     $current_page = $_SERVER['REQUEST_URI'] ?? '';
+    
+    // Deteksi halaman tentang-kami
     if (strpos($current_page, 'tentang-kami') !== false || (isset($is_tentang_kami_page) && $is_tentang_kami_page)):
     ?>
-    <!-- Load tentang-kami.css SETELAH home.css untuk override -->
-    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/tentang-kami.css" />
+    <!-- Load tentang-kami.css SETELAH semua CSS lain untuk override -->
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/tentang-kami.css?<?php echo time(); ?>" />
+    <?php endif; ?>
+    
+    <?php 
+    // Deteksi halaman visi-misi
+    if (strpos($current_page, 'visi-misi') !== false):
+    ?>
+    <!-- Load visi-misi.css SETELAH semua CSS lain untuk override -->
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/visi-misi.css?<?php echo time(); ?>" />
+    <?php endif; ?>
+    
+    <?php 
+    // Deteksi halaman roadmap
+    if (strpos($current_page, 'roadmap') !== false):
+    ?>
+    <!-- Load roadmap.css SETELAH semua CSS lain untuk override -->
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/roadmap.css?<?php echo time(); ?>" />
+    <?php endif; ?>
+    
+    <?php 
+    // Deteksi halaman personil dan inject CSS styling
+    if (strpos($current_page, 'personil') !== false && strpos($current_page, 'detail-personil') === false):
+    ?>
+    <!-- Load personil.css SETELAH semua CSS lain untuk override -->
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/personil.css?<?php echo time(); ?>" />
+    <?php endif; ?>
+    
+    <?php 
+    // Deteksi halaman detail-personil
+    if (strpos($current_page, 'detail-personil') !== false):
+    ?>
+    <!-- Load detail-personil.css SETELAH semua CSS lain untuk override -->
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/detail-personil.css?<?php echo time(); ?>" />
     <?php endif; ?>
     
   </head>

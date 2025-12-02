@@ -7,9 +7,9 @@
             <div class="col-xl-3 col-lg-4 col-md-6">
               <div class="footer-widget wow fadeInUp" data-wow-delay=".2s">
                 <div class="logo">
-                  <a href="#0"> <img src="<?php echo $labseFooterBase; ?>/assets/img/logo/logo.svg" alt=""> </a>
+                  <a href="<?php echo $labseFooterBase; ?>/index.php"> <img src="<?php echo $labseFooterBase; ?>/assets/img/logo/logo.png" alt="Logo Lab SE"> </a>
                 </div>
-                <p class="desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Facilisis nulla placerat amet amet congue.</p>
+                <p class="desc">Laboratorium Software Engineering Politeknik Negeri Malang yang berfokus pada pengembangan perangkat lunak berkualitas tinggi, penelitian, dan pembinaan kompetensi mahasiswa di bidang rekayasa perangkat lunak.</p>
                 <ul class="socials">
                   <li> <a href="#0"> <i class="lni lni-facebook-filled"></i> </a> </li>
                   <li> <a href="#0"> <i class="lni lni-twitter-filled"></i> </a> </li>
@@ -20,41 +20,40 @@
             </div>
             <div class="col-xl-2 offset-xl-1 col-lg-2 col-md-6 col-sm-6">
               <div class="footer-widget wow fadeInUp" data-wow-delay=".3s">
-                <h6>Quick Link</h6>
+                <h6>Tautan Cepat</h6>
                 <ul class="links">
-                  <li> <a href="#0">Home</a> </li>
-                  <li> <a href="#0">About</a> </li>
-                  <li> <a href="#0">Service</a> </li>
-                  <li> <a href="#0">Contact</a> </li>
+                  <li> <a href="<?php echo $labseFooterBase; ?>/index.php#home">Beranda</a> </li>
+                  <li> <a href="<?php echo $labseFooterBase; ?>/pages/profil/tentang-kami.php">Tentang Kami</a> </li>
+                  <li> <a href="<?php echo $labseFooterBase; ?>/pages/profil/personil.php">Personil</a> </li>
                 </ul>
               </div>
             </div>
             <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
               <div class="footer-widget wow fadeInUp" data-wow-delay=".4s">
-                <h6>Services</h6>
+                <h6>Layanan</h6>
                 <ul class="links">
-                  <li> <a href="#0">Web Design</a> </li>
-                  <li> <a href="#0">Web Development</a> </li>
-                  <li> <a href="#0">Seo Optimization</a> </li>
-                  <li> <a href="#0">Blog Writing</a> </li>
+                  <li> <a href="<?php echo $labseFooterBase; ?>/pages/profil/visi-misi.php">Visi & Misi</a> </li>
+                  <li> <a href="<?php echo $labseFooterBase; ?>/pages/profil/roadmap.php">Roadmap</a> </li>
+                  <li> <a href="<?php echo $labseFooterBase; ?>/pages/blog/blog-list.php">Blog</a> </li>
+                  <li> <a href="<?php echo $labseFooterBase; ?>/index.php#galeri-dosen">Dosen Pengampu</a> </li>
                 </ul>
               </div>
             </div>
             <div class="col-xl-3 col-lg-3 col-md-6">
               <div class="footer-widget wow fadeInUp" data-wow-delay=".5s">
-                <h6>Help & Support</h6>
+                <h6>Informasi</h6>
                 <ul class="links">
-                  <li> <a href="#0">Support Center</a> </li>
-                  <li> <a href="#0">Live Chat</a> </li>
-                  <li> <a href="#0">FAQ</a> </li>
-                  <li> <a href="#0">Terms & Conditions</a> </li>
+                  <li> <a href="<?php echo $labseFooterBase; ?>/pages/pendaftaran/daftar.php" style="background: transparent !important; border: none !important; padding: 0 !important; border-radius: 0 !important; box-shadow: none !important; color: #6c757d !important; font-weight: 400 !important; font-size: 14px !important;">Pendaftaran</a> </li>
+                  <li> <a href="<?php echo $labseFooterBase; ?>/pages/profil/personil.php">Anggota Lab</a> </li>
+                  <li> <a href="<?php echo $labseFooterBase; ?>/module/auth/login.php">Admin</a> </li>
+                  <li> <a href="<?php echo $labseFooterBase; ?>/index.php#contact">Kontak</a> </li>
                 </ul>
               </div>
             </div>
           </div>
         </div>
         <div class="copyright-wrapper wow fadeInUp" data-wow-delay=".2s">
-          <p>Design and Developed by <a href="https://uideck.com" rel="nofollow" target="_blank">UIdeck</a> Built-with <a href="#">Lindy UI Kit</a>. Distibuted by <a href="https://themewagon.com" target="_blank">ThemeWagon</a></p>
+          <p>&copy; <?php echo date('Y'); ?> Laboratorium Software Engineering - Jurusan Teknologi Informasi, Politeknik Negeri Malang. All rights reserved.</p>
         </div>
       </div>
     </footer>
@@ -93,23 +92,7 @@
             });
         }
         
-        // Pastikan navbar selalu visible
-        var fixedNavbar = document.getElementById('fixed-navbar');
-        if (fixedNavbar) {
-            function ensureVisible() {
-                fixedNavbar.style.setProperty('position', 'fixed', 'important');
-                fixedNavbar.style.setProperty('top', '0', 'important');
-                fixedNavbar.style.setProperty('z-index', '999999', 'important');
-                fixedNavbar.style.setProperty('display', 'block', 'important');
-                fixedNavbar.style.setProperty('visibility', 'visible', 'important');
-                fixedNavbar.style.setProperty('opacity', '1', 'important');
-            }
-            
-            ensureVisible();
-            setInterval(ensureVisible, 100);
-            window.addEventListener('scroll', ensureVisible, { passive: true });
-            
-        }
+        // Navbar sudah fixed via CSS, tidak perlu JavaScript lagi
         
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {

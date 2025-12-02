@@ -12,7 +12,45 @@ if (!function_exists('ambil_konten')) {
         if ($result && pg_num_rows($result) > 0) {
             return pg_fetch_assoc($result);
         }
+        return ['title' => '', 'content' => ''];
+    }
+}
+
+// Fungsi untuk mengambil periode roadmap
+if (!function_exists('ambil_periode_roadmap')) {
+    function ambil_periode_roadmap($koneksi) {
+        if (!$koneksi) {
+            return [];
+        }
+        $query = "SELECT id, tahun_periode, judul_fase FROM roadmap_periode ORDER BY urutan ASC";
+        $result = pg_query($koneksi, $query);
         
+        $periode = [];
+        if ($result) {
+            while ($row = pg_fetch_assoc($result)) {
+                $periode[] = $row;
+            }
+        }
+        return $periode;
+    }
+}
+
+// Fungsi untuk mengambil item roadmap berdasarkan ID periode
+if (!function_exists('ambil_item_roadmap')) {
+    function ambil_item_roadmap($koneksi, $id_periode) {
+        if (!$koneksi) {
+            return [];
+        }
+        $query = "SELECT deskripsi_tugas FROM roadmap_item WHERE id_periode = $1 ORDER BY urutan ASC LIMIT 3";
+        $result = pg_query_params($koneksi, $query, array($id_periode));
+        
+        $items = [];
+        if ($result !== false) {
+            while ($row = pg_fetch_assoc($result)) {
+                $items[] = $row;
+            }
+        }
+        return $items;
     }
 }
 
@@ -21,29 +59,52 @@ $tentang_kami_data = ambil_konten($koneksi, 'tentang_kami');
 $tentang_kami_judul = htmlspecialchars($tentang_kami_data['title'] ?? 'Tentang Kami');
 // Gunakan substr untuk preview singkat
 $tentang_kami_preview = htmlspecialchars(substr($tentang_kami_data['content'] ?? '', 0, 15000)) . '...';
+
+// Ambil data roadmap dari database (maksimal 2 periode terbaru untuk preview)
+$semua_periode = ambil_periode_roadmap($koneksi);
+$periode_preview = array_slice($semua_periode, 0, 2); // Ambil 2 periode pertama
+
+// Fungsi untuk mengambil item misi
+if (!function_exists('ambil_misi_items')) {
+    function ambil_misi_items($koneksi, $limit = 3) {
+        if (!$koneksi) {
+            return [];
+        }
+        $query = "SELECT content FROM konten_page WHERE page_key LIKE 'misi_item_%' ORDER BY page_key ASC LIMIT $1";
+        $result = pg_query_params($koneksi, $query, array($limit));
+        
+        $items = [];
+        if ($result !== false) {
+            while ($row = pg_fetch_assoc($result)) {
+                $items[] = $row;
+            }
+        }
+        return $items;
+    }
+}
+
+// Ambil data Visi
+$visi_data = ambil_konten($koneksi, 'visi_deskripsi');
+$visi_content = htmlspecialchars($visi_data['content'] ?? 'Menjadi pusat penelitian software engineering yang relevan dan berdaya guna bagi pengembangan teknologi informasi di Indonesia.');
+
+// Ambil data Misi (maksimal 3 untuk preview)
+$misi_items = ambil_misi_items($koneksi, 3);
 ?>
       <!-- ========================= hero-2 start ========================= -->
         <!-- Start of Selection -->
         <div class="row align-items-center justify-content-center">
           <div class="col-12 col-lg-10">
             <div class="row align-items-center">
-              <div class="col-lg-6">
-                <div class="text-center text-lg-left" style="padding: 60px 24px; margin-top: 150px; margin-bottom: 32px; padding-top: 150px;">
+              <div class="col-lg-6 d-flex align-items-center">
+                <div class="text-center w-100" style="padding: 60px 24px 100px 24px;">
                   <h4 style="color: #2F80ED; font-weight: 700; margin-bottom: 22px; font-size: 2rem;">Selamat Datang</h4>
                   <h2 style="font-size: 2.8rem; font-weight: 800; color: #22243e; margin-bottom: 22px; line-height: 1.2;">
                     Web Profile Laboratorium<br>Software Engineering
                   </h2>
-                  <p style="font-size: 1.15rem; color: #717791; margin-bottom: 40px;">
-                    Untuk mahasiswa yang ingin mengakses Laboratorium Software Engineering<br>silahkan klik tombol di bawah
-                  </p>
-                  <a href="<?php echo $labseHomeBase; ?>/pages/pendaftaran/daftar.php" 
-                     style="display: inline-block; font-weight: 600; color: #fff; background: #2F80ED; border-radius: 8px; padding: 12px 38px; font-size: 1.09rem; box-shadow: 0 2px 8px rgba(47,128,237,.07); text-decoration: none; transition: all 0.3s;">
-                    Daftar
-                  </a>
                 </div>
               </div>
-              <div class="col-lg-6">
-                <div class="hero-mascot wow fadeInRight" data-wow-delay=".4s">
+              <div class="col-lg-6 d-flex align-items-center">
+                <div class="hero-mascot wow fadeInRight w-100" data-wow-delay=".4s">
                   <div class="mascot-container">
                     <div class="mascot-bg-circle"></div>
                     <img src="assets/img/LAB SE_Outline.png" class="mascot-illustration" alt="Lab SE Mascot">
@@ -159,22 +220,35 @@ $tentang_kami_preview = htmlspecialchars(substr($tentang_kami_data['content'] ??
           <div class="col-lg-6 mb-4">
             <div class="single-feature wow fadeInUp" data-wow-delay=".2s" style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
               <h5 style="color: #2F80ED; margin-bottom: 15px;">Visi</h5>
-              <p>Menjadi pusat penelitian software engineering yang relevan dan berdaya guna bagi pengembangan teknologi informasi di Indonesia.</p>
+              <p><?php echo nl2br($visi_content); ?></p>
             </div>
           </div>
           <div class="col-lg-6 mb-4">
             <div class="single-feature wow fadeInUp" data-wow-delay=".3s" style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
               <h5 style="color: #2F80ED; margin-bottom: 15px;">Misi</h5>
-              <ul style="list-style: none; padding: 0;">
-                <li style="margin-bottom: 10px;"><i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>Melakukan penelitian berkualitas di bidang perangkat lunak</li>
-                <li style="margin-bottom: 10px;"><i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>Mendorong kolaborasi akademik dan industri</li>
-                <li><i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>Membina mahasiswa melalui proyek penelitian</li>
-              </ul>
+              <?php if (!empty($misi_items)): ?>
+                <ul style="list-style: none; padding: 0;">
+                  <?php foreach ($misi_items as $misi): ?>
+                  <li style="margin-bottom: 10px;">
+                    <i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>
+                    <?php echo htmlspecialchars($misi['content']); ?>
+                  </li>
+                  <?php endforeach; ?>
+                </ul>
+              <?php else: ?>
+                <p style="color: #999; font-style: italic;">Konten misi belum diatur di Admin Panel.</p>
+              <?php endif; ?>
             </div>
           </div>
         </div>
         <div class="text-center mt-4">
-          <a href="<?php echo $labseHomeBase; ?>/pages/profil/visi-misi.php" class="button button-sm radius-10">Lihat Selengkapnya</a>
+          <a href="<?php echo $labseHomeBase; ?>/pages/profil/visi-misi.php" class="button button-sm radius-10">
+            <?php if (!empty($misi_items) && count($misi_items) >= 3): ?>
+              Lihat Selengkapnya
+            <?php else: ?>
+              Lihat Selengkapnya
+            <?php endif; ?>
+          </a>
         </div>
       </div>
     </div>
@@ -192,31 +266,53 @@ $tentang_kami_preview = htmlspecialchars(substr($tentang_kami_data['content'] ??
           <p class="wow fadeInUp" data-wow-delay=".4s">Perjalanan dan Rencana Pengembangan Laboratorium</p>
         </div>
         <div class="row">
-          <div class="col-lg-6 mb-4">
-            <div class="single-feature wow fadeInUp" data-wow-delay=".2s" style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-              <h5 style="color: #2F80ED; margin-bottom: 10px;">2024 - Fase Pendirian & Setup</h5>
-              <p style="color: #999; font-size: 0.9rem; margin-bottom: 15px;">Q1 - Q4</p>
-              <ul style="list-style: none; padding: 0;">
-                <li style="margin-bottom: 8px;"><i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>Pembentukan struktur organisasi</li>
-                <li style="margin-bottom: 8px;"><i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>Pengadaan infrastruktur</li>
-                <li><i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>Peluncuran website</li>
-              </ul>
+          <?php if (!empty($periode_preview)): ?>
+            <?php 
+            $delay = 0.2;
+            foreach ($periode_preview as $index => $periode): 
+              $items_tugas = ambil_item_roadmap($koneksi, $periode['id']);
+            ?>
+            <div class="col-lg-6 mb-4">
+              <div class="single-feature wow fadeInUp" data-wow-delay="<?php echo $delay; ?>s" style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 100%;">
+                <h5 style="color: #2F80ED; margin-bottom: 10px;"><?php echo htmlspecialchars($periode['judul_fase']); ?></h5>
+                <p style="color: #999; font-size: 0.9rem; margin-bottom: 15px;"><?php echo htmlspecialchars($periode['tahun_periode']); ?></p>
+                <?php if (!empty($items_tugas)): ?>
+                <ul style="list-style: none; padding: 0;">
+                  <?php foreach ($items_tugas as $tugas): ?>
+                  <li style="margin-bottom: 8px;">
+                    <i class="lni lni-checkmark-circle" style="color: #27AE60; margin-right: 8px;"></i>
+                    <?php echo htmlspecialchars($tugas['deskripsi_tugas']); ?>
+                  </li>
+                  <?php endforeach; ?>
+                </ul>
+                <?php else: ?>
+                <p style="color: #999; font-size: 0.9rem; font-style: italic;">Belum ada tugas yang ditambahkan untuk periode ini.</p>
+                <?php endif; ?>
+              </div>
             </div>
-          </div>
-          <div class="col-lg-6 mb-4">
-            <div class="single-feature wow fadeInUp" data-wow-delay=".3s" style="background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-              <h5 style="color: #2F80ED; margin-bottom: 10px;">2025 - Fase Pengembangan & Riset</h5>
-              <p style="color: #999; font-size: 0.9rem; margin-bottom: 15px;">Q1 - Q4</p>
-              <ul style="list-style: none; padding: 0;">
-                <li style="margin-bottom: 8px;"><i class="lni lni-checkmark-circle" style="color: #2F80ED; margin-right: 8px;"></i>Pengembangan proyek penelitian</li>
-                <li><i class="lni lni-checkmark-circle" style="color: #2F80ED; margin-right: 8px;"></i>Kerjasama dengan industri</li>
-              </ul>
+            <?php 
+              $delay += 0.1;
+            endforeach; ?>
+          <?php else: ?>
+            <div class="col-12">
+              <div class="text-center" style="background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <p style="color: #717791; margin-bottom: 20px;">
+                  Roadmap belum diatur di Admin Panel.
+                  <br><small>Silakan tambahkan roadmap melalui <a href="<?php echo $labseHomeBase; ?>/module/auth/login.php" style="color: #2F80ED;">admin panel</a>.</small>
+                </p>
+              </div>
             </div>
-          </div>
+          <?php endif; ?>
         </div>
+        <?php if (!empty($semua_periode) && count($semua_periode) > 2): ?>
+        <div class="text-center mt-4">
+          <a href="<?php echo $labseHomeBase; ?>/pages/profil/roadmap.php" class="button button-sm radius-10">Lihat Selengkapnya (<?php echo count($semua_periode); ?> Periode)</a>
+        </div>
+        <?php elseif (!empty($semua_periode)): ?>
         <div class="text-center mt-4">
           <a href="<?php echo $labseHomeBase; ?>/pages/profil/roadmap.php" class="button button-sm radius-10">Lihat Selengkapnya</a>
         </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>

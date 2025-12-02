@@ -3,12 +3,12 @@ require_once __DIR__ . '/../../config/koneksi.php';
 ?>
 <?php include __DIR__ . '/../../template/header.php'; ?>
 
-<section class="pt-150 pb-50" style="background: #f3f3f3; margin-top: 80px;">
+<section class="pt-150 pb-50">
     <div class="container">
       <div class="row">
         <div class="col-lg-12">
           <div class="section-title text-center mb-30">
-            <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Anggota Laboratorium</h2>
+            <h2 class="mb-15 wow fadeInUp" data-wow-delay=".2s">Anggota <span>Laboratorium</span></h2>
             <p class="wow fadeInUp" data-wow-delay=".4s">Dosen, Asisten, dan Peneliti di Lab Software Engineering</p>
           </div>
         </div>
@@ -16,7 +16,7 @@ require_once __DIR__ . '/../../config/koneksi.php';
     </div>
 </section>
 
-<section id="team" class="team-style-1 pt-100 pb-70" style="background: #ffffff;">
+<section id="team" class="team-style-1 pt-100 pb-70">
     <div class="container">
         <div class="row">
             <?php
@@ -30,7 +30,12 @@ require_once __DIR__ . '/../../config/koneksi.php';
             <div class="col-xl-4 col-lg-4 col-md-6">
                 <div class="single-team wow fadeInUp" data-wow-delay=".2s">
                     <div class="image">
-                        <img src="<?php echo isset($row['foto']) && $row['foto'] ? $row['foto'] : 'https://via.placeholder.com/300'; ?>" alt="<?php echo htmlspecialchars($row['nama']); ?>" loading="lazy" width="300" height="300">
+                        <?php 
+                        $foto_raw = $row['foto'] ?? '';
+                        $is_abs = preg_match('/^https?:\/\//', $foto_raw) || (strlen($foto_raw) > 0 && $foto_raw[0] === '/');
+                        $foto_src = $is_abs ? $foto_raw : ($foto_raw ? '../../' . $foto_raw : 'https://via.placeholder.com/300');
+                        ?>
+                        <img src="<?php echo htmlspecialchars($foto_src); ?>" alt="<?php echo htmlspecialchars($row['nama']); ?>" loading="lazy" width="300" height="300" onerror="this.src='https://via.placeholder.com/300?text=<?php echo urlencode(substr($row['nama'], 0, 1)); ?>'">
                     </div>
                     <div class="info">
                         <h6><?php echo htmlspecialchars($row['nama']); ?></h6>
@@ -73,21 +78,7 @@ require_once __DIR__ . '/../../config/koneksi.php';
     </div>
 </section>
 
-<style>
-#personilOverlay { display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; align-items: center; justify-content: center; padding: 20px; }
-.personil-modal { background: #fff; border-radius: 12px; max-width: 760px; width: 100%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; }
-.personil-header { padding: 16px 20px; border-bottom: 1px solid #f1f1f1; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.personil-header h4 { margin: 0; color: #2c3e50; font-weight: 700; font-size: 18px; display: flex; align-items: center; gap: 10px; }
-.personil-close { background: transparent; border: none; font-size: 20px; cursor: pointer; color: #6c757d; }
-.personil-body { padding: 18px 20px; }
-.personil-grid { display: grid; grid-template-columns: 180px 1fr; gap: 16px 20px; align-items: start; }
-.personil-photo { width: 180px; height: 180px; border-radius: 12px; object-fit: cover; border: 1px solid #eee; background: #fafafa; }
-.personil-name { margin: 0 0 6px 0; font-size: 20px; font-weight: 800; color: #2c3e50; }
-.personil-role { margin: 0 0 12px 0; font-size: 14px; color: #6c757d; font-weight: 700; }
-.personil-desc { font-size: 14px; color: #2c3e50; line-height: 1.6; white-space: pre-wrap; }
-.personil-meta { margin-top: 12px; font-size: 12px; color: #8b8f97; }
-.personil-footer { padding: 12px 20px; background: #fafafa; border-top: 1px solid #f1f1f1; display: flex; justify-content: flex-end; gap: 8px; }
-</style>
+<!-- Styling modal sudah dipindah ke personil.css -->
 
 <?php if (!empty($anggota_map)): ?>
 <script>
