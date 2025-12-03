@@ -61,6 +61,39 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $post_action = isset($_POST['action']) ? clean_input($_POST['action']) : '';
     
+    // Handle file upload untuk featured_image
+    $featured_image = '';
+    
+    // Jika ada file yang diupload
+    if (isset($_FILES['featured_image']) && $_FILES['featured_image']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['featured_image'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $max_size = 5 * 1024 * 1024; // 5MB
+        
+        if (in_array($ext, $allowed) && $file['size'] <= $max_size) {
+            $upload_dir = __DIR__ . '/../../assets/img/blog/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+            
+            $nama_file_baru = uniqid('blog_', true) . '.' . $ext;
+            $server_file = $upload_dir . $nama_file_baru;
+            
+            if (move_uploaded_file($file['tmp_name'], $server_file)) {
+                $featured_image = '../../assets/img/blog/' . $nama_file_baru;
+            }
+        }
+    } 
+    // Jika tidak ada file baru dan ada featured_image_old (untuk edit yang tidak ganti gambar)
+    elseif (isset($_POST['featured_image_old']) && !empty($_POST['featured_image_old'])) {
+        $featured_image = clean_input($_POST['featured_image_old']);
+    }
+    // Jika ada input featured_image langsung (untuk tambah atau fallback)
+    elseif (isset($_POST['featured_image']) && !empty($_POST['featured_image'])) {
+        $featured_image = clean_input($_POST['featured_image']);
+    }
+    
     if ($post_action === 'tambah') {
         $data = [
             'title' => clean_input($_POST['title']),
@@ -68,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             'excerpt' => clean_input($_POST['excerpt']),
             'category' => clean_input($_POST['category']),
             'tags' => clean_input($_POST['tags']),
-            'featured_image' => clean_input($_POST['featured_image']),
+            'featured_image' => $featured_image,
             'is_published' => isset($_POST['is_published']) ? '1' : '0'
         ];
         
@@ -88,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             'excerpt' => clean_input($_POST['excerpt']),
             'category' => clean_input($_POST['category']),
             'tags' => clean_input($_POST['tags']),
-            'featured_image' => clean_input($_POST['featured_image']),
+            'featured_image' => $featured_image,
             'is_published' => isset($_POST['is_published']) ? '1' : '0'
         ];
         
@@ -374,7 +407,7 @@ include __DIR__ . '/../../template/admin_header.php';
                             </h5>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="" id="formTambahBlog">
+                            <form method="POST" action="" id="formTambahBlog" enctype="multipart/form-data">
                                 <input type="hidden" name="action" value="tambah">
                                 
                                 <div class="mb-4">
@@ -432,16 +465,19 @@ include __DIR__ . '/../../template/admin_header.php';
 
                                 <div class="mb-4">
                                     <label for="featured_image" class="form-label form-label-custom">
-                                        <i class="lni lni-image"></i> URL Gambar Featured
+                                        <i class="lni lni-image"></i> Gambar Featured
                                     </label>
                                     <input 
-                                        type="text" 
+                                        type="file" 
                                         class="form-control form-control-lg form-input-custom" 
                                         id="featured_image" 
                                         name="featured_image" 
-                                        placeholder="Contoh: assets/img/blog/blog-1.jpg">
+                                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp">
                                     <div class="form-text">
-                                        <i class="lni lni-information"></i> Masukkan path/URL gambar featured untuk blog ini
+                                        <i class="lni lni-information"></i> Upload gambar featured untuk blog ini (JPG, PNG, GIF, WEBP - Maksimal 5MB)
+                                    </div>
+                                    <div id="imagePreview" class="mt-3" style="display: none;">
+                                        <img id="previewImg" src="" alt="Preview" style="max-width: 300px; max-height: 200px; border-radius: 8px; border: 2px solid #e0e0e0;">
                                     </div>
                                 </div>
 
@@ -593,9 +629,10 @@ include __DIR__ . '/../../template/admin_header.php';
                             </h5>
                         </div>
                         <div class="card-body">
-                            <form method="POST" action="" id="formEditBlog">
+                            <form method="POST" action="" id="formEditBlog" enctype="multipart/form-data">
                                 <input type="hidden" name="action" value="edit">
                                 <input type="hidden" name="id" value="<?php echo $blog['id']; ?>">
+                                <input type="hidden" name="featured_image" id="featured_image_old" value="<?php echo htmlspecialchars($blog['featured_image'] ?? ''); ?>">
                                 
                                 <div class="mb-4">
                                     <label for="title" class="form-label form-label-custom">
@@ -655,17 +692,26 @@ include __DIR__ . '/../../template/admin_header.php';
 
                                 <div class="mb-4">
                                     <label for="featured_image" class="form-label form-label-custom">
-                                        <i class="lni lni-image"></i> URL Gambar Featured
+                                        <i class="lni lni-image"></i> Gambar Featured
                                     </label>
+                                    <?php if (!empty($blog['featured_image'])): ?>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Gambar saat ini:</small><br>
+                                        <img src="<?php echo htmlspecialchars($blog['featured_image']); ?>" alt="Current" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 2px solid #e0e0e0; margin-top: 8px;">
+                                    </div>
+                                    <?php endif; ?>
                                     <input 
-                                        type="text" 
+                                        type="file" 
                                         class="form-control form-control-lg form-input-custom" 
-                                        id="featured_image" 
+                                        id="featured_image_edit" 
                                         name="featured_image" 
-                                        value="<?php echo htmlspecialchars($blog['featured_image'] ?? ''); ?>"
-                                        placeholder="Contoh: assets/img/blog/blog-1.jpg">
+                                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp">
                                     <div class="form-text">
-                                        <i class="lni lni-information"></i> Masukkan path/URL gambar featured untuk blog ini
+                                        <i class="lni lni-information"></i> Upload gambar baru untuk mengganti gambar saat ini (JPG, PNG, GIF, WEBP - Maksimal 5MB). Kosongkan jika tidak ingin mengganti.
+                                    </div>
+                                    <div id="imagePreviewEdit" class="mt-3" style="display: none;">
+                                        <small class="text-muted">Preview gambar baru:</small><br>
+                                        <img id="previewImgEdit" src="" alt="Preview" style="max-width: 300px; max-height: 200px; border-radius: 8px; border: 2px solid #e0e0e0; margin-top: 8px;">
                                     </div>
                                 </div>
 
@@ -1029,6 +1075,48 @@ document.addEventListener('DOMContentLoaded', function() {
                 btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>' + buttonText;
             });
         }
+    }
+    
+    // Preview gambar untuk form tambah
+    const featuredImageInput = document.getElementById('featured_image');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    if (featuredImageInput && imagePreview && previewImg) {
+        featuredImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        });
+    }
+    
+    // Preview gambar untuk form edit
+    const featuredImageInputEdit = document.getElementById('featured_image_edit');
+    const imagePreviewEdit = document.getElementById('imagePreviewEdit');
+    const previewImgEdit = document.getElementById('previewImgEdit');
+    
+    if (featuredImageInputEdit && imagePreviewEdit && previewImgEdit) {
+        featuredImageInputEdit.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImgEdit.src = e.target.result;
+                    imagePreviewEdit.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreviewEdit.style.display = 'none';
+            }
+        });
     }
 });
 </script>

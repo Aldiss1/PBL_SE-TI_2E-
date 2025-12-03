@@ -200,6 +200,15 @@
 	left: 100%;
 }
 
+/* Center cards - mulai dari tengah */
+#galeri-dosen .row.justify-content-center {
+	justify-content: center !important;
+}
+
+#galeri-dosen .row.justify-content-center > div {
+	flex: 0 0 auto;
+}
+
 /* Responsive Design */
 @media (max-width: 991px) {
 	#galeri-dosen .single-team .image {

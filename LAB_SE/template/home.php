@@ -329,7 +329,7 @@ $misi_items = ambil_misi_items($koneksi, 3);
         </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row justify-content-center">
       <?php
       // Cek jumlah data dari materialized view (lebih cepat!)
       $total_data = 0;

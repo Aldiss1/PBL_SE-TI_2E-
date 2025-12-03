@@ -297,6 +297,24 @@ window.anggotaData = <?php echo json_encode($anggota_map); ?>;
 
 <!-- Load UI/UX Components -->
 <link rel="stylesheet" href="../../assets/css/anggota-ui.css">
+<style>
+/* Force blue color for modal header */
+.anggota-modal-header {
+    background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+}
+.anggota-preview-photo {
+    border-color: #2F80ED !important;
+    box-shadow: 0 4px 12px rgba(47, 128, 237, 0.3) !important;
+}
+.anggota-preview-initial {
+    background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+    border-color: #2F80ED !important;
+    box-shadow: 0 4px 12px rgba(47, 128, 237, 0.3) !important;
+}
+.anggota-preview-label i {
+    color: #2F80ED !important;
+}
+</style>
 <script src="../../assets/js/classes/ToastNotification.js"></script>
 <script src="../../assets/js/classes/LoadingState.js"></script>
 <script src="../../assets/js/classes/AnggotaConfirmModal.js"></script>
@@ -423,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Modal Preview Anggota -->
 <div id="anggotaPreviewOverlay" onclick="if(event.target===this){closePreviewAnggota()}">
 	<div class="anggota-modal-bootstrap">
-		<div class="anggota-modal-header">
+		<div class="anggota-modal-header" style="background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;">
 			<h5 class="anggota-modal-title">
 				<i class="lni lni-user me-2"></i> Preview Anggota
 			</h5>

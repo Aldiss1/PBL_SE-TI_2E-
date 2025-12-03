@@ -24,7 +24,6 @@ require_once __DIR__ . '/../../config/koneksi.php';
             $result = pg_query($koneksi, $query);
             
             if ($result && pg_num_rows($result) > 0) {
-                $anggota_map = [];
                 while ($row = pg_fetch_assoc($result)) {
             ?>
             <div class="col-xl-4 col-lg-4 col-md-6">
@@ -48,21 +47,11 @@ require_once __DIR__ . '/../../config/koneksi.php';
                             <li> <a href="<?php echo htmlspecialchars($row['linkedin']); ?>" target="_blank" rel="noopener"> <i class="lni lni-linkedin-original"></i> </a> </li>
                             <?php endif; ?>
                         </ul>
-                        <a href="javascript:void(0)" onclick="openPersonilDetail(<?php echo (int)$row['id']; ?>)" class="button button-sm radius-10 border-button mt-20">Lihat Profil</a>
+                        <a href="<?php echo LABSE_BASE_PATH; ?>/pages/profil/detail-personil.php?id=<?php echo (int)$row['id']; ?>" class="button button-sm radius-10 border-button mt-20">Lihat Profil</a>
                     </div>
                 </div>
             </div>
             <?php
-                // Siapkan data untuk modal detail
-                $anggota_map[(string)$row['id']] = [
-                    'id' => (int)$row['id'],
-                    'nama' => $row['nama'] ?? '',
-                    'jabatan' => $row['jabatan'] ?? '',
-                    'foto' => $row['foto'] ?? '',
-                    'deskripsi' => $row['deskripsi'] ?? '',
-                    'created_at' => $row['created_at'] ?? '',
-                    'updated_at' => $row['updated_at'] ?? ''
-                ];
                 }
             } else {
             ?>
@@ -78,38 +67,6 @@ require_once __DIR__ . '/../../config/koneksi.php';
     </div>
 </section>
 
-<!-- Styling modal sudah dipindah ke personil.css -->
-
-<?php if (!empty($anggota_map)): ?>
-<script>
-window.personilData = <?php echo json_encode($anggota_map); ?>;
-</script>
-<script src="../../assets/js/classes/PersonilModal.js"></script>
-
-<!-- Modal Detail Personil -->
-<div id="personilOverlay" onclick="if(event.target===this){ closePersonilModal(); }">
-	<div class="personil-modal">
-		<div class="personil-header">
-			<h4><i class="lni lni-user" style="color:#2F80ED;"></i> Detail Personil</h4>
-			<button class="personil-close" title="Tutup" onclick="closePersonilModal()">&times;</button>
-		</div>
-		<div class="personil-body">
-			<div class="personil-grid">
-				<img id="personilFoto" class="personil-photo" src="https://via.placeholder.com/300" alt="Foto Personil" loading="lazy" width="300" height="300">
-				<div>
-					<h5 id="personilNama" class="personil-name">-</h5>
-					<div id="personilJabatan" class="personil-role">Anggota</div>
-					<div id="personilDeskripsi" class="personil-desc">-</div>
-					<div id="personilMeta" class="personil-meta"></div>
-				</div>
-			</div>
-		</div>
-		<div class="personil-footer">
-			<button class="button radius-10 border-button" onclick="closePersonilModal()">Tutup</button>
-		</div>
-	</div>
-</div>
-<?php endif; ?>
 
 <?php include __DIR__ . '/../../template/footer.php'; ?>
 

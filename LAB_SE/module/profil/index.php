@@ -12,8 +12,6 @@ if (!isset($base_path)) {
 
 // --- DEFINISI VARIABEL KOSONG ---
 $pesan = '';
-$data_edit = null;
-$semua_konten = [];
 // --- END DEFINISI ---
 
 // --- 2. KONFIGURASI MENU SIDEBAR ---
@@ -59,81 +57,16 @@ $menu_items = [
         'icon' => 'lni lni-cog', 
         'link' => '../../module/profil/index.php',
         'active' => true
+    ],
+    'roadmap' => [
+        'title' => 'Kelola Roadmap',
+        'icon' => 'lni lni-map-marker',
+        'link' => '../../module/profil/kelola_roadmap.php',
+        'active' => false
     ]
 ];
 
-// --- 3. LOGIKA UPDATE / SIMPAN DATA (POST) ---
-$pesan = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['page_key']) && isset($_POST['content'])) {
-    $page_key = $_POST['page_key'] ?? ''; 
-    $title    = $_POST['title'] ?? '';
-    $content  = $_POST['content'] ?? ''; 
-
-    if (empty($page_key) || empty($content)) {
-        $pesan = "<div class='alert alert-danger'>❌ Error: Page Key dan Konten wajib diisi!</div>";
-    } else {
-        // Cek data
-        $query_cek = "SELECT COUNT(*) FROM konten_page WHERE page_key = $1";
-        $result_cek = pg_query_params($koneksi, $query_cek, array($page_key));
-        $count = 0;
-        if ($result_cek) {
-            $row_cek = pg_fetch_row($result_cek);
-            $count = $row_cek[0];
-        }
-
-        if ($count > 0) {
-            // Update
-            $query_update = "UPDATE konten_page SET title = $1, content = $2, last_updated = NOW() WHERE page_key = $3";
-            $result_update = pg_query_params($koneksi, $query_update, array($title, $content, $page_key));
-            if ($result_update) {
-                $pesan = "<div class='alert alert-success'>✅ Konten <b>" . htmlspecialchars($page_key) . "</b> berhasil diperbarui!</div>";
-            } else {
-                $pesan = "<div class='alert alert-danger'>❌ Gagal Update: " . pg_last_error($koneksi) . "</div>";
-            }
-        } else {
-            // Insert
-            $query_insert = "INSERT INTO konten_page (page_key, title, content) VALUES ($1, $2, $3)";
-            $result_insert = pg_query_params($koneksi, $query_insert, array($page_key, $title, $content));
-            if ($result_insert) {
-                $pesan = "<div class='alert alert-success'>✅ Konten baru <b>" . htmlspecialchars($page_key) . "</b> berhasil ditambahkan!</div>";
-            } else {
-                $pesan = "<div class='alert alert-danger'>❌ Gagal Insert: " . pg_last_error($koneksi) . "</div>";
-            }
-        }
-    }
-}
-
-// --- 4. LOGIKA HAPUS DATA (GET) ---
-if (isset($_GET['delete'])) {
-    $delete_key = $_GET['delete'];
-    // Jangan hapus visi_deskripsi dan misi_item_% dari sini (gunakan modal Visi-Misi)
-    if ($delete_key !== 'visi_deskripsi' && strpos($delete_key, 'misi_item_') !== 0) {
-        $query_delete = "DELETE FROM konten_page WHERE page_key = $1";
-        $result_delete = pg_query_params($koneksi, $query_delete, array($delete_key));
-        if ($result_delete) {
-            $pesan = "<div class='alert alert-success'>✅ Konten <b>" . htmlspecialchars($delete_key) . "</b> berhasil dihapus!</div>";
-        } else {
-            $pesan = "<div class='alert alert-danger'>❌ Gagal hapus: " . pg_last_error($koneksi) . "</div>";
-        }
-    } else {
-        $pesan = "<div class='alert alert-warning'>⚠️ Konten ini tidak bisa dihapus dari sini. Gunakan menu Kelola Visi & Misi untuk menghapus.</div>";
-    }
-}
-
-// --- 5. LOGIKA AMBIL DATA UNTUK EDIT (GET) ---
-$data_edit = null;
-if (isset($_GET['edit'])) {
-    $edit_key = $_GET['edit'];
-    $query_get = "SELECT page_key, title, content FROM konten_page WHERE page_key = $1";
-    $result_get = pg_query_params($koneksi, $query_get, array($edit_key));
-    
-    if ($result_get && pg_num_rows($result_get) > 0) {
-        $data_edit = pg_fetch_assoc($result_get);
-    }
-}
-
-// --- 5. LOGIKA CRUD TENTANG KAMI ---
+// --- 3. LOGIKA CRUD TENTANG KAMI ---
 $tentang_kami_data = null;
 
 // Ambil data Tentang Kami
@@ -351,17 +284,6 @@ if (isset($_GET['hapus_misi'])) {
         }
     } else {
         $pesan = "<div class='alert alert-danger'>❌ Gagal hapus Misi: " . pg_last_error($koneksi) . "</div>";
-    }
-}
-
-// --- 7. AMBIL SEMUA DATA KONTEN LAINNYA ---
-$semua_konten = [];
-$query_all = "SELECT page_key, title, content, last_updated FROM konten_page WHERE page_key NOT IN ('visi_deskripsi', 'tentang_kami') AND page_key NOT LIKE 'misi_item_%' ORDER BY page_key ASC";
-$result_all = pg_query($koneksi, $query_all);
-
-if ($result_all) {
-    while ($row = pg_fetch_assoc($result_all)) {
-        $semua_konten[] = $row;
     }
 }
 
@@ -611,113 +533,6 @@ table.custom-table tr:hover { background-color: #f1f1f1; }
     </div>
     <!-- ========================= END MODAL: KELOLA TENTANG KAMI ========================= -->
 
-    <!-- ========================= SECTION: TAMBAH/EDIT KONTEN BARU ========================= -->
-    <div class="card mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="card-title-profile mb-0">
-                <i class="lni lni-add-files"></i> <?php echo $data_edit ? 'Edit Konten: ' . htmlspecialchars($data_edit['page_key']) : 'Tambah Konten Baru'; ?>
-        </h3>
-            <?php if ($data_edit): ?>
-                <a href="index.php" class="btn btn-outline-secondary">
-                    <i class="lni lni-close"></i> Batal Edit
-                </a>
-            <?php endif; ?>
-        </div>
-        <hr class="card-divider"/>
-        
-        <form method="POST" action="">
-            <div class="form-group mb-3">
-                <label for="page_key">Page Key (ID Unik):</label>
-                <input type="text" name="page_key" id="page_key" class="form-control" 
-                        value="<?php echo $data_edit ? htmlspecialchars($data_edit['page_key']) : ''; ?>" 
-                        placeholder="contoh: visi_misi, sejarah, sambutan"
-                        required 
-                        <?php echo $data_edit ? 'readonly class="form-control-readonly"' : ''; ?>>
-                <?php if (!$data_edit): ?>
-                <small class="text-muted">Gunakan huruf kecil tanpa spasi (gunakan underscore _).</small>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-group mb-3">
-                <label for="title">Judul (Opsional):</label>
-                <input type="text" name="title" id="title" class="form-control" 
-                        value="<?php echo $data_edit ? htmlspecialchars($data_edit['title']) : ''; ?>"
-                        placeholder="Judul konten jika ada">
-                <small class="text-muted">Judul untuk konten ini (opsional)</small>
-            </div>
-
-            <div class="form-group mb-3">
-                <label for="content">Isi Konten:</label>
-                <textarea name="content" id="content" class="form-control" rows="8" required><?php echo $data_edit ? htmlspecialchars($data_edit['content']) : ''; ?></textarea>
-                <small class="text-muted">Masukkan isi konten yang ingin ditambahkan atau diedit</small>
-            </div>
-
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">
-                    <i class="lni lni-save"></i> <?php echo $data_edit ? 'Simpan Perubahan' : 'Simpan Konten'; ?>
-                </button>
-            <?php if ($data_edit): ?>
-                    <a href="index.php" class="btn btn-outline-danger">
-                        <i class="lni lni-close"></i> Batal
-                    </a>
-            <?php endif; ?>
-            </div>
-        </form>
-    </div>
-    <!-- ========================= END SECTION: TAMBAH/EDIT KONTEN BARU ========================= -->
-
-    <!-- ========================= SECTION: DAFTAR KONTEN TERSIMPAN ========================= -->
-    <div class="card mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="card-title-profile mb-0">
-                <i class="lni lni-files"></i> Daftar Konten Tersimpan
-            </h3>
-        </div>
-        <hr class="card-divider"/>
-        <div class="table-wrapper">
-            <?php if (empty($semua_konten)): ?>
-                <p style="text-align: center; padding: 20px;">Belum ada konten yang tersimpan.</p>
-            <?php else: ?>
-                <table class="custom-table">
-                    <thead>
-                        <tr>
-                            <th width="150">Page Key</th>
-                            <th width="150">Judul</th>
-                            <th>Preview Isi</th>
-                            <th width="200">Terakhir Update</th>
-                            <th width="150">Aksi</th> </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($semua_konten as $row): ?>
-                        <tr>
-                            <td><code><?php echo htmlspecialchars($row['page_key']); ?></code></td>
-                            <td><?php echo htmlspecialchars($row['title']); ?></td>
-                            <td>
-                                <?php 
-                                // Preview Isi (80 karakter)
-                                $preview = htmlspecialchars(substr(strip_tags($row['content']), 0, 80)); 
-                                echo $preview;
-                                echo strlen(strip_tags($row['content'])) > 80 ? '...' : '';
-                                ?>
-                            </td>
-                            <td><?php echo $row['last_updated']; ?></td>
-                            <td>
-                                <a href="index.php?edit=<?php echo urlencode($row['page_key']); ?>" class="btn btn-sm btn-info" style="margin-right: 5px;">
-                                    ✏️ Edit
-                                </a>
-                                <a href="index.php?delete=<?php echo urlencode($row['page_key']); ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus konten ini? Tindakan ini tidak bisa dibatalkan.');">
-                                    🗑️ Hapus
-                                </a>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endif; ?>
-        </div>
-    </div>
-    <!-- ========================= END SECTION: DAFTAR KONTEN TERSIMPAN ========================= -->
-
     <!-- ========================= SECTION: KELOLA TENTANG KAMI ========================= -->
     <div class="card mb-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -754,7 +569,7 @@ table.custom-table tr:hover { background-color: #f1f1f1; }
             </h3>
             <a href="kelola_roadmap.php" class="btn btn-secondary">
                 <i class="lni lni-map-marker"></i> Buka Halaman Roadmap
-            </a>
+            </a>
         </div>
         <p class="text-muted">Kelola periode dan tugas roadmap laboratorium. Klik tombol di atas untuk membuka halaman kelola roadmap lengkap.</p>
     </div>
