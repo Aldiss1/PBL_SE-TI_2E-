@@ -4,7 +4,6 @@ require_once __DIR__ . '/../../config/koneksi.php';
 require_once __DIR__ . '/../auth/cek_login.php';
 require_once __DIR__ . '/../../config/anti_injection.php';
 require_once __DIR__ . '/../../fungsi/pesan_kilat.php';
-require_once __DIR__ . '/../../fungsi/pendaftar_log.php';
 
 // Set active menu
 $current_page = 'pendaftar';
@@ -331,9 +330,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 				pg_query($koneksi, "INSERT INTO riwayat_pendaftaran (pendaftaran_id, status_lama, status_baru, changed_by, catatan) VALUES ($id_escaped, '$old_status', '$status_escaped', $user_id, '$catatan_escaped')");
 			}
 			
-			// Log aktivitas
-			log_pendaftar_activity($id, 'status_change', "Status diubah dari $old_status menjadi $new_status", ['status' => $old_status], ['status' => $new_status]);
-			
 			$status_text = $new_status === 'accepted' ? 'diterima' : ($new_status === 'rejected' ? 'ditolak' : 'diubah');
 			pesan_kilat('Status pendaftar berhasil ' . $status_text . '!', 'success');
 		} else {
@@ -411,9 +407,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 					pg_query($koneksi, "INSERT INTO riwayat_pendaftaran (pendaftaran_id, status_lama, status_baru, changed_by, catatan) VALUES ($id_escaped, '{$old_data['status']}', '$status_escaped', $user_id, 'Update data: Status diubah')");
 				}
 				
-				// Log aktivitas
-				log_pendaftar_activity($id, 'update', 'Data pendaftar diupdate', $old_data, $new_data);
-				
 				pesan_kilat('Data pendaftar berhasil diupdate!', 'success');
 			} else {
 				pesan_kilat('Gagal mengupdate data. Error: ' . pg_last_error($koneksi), 'error');
@@ -444,8 +437,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 		
 		$delete = pg_query($koneksi, "DELETE FROM pendaftaran WHERE id = $id_escaped");
 		if ($delete) {
-			// Log aktivitas
-			log_pendaftar_activity($id, 'delete', 'Pendaftar dihapus', $before_data, null);
 			pesan_kilat('Pendaftar berhasil dihapus.', 'success');
 		} else {
 			pesan_kilat('Gagal menghapus pendaftar: ' . pg_last_error($koneksi), 'error');

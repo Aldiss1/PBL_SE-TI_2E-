@@ -233,10 +233,23 @@ function getBlogById($id) {
     if ($result && pg_num_rows($result) > 0) {
         $blog = pg_fetch_assoc($result);
         
-        // Parse tags from JSON
+        // Parse tags from PostgreSQL array
         if (!empty($blog['tags'])) {
-            $tags_array = json_decode($blog['tags'], true);
-            if (is_array($tags_array)) {
+            // PostgreSQL array bisa berupa string "{tag1,tag2}" atau sudah array PHP
+            if (is_array($blog['tags'])) {
+                $tags_array = $blog['tags'];
+            } else {
+                // Jika string, parse format PostgreSQL array: {tag1,tag2,tag3}
+                $tags_str = trim($blog['tags'], '{}');
+                if (!empty($tags_str)) {
+                    $tags_array = explode(',', $tags_str);
+                    $tags_array = array_map('trim', $tags_array);
+                } else {
+                    $tags_array = [];
+                }
+            }
+            
+            if (is_array($tags_array) && !empty($tags_array)) {
                 $blog['tags_string'] = implode(', ', $tags_array);
             } else {
                 $blog['tags_string'] = '';

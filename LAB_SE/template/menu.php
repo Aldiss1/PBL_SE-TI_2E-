@@ -34,7 +34,7 @@
       }
       ?>
       <a class="dropdown-item" href="<?php echo $labseMenuBase; ?>/pages/profil/personil.php">Anggota: <strong><?php echo $stats['anggota']; ?></strong></a>
-      <a class="dropdown-item" href="<?php echo $labseMenuBase; ?>/module/pendaftar/index.php">Pendaftar: <strong><?php echo $stats['pendaftar']; ?></strong></a>
+      <a class="dropdown-item" href="<?php echo $labseMenuBase; ?>/pages/pendaftaran/pendaftar-list.php">Pendaftar: <strong><?php echo $stats['pendaftar']; ?></strong></a>
       <a class="dropdown-item" href="<?php echo $labseMenuBase; ?>/pages/blog/blog-list.php">Blog: <strong><?php echo $stats['blog']; ?></strong></a>
     </div>
   </li>
