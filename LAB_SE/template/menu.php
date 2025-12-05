@@ -15,6 +15,9 @@
     <a class="page-scroll" href="<?php echo $labseMenuBase; ?>/pages/profil/personil.php">Personil</a>
   </li>
   <li class="nav-item">
+    <a class="page-scroll" href="<?php echo $labseMenuBase; ?>/pages/profil/penelitian-dan-publikasi.php">Penelitian dan Publikasi</a>
+  </li>
+  <li class="nav-item">
     <a class="page-scroll" href="<?php echo $labseMenuBase; ?>/pages/pendaftaran/daftar.php">Daftar</a>
   </li>
   <li class="nav-item">

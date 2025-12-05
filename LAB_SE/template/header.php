@@ -134,6 +134,14 @@ if (!isset($koneksi)) {
     <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/detail-personil.css?<?php echo time(); ?>" />
     <?php endif; ?>
     
+    <?php 
+    // Deteksi halaman penelitian-dan-publikasi
+    if (strpos($current_page, 'penelitian-dan-publikasi') !== false || (isset($is_penelitian_publikasi_page) && $is_penelitian_publikasi_page)):
+    ?>
+    <!-- Load penelitian-publikasi.css SETELAH semua CSS lain untuk override -->
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/penelitian-publikasi.css?<?php echo time(); ?>" />
+    <?php endif; ?>
+    
   </head>
   <body>
 

@@ -114,7 +114,7 @@ foreach ($menu_items as $key => $item) {
             <a href="<?php echo $menu_items['roadmap']['link']; ?>" class="<?php echo $menu_items['roadmap']['active'] ? 'active' : ''; ?>">
                 <i class="<?php echo $menu_items['roadmap']['icon']; ?>"></i>
                 <span class="menu-text"><?php echo $menu_items['roadmap']['title']; ?></span>
-            </a>
+          </a>
         </li>
         <?php endif; ?>
     </ul>

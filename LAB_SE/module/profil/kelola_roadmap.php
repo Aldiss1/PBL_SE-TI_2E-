@@ -786,9 +786,9 @@ textarea.form-control {
         <p>Atur periode (tahun) dan daftar tugas di setiap fase pengembangan laboratorium</p>
     </div>
     
-    <?php if ($pesan): ?>
-        <?php echo $pesan; ?>
-    <?php endif; ?>
+        <?php if ($pesan): ?>
+            <?php echo $pesan; ?>
+        <?php endif; ?>
 
         <div class="row" style="margin: 0;">
             <div class="col-12" style="padding: 0;">
@@ -823,15 +823,15 @@ textarea.form-control {
                                             <td><?php echo htmlspecialchars($tugas['deskripsi_tugas']); ?></td>
                                             <td>
                                                 <div style="display: inline-flex; gap: 6px; align-items: center; flex-wrap: nowrap;">
-                                                    <!-- Edit trigger: data attributes diisi -->
+                                                <!-- Edit trigger: data attributes diisi -->
                                                     <button type="button" class="btn btn-sm btn-warning" style="white-space: nowrap;"
-                                                        data-bs-toggle="modal" data-bs-target="#modalEditTugas"
-                                                        data-id="<?php echo $tugas['id']; ?>"
-                                                        data-deskripsi="<?php echo htmlspecialchars($tugas['deskripsi_tugas']); ?>"
-                                                        data-urutan="<?php echo htmlspecialchars($tugas['urutan']); ?>"
-                                                        onclick="openModalEditTugas(event, this)">
+                                                    data-bs-toggle="modal" data-bs-target="#modalEditTugas"
+                                                    data-id="<?php echo $tugas['id']; ?>"
+                                                    data-deskripsi="<?php echo htmlspecialchars($tugas['deskripsi_tugas']); ?>"
+                                                    data-urutan="<?php echo htmlspecialchars($tugas['urutan']); ?>"
+                                                    onclick="openModalEditTugas(event, this)">
                                                         <i class="lni lni-pencil"></i> Edit
-                                                    </button>
+                                                </button>
                                                     <button type="button" class="btn btn-sm btn-danger" style="white-space: nowrap;"
                                                             onclick="confirmDeleteTugas(<?php echo $tugas['id']; ?>, '<?php echo htmlspecialchars(addslashes($tugas['deskripsi_tugas'])); ?>', <?php echo $id_periode_aktif; ?>)">
                                                         <i class="lni lni-trash"></i> Hapus
@@ -878,14 +878,14 @@ textarea.form-control {
                                                             <i class="lni lni-list"></i> Kelola Tugas
                                                         </a>
                                                         <button type="button" class="btn btn-sm btn-warning" style="white-space: nowrap;"
-                                                            data-bs-toggle="modal" data-bs-target="#modalEditPeriode"
-                                                            data-id="<?php echo $periode['id']; ?>"
-                                                            data-tahun="<?php echo htmlspecialchars($periode['tahun_periode']); ?>"
-                                                            data-judul="<?php echo htmlspecialchars($periode['judul_fase']); ?>"
-                                                            data-urutan="<?php echo htmlspecialchars($periode['urutan']); ?>"
-                                                            onclick="openModalEditPeriode(event, this)">
+                                                        data-bs-toggle="modal" data-bs-target="#modalEditPeriode"
+                                                        data-id="<?php echo $periode['id']; ?>"
+                                                        data-tahun="<?php echo htmlspecialchars($periode['tahun_periode']); ?>"
+                                                        data-judul="<?php echo htmlspecialchars($periode['judul_fase']); ?>"
+                                                        data-urutan="<?php echo htmlspecialchars($periode['urutan']); ?>"
+                                                        onclick="openModalEditPeriode(event, this)">
                                                             <i class="lni lni-pencil"></i> Edit
-                                                        </button>
+                                                    </button>
                                                         <button type="button" class="btn btn-sm btn-danger" style="white-space: nowrap;"
                                                                 onclick="confirmDeletePeriode(<?php echo $periode['id']; ?>, '<?php echo htmlspecialchars(addslashes($periode['tahun_periode'] . ' - ' . $periode['judul_fase'])); ?>')">
                                                             <i class="lni lni-trash"></i> Hapus
@@ -1119,7 +1119,7 @@ textarea.form-control {
           </button>
         </div>
       </form>
-    </div>
+  </div>
 </div>
 
 </main>
