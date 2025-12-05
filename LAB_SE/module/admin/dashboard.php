@@ -84,44 +84,50 @@ if (file_exists(__DIR__ . '/../../fungsi/materialized_views_complete.php')) {
     }
 }
 
-// Fallback: Query langsung jika materialized view tidak tersedia
-if (empty($recent_pendaftar) && $koneksi) {
-    // Hitung statistik (sederhanakan dengan satu query)
-    $query_stats = "SELECT 
-        (SELECT COUNT(*) FROM anggota) as anggota,
-        (SELECT COUNT(*) FROM pendaftaran) as pendaftar,
-        (SELECT COUNT(*) FROM pendaftaran WHERE status = 'pending') as pendaftar_pending,
-        (SELECT COUNT(*) FROM jabatan) as jabatan,
-        (SELECT COUNT(*) FROM blog WHERE is_published = TRUE) as blog_published,
-        (SELECT COUNT(*) FROM blog WHERE is_published = FALSE) as blog_draft,
-        (SELECT COUNT(*) FROM users) as user";
-    $result_stats = pg_query($koneksi, $query_stats);
-    if ($result_stats && pg_num_rows($result_stats) > 0) {
-        $row = pg_fetch_assoc($result_stats);
-        $stats['anggota'] = (int)$row['anggota'];
-        $stats['pendaftar'] = (int)$row['pendaftar'];
-        $stats['pendaftar_pending'] = (int)$row['pendaftar_pending'];
-        $stats['jabatan'] = (int)$row['jabatan'];
-        $stats['blog_published'] = (int)$row['blog_published'];
-        $stats['blog_draft'] = (int)$row['blog_draft'];
-        $stats['user'] = (int)$row['user'];
-    }
-    
-    // Ambil pendaftar terbaru (5 terakhir)
-    $query_recent = "SELECT nama, nim, tanggal_daftar, status FROM pendaftaran ORDER BY tanggal_daftar DESC LIMIT 5";
-    $result_recent = pg_query($koneksi, $query_recent);
-    if ($result_recent && pg_num_rows($result_recent) > 0) {
-        while ($row = pg_fetch_assoc($result_recent)) {
-            $recent_pendaftar[] = $row;
+// Fallback: Query langsung jika materialized view tidak tersedia atau data kosong
+if ($koneksi) {
+    // Jika stats masih 0 (belum diisi dari materialized view), query stats
+    if ($stats['anggota'] == 0 && $stats['pendaftar'] == 0) {
+        $query_stats = "SELECT 
+            (SELECT COUNT(*) FROM anggota) as anggota,
+            (SELECT COUNT(*) FROM pendaftaran) as pendaftar,
+            (SELECT COUNT(*) FROM pendaftaran WHERE status = 'pending') as pendaftar_pending,
+            (SELECT COUNT(*) FROM jabatan) as jabatan,
+            (SELECT COUNT(*) FROM blog WHERE is_published = TRUE) as blog_published,
+            (SELECT COUNT(*) FROM blog WHERE is_published = FALSE) as blog_draft,
+            (SELECT COUNT(*) FROM users) as user";
+        $result_stats = pg_query($koneksi, $query_stats);
+        if ($result_stats && pg_num_rows($result_stats) > 0) {
+            $row = pg_fetch_assoc($result_stats);
+            $stats['anggota'] = (int)$row['anggota'];
+            $stats['pendaftar'] = (int)$row['pendaftar'];
+            $stats['pendaftar_pending'] = (int)$row['pendaftar_pending'];
+            $stats['jabatan'] = (int)$row['jabatan'];
+            $stats['blog_published'] = (int)$row['blog_published'];
+            $stats['blog_draft'] = (int)$row['blog_draft'];
+            $stats['user'] = (int)$row['user'];
         }
     }
     
-    // Ambil blog terbaru (3 terakhir)
-    $query_blog = "SELECT id, title, slug, published_at, created_at FROM blog WHERE is_published = TRUE ORDER BY COALESCE(published_at, created_at) DESC LIMIT 3";
-    $result_blog = pg_query($koneksi, $query_blog);
-    if ($result_blog && pg_num_rows($result_blog) > 0) {
-        while ($row = pg_fetch_assoc($result_blog)) {
-            $recent_blog[] = $row;
+    // Ambil pendaftar terbaru jika masih kosong
+    if (empty($recent_pendaftar)) {
+        $query_recent = "SELECT nama, nim, tanggal_daftar, status FROM pendaftaran ORDER BY tanggal_daftar DESC LIMIT 5";
+        $result_recent = pg_query($koneksi, $query_recent);
+        if ($result_recent && pg_num_rows($result_recent) > 0) {
+            while ($row = pg_fetch_assoc($result_recent)) {
+                $recent_pendaftar[] = $row;
+            }
+        }
+    }
+    
+    // Ambil blog terbaru jika masih kosong
+    if (empty($recent_blog)) {
+        $query_blog = "SELECT id, title, slug, published_at, created_at FROM blog WHERE is_published = TRUE ORDER BY COALESCE(published_at, created_at) DESC LIMIT 3";
+        $result_blog = pg_query($koneksi, $query_blog);
+        if ($result_blog && pg_num_rows($result_blog) > 0) {
+            while ($row = pg_fetch_assoc($result_blog)) {
+                $recent_blog[] = $row;
+            }
         }
     }
 }

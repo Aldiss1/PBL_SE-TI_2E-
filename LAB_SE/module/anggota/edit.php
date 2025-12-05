@@ -502,9 +502,25 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Check if there are changes
+            const jabatanSelect = document.getElementById('jabatan');
+            const instagramInput = document.getElementById('instagram');
+            const linkedinInput = document.getElementById('linkedin');
+            const fotoInput = document.getElementById('foto');
+            
+            const originalJabatan = jabatanSelect ? jabatanSelect.value : '';
+            const originalInstagram = instagramInput ? instagramInput.value.trim() : '';
+            const originalLinkedin = linkedinInput ? linkedinInput.value.trim() : '';
+            
+            const currentJabatan = jabatanSelect ? jabatanSelect.value : '';
+            const currentInstagram = instagramInput ? instagramInput.value.trim() : '';
+            const currentLinkedin = linkedinInput ? linkedinInput.value.trim() : '';
+            
             const hasChanges = namaValue !== originalNama || 
                               deskripsiValue !== originalDeskripsi ||
-                              document.getElementById('foto').files.length > 0;
+                              currentJabatan !== originalJabatan ||
+                              currentInstagram !== originalInstagram ||
+                              currentLinkedin !== originalLinkedin ||
+                              (fotoInput && fotoInput.files.length > 0);
             
             if (!hasChanges) {
                 e.preventDefault();
@@ -525,23 +541,31 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Show toast from PHP flash messages
-    const alertMessages = document.querySelectorAll('.alert:not(.alert-info)');
-    alertMessages.forEach(function(alert) {
-        const message = alert.textContent.trim();
-        const type = alert.classList.contains('alert-success') ? 'success' :
-                     alert.classList.contains('alert-danger') ? 'error' :
-                     alert.classList.contains('alert-warning') ? 'warning' : 'info';
-        
-        if (window.toast && message) {
-            window.toast.show(message, type);
-        }
-        
-        // Hide original alert after showing toast
-        setTimeout(() => {
-            alert.style.display = 'none';
-        }, 100);
-    });
+    // Show toast from PHP flash messages (only if toast is available)
+    if (window.toast) {
+        const alertMessages = document.querySelectorAll('.alert:not(.alert-info)');
+        alertMessages.forEach(function(alert) {
+            // Get message text (exclude close button text)
+            const closeBtn = alert.querySelector('.btn-close');
+            let message = alert.textContent.trim();
+            if (closeBtn) {
+                message = message.replace(closeBtn.textContent.trim(), '').trim();
+            }
+            
+            if (message) {
+                const type = alert.classList.contains('alert-success') ? 'success' :
+                             alert.classList.contains('alert-danger') ? 'error' :
+                             alert.classList.contains('alert-warning') ? 'warning' : 'info';
+                
+                window.toast.show(message, type);
+                
+                // Hide original alert after showing toast
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 100);
+            }
+        });
+    }
 });
 </script>
 
