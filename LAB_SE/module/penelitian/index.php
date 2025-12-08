@@ -69,12 +69,19 @@ include __DIR__ . '/../../template/admin_header.php';
 // Proses hapus
 if (isset($_GET['hapus']) && isset($_GET['id'])) {
     $id = (int)$_GET['id'];
-    $query = "DELETE FROM penelitian WHERE id = $1";
+    // Menggunakan stored procedure sp_delete_penelitian
+    $query = "SELECT sp_delete_penelitian($1)";
     $result = pg_query_params($koneksi, $query, array($id));
     if ($result) {
-        pesan_kilat('Penelitian berhasil dihapus!', 'success');
+        $row = pg_fetch_row($result);
+        $deleted = $row[0] ?? false;
+        if ($deleted) {
+            pesan_kilat('Penelitian berhasil dihapus!', 'success');
+        } else {
+            pesan_kilat('Gagal menghapus penelitian! Data tidak ditemukan.', 'error');
+        }
     } else {
-        pesan_kilat('Gagal menghapus penelitian!', 'error');
+        pesan_kilat('Gagal menghapus penelitian! Error: ' . pg_last_error($koneksi), 'error');
     }
     header('Location: index.php');
     exit;

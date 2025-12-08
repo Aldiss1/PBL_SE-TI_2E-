@@ -20,7 +20,11 @@ if (!$koneksi) {
    
     // Tampilkan error detail untuk debugging (bisa diubah di production)
     $error_msg = "Koneksi ke database gagal!\n\n";
-    $error_msg .= "Error: " . $error . "\n\n";
+    $pg_error = '';
+    if (function_exists('pg_last_error')) {
+        $pg_error = pg_last_error();
+    }
+    $error_msg .= "Error: " . ($pg_error ?: 'Unknown error') . "\n\n";
     $error_msg .= "Periksa:\n";
     $error_msg .= "1. Apakah PostgreSQL service sudah berjalan?\n";
     $error_msg .= "2. Apakah database '$database' sudah dibuat?\n";

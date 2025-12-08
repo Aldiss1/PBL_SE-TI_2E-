@@ -69,12 +69,19 @@ include __DIR__ . '/../../template/admin_header.php';
 // Proses hapus
 if (isset($_GET['hapus']) && isset($_GET['id'])) {
     $id = (int)$_GET['id'];
-    $query = "DELETE FROM publikasi WHERE id = $1";
+    // Menggunakan stored procedure sp_delete_publikasi
+    $query = "SELECT sp_delete_publikasi($1)";
     $result = pg_query_params($koneksi, $query, array($id));
     if ($result) {
-        pesan_kilat('Publikasi berhasil dihapus!', 'success');
+        $row = pg_fetch_row($result);
+        $deleted = $row[0] ?? false;
+        if ($deleted) {
+            pesan_kilat('Publikasi berhasil dihapus!', 'success');
+        } else {
+            pesan_kilat('Gagal menghapus publikasi! Data tidak ditemukan.', 'error');
+        }
     } else {
-        pesan_kilat('Gagal menghapus publikasi!', 'error');
+        pesan_kilat('Gagal menghapus publikasi! Error: ' . pg_last_error($koneksi), 'error');
     }
     header('Location: index.php');
     exit;

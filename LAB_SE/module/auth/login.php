@@ -24,8 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!$result) {
             $error = pg_last_error($koneksi);
             if (strpos($error, 'does not exist') !== false) {
-                header('Location: ../../setup.php');
-                exit;
+                pesan_kilat('Tabel users belum ada. Silakan jalankan setup database terlebih dahulu.', 'error');
             }
             pesan_kilat('Terjadi kesalahan sistem.', 'error');
         } elseif (pg_num_rows($result) > 0) {

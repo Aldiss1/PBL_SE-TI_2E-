@@ -92,50 +92,69 @@
                 }
             });
             
-            // Handle dropdown toggle on mobile
-            var dropdownToggles = navbarMenu.querySelectorAll('.dropdown-toggle');
-            dropdownToggles.forEach(function(toggle) {
-                toggle.addEventListener('click', function(e) {
-                    if (window.innerWidth <= 991) {
-                        e.preventDefault();
-                        var dropdown = this.parentElement;
-                        var dropdownMenu = dropdown.querySelector('.dropdown-menu');
-                        
-                        // Pastikan parent item tidak memiliki style button
-                        this.style.background = 'transparent';
-                        this.style.backgroundColor = 'transparent';
-                        this.style.border = 'none';
-                        this.style.borderRadius = '0';
-                        this.style.boxShadow = 'none';
-                        this.style.padding = '10px 0px';
-                        
-                        // Close other dropdowns
-                        dropdownToggles.forEach(function(otherToggle) {
-                            if (otherToggle !== toggle) {
-                                var otherDropdown = otherToggle.parentElement;
-                                var otherMenu = otherDropdown.querySelector('.dropdown-menu');
-                                if (otherMenu) {
-                                    otherMenu.style.display = 'none';
+            // Handle dropdown toggle on mobile - FIXED VERSION
+            function setupMobileDropdowns() {
+                var dropdownToggles = navbarMenu.querySelectorAll('.dropdown-toggle');
+                dropdownToggles.forEach(function(toggle) {
+                    // Remove old listener by cloning
+                    var newToggle = toggle.cloneNode(true);
+                    toggle.parentNode.replaceChild(newToggle, toggle);
+                    
+                    newToggle.addEventListener('click', function(e) {
+                        if (window.innerWidth <= 991) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            
+                            var dropdown = this.closest('.nav-item.dropdown');
+                            if (!dropdown) dropdown = this.parentElement;
+                            
+                            var dropdownMenu = dropdown.querySelector('.dropdown-menu');
+                            if (!dropdownMenu) return;
+                            
+                            // Style fix
+                            this.style.background = 'transparent';
+                            this.style.backgroundColor = 'transparent';
+                            this.style.border = 'none';
+                            this.style.borderRadius = '0';
+                            this.style.boxShadow = 'none';
+                            
+                            // Close other dropdowns
+                            dropdownToggles.forEach(function(otherToggle) {
+                                if (otherToggle !== newToggle) {
+                                    var otherDropdown = otherToggle.closest('.nav-item.dropdown') || otherToggle.parentElement;
+                                    if (otherDropdown) {
+                                        var otherMenu = otherDropdown.querySelector('.dropdown-menu');
+                                        if (otherMenu) {
+                                            otherMenu.style.display = 'none';
+                                        }
+                                        otherDropdown.classList.remove('active', 'show');
+                                    }
                                 }
-                                // Pastikan parent item lain juga tidak memiliki style button
-                                otherToggle.style.background = 'transparent';
-                                otherToggle.style.backgroundColor = 'transparent';
-                                otherToggle.style.border = 'none';
-                                otherToggle.style.borderRadius = '0';
-                                otherToggle.style.boxShadow = 'none';
-                            }
-                        });
-                        
-                        // Toggle current dropdown
-                        if (dropdownMenu) {
-                            if (dropdownMenu.style.display === 'block') {
+                            });
+                            
+                            // Toggle current
+                            var isActive = dropdown.classList.contains('active');
+                            if (isActive) {
                                 dropdownMenu.style.display = 'none';
+                                dropdown.classList.remove('active', 'show');
                             } else {
                                 dropdownMenu.style.display = 'block';
+                                dropdown.classList.add('active', 'show');
                             }
                         }
-                    }
+                    });
                 });
+            }
+            
+            setupMobileDropdowns();
+            
+            // Re-setup when menu toggles
+            if (toggleBtn) {
+                var originalToggle = toggleBtn.onclick;
+                toggleBtn.addEventListener('click', function() {
+                    setTimeout(setupMobileDropdowns, 200);
+                });
+            }
                 
                 // Pastikan dropdown toggle tidak memiliki style button saat hover
                 toggle.addEventListener('mouseenter', function() {

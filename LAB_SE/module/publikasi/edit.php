@@ -86,10 +86,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $status_e = pg_escape_string($koneksi, $status);
         $quartile_e = pg_escape_string($koneksi, $quartile);
         
-        $query = "UPDATE publikasi SET judul = $1, tipe = $2, tahun = $3, penulis_utama = $5, daftar_penulis = $6, nama_journal_conference = $7, volume = $8, issue = $9, halaman = $10, doi = $11, abstract = $12, keywords = $13, link_url = $14, status = $15, scopus_indexed = $16, quartile = $17, tanggal_publikasi = $18, updated_at = CURRENT_TIMESTAMP 
-                  WHERE id = $4";
+        // Menggunakan stored procedure sp_update_publikasi
+        $query = "SELECT sp_update_publikasi($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)";
         $result = pg_query_params($koneksi, $query, array(
-            $judul_e, $tipe_e, $tahun, $id,
+            $id, $judul_e, $tipe_e, $tahun,
             $penulis_utama_e ?: null, $daftar_penulis_e ?: null, $nama_journal_conference_e ?: null,
             $volume_e ?: null, $issue_e ?: null, $halaman_e ?: null, $doi_e ?: null,
             $abstract_e ?: null, $keywords_e ?: null, $link_url_e ?: null, $status_e,
@@ -97,11 +97,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ));
         
         if ($result) {
-            pesan_kilat('Publikasi berhasil diupdate!', 'success');
-            header('Location: index.php');
-            exit;
+            $row = pg_fetch_row($result);
+            $updated = $row[0] ?? false;
+            if ($updated) {
+                pesan_kilat('Publikasi berhasil diupdate!', 'success');
+                header('Location: index.php');
+                exit;
+            } else {
+                pesan_kilat('Gagal mengupdate publikasi! Data tidak ditemukan.', 'error');
+            }
         } else {
-            pesan_kilat('Gagal mengupdate publikasi!', 'error');
+            pesan_kilat('Gagal mengupdate publikasi! Error: ' . pg_last_error($koneksi), 'error');
         }
     }
 }

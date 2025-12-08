@@ -132,47 +132,55 @@ $is_penelitian_publikasi_page = true;
                 <?php if (count($publikasi_list) > 0): ?>
                 <div class="publications-grid">
                   <?php foreach ($publikasi_list as $index => $pub): ?>
-                  <div class="pub-card">
-                    <div class="pub-number"><?php echo str_pad($index + 1, 2, '0', STR_PAD_LEFT); ?></div>
-                    <div class="pub-body">
-                      <p class="pub-text">
-                        <?php echo htmlspecialchars($pub['judul']); ?>
-                        <?php if (!empty($pub['nama_journal_conference'])): ?>
+                  <div class="pub-item-card">
+                    <div class="pub-number-badge"><?php echo str_pad($index + 1, 2, '0', STR_PAD_LEFT); ?></div>
+                    <div class="pub-content">
+                      <h3 class="pub-title-main"><?php echo htmlspecialchars($pub['judul']); ?></h3>
+                      <?php if (!empty($pub['nama_journal_conference'])): ?>
+                        <p class="pub-journal">
+                          <i class="lni lni-book"></i>
+                          <?php echo htmlspecialchars($pub['nama_journal_conference']); ?>
                           <?php if (!empty($pub['volume']) || !empty($pub['issue'])): ?>
-                            . <?php echo htmlspecialchars($pub['nama_journal_conference']); ?>
-                            <?php if (!empty($pub['volume'])): ?>, Vol. <?php echo htmlspecialchars($pub['volume']); ?><?php endif; ?>
-                            <?php if (!empty($pub['issue'])): ?>, No. <?php echo htmlspecialchars($pub['issue']); ?><?php endif; ?>
-                          <?php else: ?>
-                            . <?php echo htmlspecialchars($pub['nama_journal_conference']); ?>
+                            <?php if (!empty($pub['volume'])): ?><span class="pub-volume">Vol. <?php echo htmlspecialchars($pub['volume']); ?></span><?php endif; ?>
+                            <?php if (!empty($pub['issue'])): ?><span class="pub-issue">No. <?php echo htmlspecialchars($pub['issue']); ?></span><?php endif; ?>
                           <?php endif; ?>
-                        <?php endif; ?>
-                        <?php if (!empty($pub['halaman'])): ?>
-                          , pp. <?php echo htmlspecialchars($pub['halaman']); ?>
-                        <?php endif; ?>
-                        <?php if (!empty($pub['penulis_utama'])): ?>
-                          <br><small style="color: #6c757d;"><i class="lni lni-user"></i> <?php echo htmlspecialchars($pub['penulis_utama']); ?></small>
-                        <?php endif; ?>
-                      </p>
-                      <div class="pub-meta">
-                        <span class="pub-type type-<?php echo $pub['tipe'] == 'journal' ? 'journal' : 'conference'; ?>">
+                          <?php if (!empty($pub['halaman'])): ?>
+                            <span class="pub-pages">pp. <?php echo htmlspecialchars($pub['halaman']); ?></span>
+                          <?php endif; ?>
+                        </p>
+                      <?php endif; ?>
+                      <?php if (!empty($pub['penulis_utama'])): ?>
+                        <div class="pub-author">
+                          <i class="lni lni-user"></i>
+                          <span><?php echo htmlspecialchars($pub['penulis_utama']); ?></span>
+                        </div>
+                      <?php endif; ?>
+                      <div class="pub-meta-tags">
+                        <span class="pub-type-badge type-<?php echo $pub['tipe'] == 'journal' ? 'journal' : 'conference'; ?>">
+                          <i class="lni <?php echo $pub['tipe'] == 'journal' ? 'lni-book' : 'lni-presentation'; ?>"></i>
                           <?php echo ucfirst($pub['tipe']); ?>
                         </span>
                         <?php if (!empty($pub['quartile'])): ?>
-                          <span class="pub-quartile" style="background: #9B59B6; color: white; padding: 4px 10px; border-radius: 5px; font-size: 0.85rem; font-weight: 600;">
+                          <span class="pub-quartile-badge">
                             <?php echo htmlspecialchars($pub['quartile']); ?>
                           </span>
                         <?php endif; ?>
                         <?php if (!empty($pub['scopus_indexed']) && $pub['scopus_indexed']): ?>
-                          <span class="pub-scopus" style="background: #E74C3C; color: white; padding: 4px 10px; border-radius: 5px; font-size: 0.85rem; font-weight: 600;">
+                          <span class="pub-scopus-badge">
                             <i class="lni lni-checkmark-circle"></i> Scopus
                           </span>
                         <?php endif; ?>
-                        <span class="pub-year"><?php echo htmlspecialchars($pub['tahun']); ?></span>
+                        <span class="pub-year-badge">
+                          <i class="lni lni-calendar"></i>
+                          <?php echo htmlspecialchars($pub['tahun']); ?>
+                        </span>
                       </div>
                       <?php if (!empty($pub['doi'])): ?>
-                        <div style="margin-top: 8px;">
-                          <a href="https://doi.org/<?php echo htmlspecialchars($pub['doi']); ?>" target="_blank" style="color: #2F80ED; text-decoration: none; font-size: 0.9rem;">
-                            <i class="lni lni-link"></i> DOI: <?php echo htmlspecialchars($pub['doi']); ?>
+                        <div class="pub-doi-link">
+                          <a href="https://doi.org/<?php echo htmlspecialchars($pub['doi']); ?>" target="_blank" class="doi-link">
+                            <i class="lni lni-link"></i>
+                            <span>DOI: <?php echo htmlspecialchars($pub['doi']); ?></span>
+                            <i class="lni lni-arrow-right"></i>
                           </a>
                         </div>
                       <?php endif; ?>

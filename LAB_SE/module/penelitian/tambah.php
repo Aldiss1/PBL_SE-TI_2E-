@@ -64,21 +64,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $link_dokumen_e = pg_escape_string($koneksi, $link_dokumen);
         $output_hasil_e = pg_escape_string($koneksi, $output_hasil);
         
-        $query = "INSERT INTO penelitian (judul, deskripsi, tahun, status, jumlah_tim, peneliti_utama, anggota_tim, dosen_pembimbing, kategori, metodologi, tanggal_mulai, tanggal_selesai, progress, keywords, link_dokumen, output_hasil) 
-                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)";
+        // Menggunakan stored procedure sp_insert_penelitian
+        $query = "SELECT sp_insert_penelitian($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)";
         $result = pg_query_params($koneksi, $query, array(
-            $judul_e, $deskripsi_e, $tahun, $status_e, $jumlah_tim, 
+            $judul_e, $tahun, $deskripsi_e ?: null, $status_e, $jumlah_tim, 
             $peneliti_utama_e ?: null, $anggota_tim_e ?: null, $dosen_pembimbing_e ?: null, 
             $kategori_e ?: null, $metodologi_e ?: null, $tanggal_mulai ?: null, $tanggal_selesai ?: null, 
             $progress, $keywords_e ?: null, $link_dokumen_e ?: null, $output_hasil_e ?: null
         ));
         
         if ($result) {
-            pesan_kilat('Penelitian berhasil ditambahkan!', 'success');
-            header('Location: index.php');
-            exit;
+            $row = pg_fetch_row($result);
+            $new_id = $row[0] ?? null;
+            if ($new_id) {
+                pesan_kilat('Penelitian berhasil ditambahkan!', 'success');
+                header('Location: index.php');
+                exit;
+            } else {
+                pesan_kilat('Gagal menambahkan penelitian!', 'error');
+            }
         } else {
-            pesan_kilat('Gagal menambahkan penelitian!', 'error');
+            pesan_kilat('Gagal menambahkan penelitian! Error: ' . pg_last_error($koneksi), 'error');
         }
     }
 }

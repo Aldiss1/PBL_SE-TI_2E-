@@ -66,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $status_e = pg_escape_string($koneksi, $status);
         $quartile_e = pg_escape_string($koneksi, $quartile);
         
-        $query = "INSERT INTO publikasi (judul, tipe, tahun, penulis_utama, daftar_penulis, nama_journal_conference, volume, issue, halaman, doi, abstract, keywords, link_url, status, scopus_indexed, quartile, tanggal_publikasi) 
-                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)";
+        // Menggunakan stored procedure sp_insert_publikasi
+        $query = "SELECT sp_insert_publikasi($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)";
         $result = pg_query_params($koneksi, $query, array(
             $judul_e, $tipe_e, $tahun, 
             $penulis_utama_e ?: null, $daftar_penulis_e ?: null, $nama_journal_conference_e ?: null,
@@ -77,11 +77,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ));
         
         if ($result) {
-            pesan_kilat('Publikasi berhasil ditambahkan!', 'success');
-            header('Location: index.php');
-            exit;
+            $row = pg_fetch_row($result);
+            $new_id = $row[0] ?? null;
+            if ($new_id) {
+                pesan_kilat('Publikasi berhasil ditambahkan!', 'success');
+                header('Location: index.php');
+                exit;
+            } else {
+                pesan_kilat('Gagal menambahkan publikasi!', 'error');
+            }
         } else {
-            pesan_kilat('Gagal menambahkan publikasi!', 'error');
+            pesan_kilat('Gagal menambahkan publikasi! Error: ' . pg_last_error($koneksi), 'error');
         }
     }
 }

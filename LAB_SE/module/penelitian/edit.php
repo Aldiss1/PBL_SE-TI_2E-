@@ -84,24 +84,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $link_dokumen_e = pg_escape_string($koneksi, $link_dokumen);
         $output_hasil_e = pg_escape_string($koneksi, $output_hasil);
         
-        $query = "UPDATE penelitian SET judul = $1, deskripsi = $2, tahun = $3, status = $4, jumlah_tim = $5, 
-                  peneliti_utama = $7, anggota_tim = $8, dosen_pembimbing = $9, kategori = $10, metodologi = $11, 
-                  tanggal_mulai = $12, tanggal_selesai = $13, progress = $14, keywords = $15, link_dokumen = $16, 
-                  output_hasil = $17, updated_at = CURRENT_TIMESTAMP 
-                  WHERE id = $6";
+        // Menggunakan stored procedure sp_update_penelitian
+        $query = "SELECT sp_update_penelitian($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)";
         $result = pg_query_params($koneksi, $query, array(
-            $judul_e, $deskripsi_e, $tahun, $status_e, $jumlah_tim, $id,
+            $id, $judul_e, $tahun, $deskripsi_e ?: null, $status_e, $jumlah_tim, 
             $peneliti_utama_e ?: null, $anggota_tim_e ?: null, $dosen_pembimbing_e ?: null, 
             $kategori_e ?: null, $metodologi_e ?: null, $tanggal_mulai ?: null, $tanggal_selesai ?: null, 
             $progress, $keywords_e ?: null, $link_dokumen_e ?: null, $output_hasil_e ?: null
         ));
         
         if ($result) {
-            pesan_kilat('Penelitian berhasil diupdate!', 'success');
-            header('Location: index.php');
-            exit;
+            $row = pg_fetch_row($result);
+            $updated = $row[0] ?? false;
+            if ($updated) {
+                pesan_kilat('Penelitian berhasil diupdate!', 'success');
+                header('Location: index.php');
+                exit;
+            } else {
+                pesan_kilat('Gagal mengupdate penelitian! Data tidak ditemukan.', 'error');
+            }
         } else {
-            pesan_kilat('Gagal mengupdate penelitian!', 'error');
+            pesan_kilat('Gagal mengupdate penelitian! Error: ' . pg_last_error($koneksi), 'error');
         }
     }
 }

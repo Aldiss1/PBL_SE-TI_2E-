@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS anggota (
     nama VARCHAR(255) NOT NULL,
     jabatan VARCHAR(100),
     foto VARCHAR(500),
-    instagram VARCHAR(255),
-    linkedin VARCHAR(255),
+	instagram VARCHAR(255),
+	linkedin VARCHAR(255),
     deskripsi TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -57,8 +57,8 @@ CREATE TABLE IF NOT EXISTS pendaftaran (
     id SERIAL PRIMARY KEY,
     nama VARCHAR(255) NOT NULL,
     nim VARCHAR(50) NOT NULL,
-    email VARCHAR(255),
-    foto VARCHAR(500),
+	email VARCHAR(255),
+	foto VARCHAR(500),
     minat TEXT,
     status VARCHAR(50) DEFAULT 'pending',
     tanggal_daftar TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -264,6 +264,7 @@ END;
 $$ language 'plpgsql';
 
 -- Trigger untuk konten_page
+DROP TRIGGER IF EXISTS last_updated_trg ON konten_page;
 CREATE TRIGGER last_updated_trg
 BEFORE UPDATE ON konten_page
 FOR EACH ROW

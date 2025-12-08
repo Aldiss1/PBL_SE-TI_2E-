@@ -353,13 +353,23 @@ html body #fixed-navbar.fixed-navbar-new .navbar-container-new .container .navba
 	position: relative;
 }
 
-/* Pastikan dropdown tetap muncul saat mouse bergerak ke dropdown */
-.navbar-menu-new .nav-item.dropdown:hover .dropdown-menu,
-.navbar-menu-new .dropdown-menu:hover {
-	display: block !important;
-	opacity: 1 !important;
-	transform: translateY(0) scale(1) !important;
-	pointer-events: auto !important;
+/* Pastikan dropdown tetap muncul saat mouse bergerak ke dropdown - HANYA UNTUK DESKTOP */
+@media (min-width: 992px) {
+	.navbar-menu-new .nav-item.dropdown:hover .dropdown-menu,
+	.navbar-menu-new .dropdown-menu:hover {
+		display: block !important;
+		opacity: 1 !important;
+		transform: translateY(0) scale(1) !important;
+		pointer-events: auto !important;
+	}
+	
+	.navbar-menu-new .nav-item:hover .dropdown-menu,
+	.navbar-menu-new .nav-item.dropdown:hover .dropdown-menu {
+		display: block;
+		opacity: 1;
+		transform: translateY(0) scale(1);
+		pointer-events: auto;
+	}
 }
 
 .navbar-menu-new .dropdown-menu {
@@ -525,6 +535,15 @@ html body #fixed-navbar.fixed-navbar-new .navbar-container-new .container .navba
 
 /* Tablet & Mobile - Desain Responsif Modern */
 @media (max-width: 991px) {
+	/* DISABLE HOVER EFFECTS DI MOBILE */
+	.navbar-menu-new .nav-item.dropdown:hover .dropdown-menu,
+	.navbar-menu-new .dropdown-menu:hover,
+	.navbar-menu-new .nav-item:hover .dropdown-menu,
+	.navbar-menu-new .nav-item.dropdown:hover > .dropdown-menu {
+		display: none !important;
+		opacity: 0 !important;
+		pointer-events: none !important;
+	}
 	#fixed-navbar .navbar-container-new {
 		padding: 15px 0;
 	}
@@ -576,7 +595,7 @@ html body #fixed-navbar.fixed-navbar-new .navbar-container-new .container .navba
 	.navbar-menu-new .navbar-nav .nav-item {
 		width: 100%;
 		margin: 0;
-		margin-bottom: 5px;
+		margin-bottom: 8px;
 		display: block !important;
 	}
 	
@@ -587,6 +606,9 @@ html body #fixed-navbar.fixed-navbar-new .navbar-container-new .container .navba
 		border-radius: 8px;
 		text-align: left;
 		font-size: 15px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	
 	.navbar-menu-new .navbar-nav .nav-item a:hover {
@@ -597,46 +619,125 @@ html body #fixed-navbar.fixed-navbar-new .navbar-container-new .container .navba
 		display: none;
 	}
 	
-	.navbar-menu-new .nav-item.dropdown > a::after {
-		float: right;
-		margin-top: 5px;
+	.navbar-menu-new .nav-item.dropdown > a {
+		position: relative;
+		padding-right: 40px !important;
 	}
 	
+	.navbar-menu-new .nav-item.dropdown > a::after {
+		content: '▼';
+		position: absolute;
+		right: 15px;
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 10px;
+		transition: transform 0.3s;
+		border: none !important;
+		width: auto !important;
+		height: auto !important;
+		float: none !important;
+		margin: 0 !important;
+	}
+	
+	.navbar-menu-new .nav-item.dropdown.active > a::after {
+		transform: translateY(-50%) rotate(180deg);
+	}
+	
+	/* Override semua rule dropdown untuk mobile */
 	.navbar-menu-new .dropdown-menu {
 		position: static !important;
-		box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-		border: 1px solid rgba(47, 128, 237, 0.1);
-		background: #f8f9fa;
-		margin-top: 8px;
-		margin-left: 0;
-		border-radius: 10px;
+		box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
+		border: 1px solid rgba(47, 128, 237, 0.1) !important;
+		background: #f8f9fa !important;
+		margin-top: 8px !important;
+		margin-left: 0 !important;
+		margin-right: 0 !important;
+		border-radius: 10px !important;
 		transform: none !important;
 		opacity: 1 !important;
-		padding: 8px 0;
+		padding: 8px 0 !important;
 		display: none !important;
-		width: 100%;
-		min-width: auto;
+		width: 100% !important;
+		min-width: auto !important;
+		max-width: 100% !important;
+		overflow: visible !important;
+		pointer-events: auto !important;
+		top: auto !important;
+		left: auto !important;
+		right: auto !important;
 	}
 	
-	.navbar-menu-new .nav-item.dropdown.active .dropdown-menu {
+	.navbar-menu-new .nav-item.dropdown.active .dropdown-menu,
+	.navbar-menu-new .nav-item.dropdown.active > .dropdown-menu,
+	.navbar-menu-new .nav-item.dropdown.show .dropdown-menu,
+	.navbar-menu-new .nav-item.dropdown.show > .dropdown-menu {
 		display: block !important;
+		visibility: visible !important;
+		opacity: 1 !important;
+	}
+	
+	/* Disable hover effects di mobile */
+	.navbar-menu-new .nav-item.dropdown:hover .dropdown-menu {
+		display: none !important;
+	}
+	
+	.navbar-menu-new .dropdown-menu:hover {
+		display: none !important;
+	}
+	
+	.navbar-menu-new .nav-item.dropdown > a.dropdown-toggle {
+		position: relative;
+		padding-right: 30px !important;
+	}
+	
+	.navbar-menu-new .nav-item.dropdown > a.dropdown-toggle::after {
+		content: '▼';
+		position: absolute;
+		right: 10px;
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 10px;
+		transition: transform 0.3s;
+		border: none !important;
+		width: auto !important;
+		height: auto !important;
+	}
+	
+	.navbar-menu-new .nav-item.dropdown.active > a.dropdown-toggle::after {
+		transform: translateY(-50%) rotate(180deg);
 	}
 	
 	.navbar-menu-new .dropdown-item {
-		padding: 10px 18px;
+		padding: 12px 20px;
 		border-left: none;
 		font-size: 14px;
+		display: block;
+		width: 100%;
+		margin: 0;
+		border-radius: 6px;
+		transition: all 0.2s;
 	}
 	
 	.navbar-menu-new .dropdown-item:hover {
 		background: linear-gradient(90deg, #e6f2ff 0%, #f0f7ff 100%);
 		transform: translateX(3px);
-		padding-left: 20px;
+		padding-left: 24px;
 	}
 	
 	.navbar-menu-new .dropdown-item::before,
 	.navbar-menu-new .dropdown-item::after {
 		display: none;
+	}
+	
+	.navbar-menu-new .nav-item.dropdown {
+		width: 100%;
+		margin-bottom: 8px;
+	}
+	
+	.navbar-menu-new .nav-item.dropdown > a {
+		width: 100%;
+		display: block;
+		text-align: left;
 	}
 	
 	.btn-admin-new {
