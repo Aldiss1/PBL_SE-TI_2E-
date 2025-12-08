@@ -23,6 +23,9 @@ foreach ($menu_items as $key => $item) {
     if (isset($current_page)) {
         if ($key === 'dashboard.php' && $current_page === 'dashboard') {
             $menu_items[$key]['active'] = true;
+        } elseif ($key === 'profil' && ($current_page === 'profil' || $current_page === 'roadmap')) {
+            // Menu profil aktif jika current_page adalah 'profil' atau 'roadmap'
+            $menu_items[$key]['active'] = true;
         } elseif ($key !== 'dashboard.php' && $current_page === $key) {
             $menu_items[$key]['active'] = true;
         } elseif ($key !== 'dashboard.php' && strpos($current_page, $key) !== false) {
@@ -102,19 +105,28 @@ foreach ($menu_items as $key => $item) {
         <?php endif; ?>
         <?php if (isset($menu_items['profil'])): ?>
         <li>
-          <a href="<?php echo $menu_items['profil']['link']; ?>" class="<?php echo $menu_items['profil']['active'] ? 'active' : ''; ?>">
+          <a href="<?php echo $menu_items['profil']['link']; ?>" class="<?php echo ($menu_items['profil']['active'] || (isset($current_page) && ($current_page === 'profil' || $current_page === 'roadmap'))) ? 'active' : ''; ?>">
             <i class="<?php echo $menu_items['profil']['icon']; ?>"></i>
               <span class="menu-text"><?php echo $menu_items['profil']['title']; ?></span>
           </a>
         </li>
         <?php endif; ?>
         
-        <?php if (isset($menu_items['roadmap'])): ?>
+        <?php if (isset($menu_items['penelitian'])): ?>
         <li>
-            <a href="<?php echo $menu_items['roadmap']['link']; ?>" class="<?php echo $menu_items['roadmap']['active'] ? 'active' : ''; ?>">
-                <i class="<?php echo $menu_items['roadmap']['icon']; ?>"></i>
-                <span class="menu-text"><?php echo $menu_items['roadmap']['title']; ?></span>
-          </a>
+            <a href="<?php echo $menu_items['penelitian']['link']; ?>" class="<?php echo $menu_items['penelitian']['active'] ? 'active' : ''; ?>">
+                <i class="<?php echo $menu_items['penelitian']['icon']; ?>"></i>
+                <span class="menu-text"><?php echo $menu_items['penelitian']['title']; ?></span>
+            </a>
+        </li>
+        <?php endif; ?>
+        
+        <?php if (isset($menu_items['publikasi'])): ?>
+        <li>
+            <a href="<?php echo $menu_items['publikasi']['link']; ?>" class="<?php echo $menu_items['publikasi']['active'] ? 'active' : ''; ?>">
+                <i class="<?php echo $menu_items['publikasi']['icon']; ?>"></i>
+                <span class="menu-text"><?php echo $menu_items['publikasi']['title']; ?></span>
+            </a>
         </li>
         <?php endif; ?>
     </ul>

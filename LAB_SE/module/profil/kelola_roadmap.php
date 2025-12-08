@@ -26,15 +26,16 @@ $data_edit = null;
 $pesan = '';
 
 // --- Sidebar/menu (tidak wajib diubah) ---
-$current_page = 'roadmap';
+$current_page = 'profil';
 $menu_items = [
     'dashboard.php' => ['title'=>'Dashboard','icon'=>'lni lni-home','link'=>'../../module/admin/dashboard.php','active'=>false],
     'anggota' => ['title'=>'Kelola Anggota','icon'=>'lni lni-users','link'=>'../../module/anggota/index.php','active'=>false],
     'jabatan' => ['title'=>'Kelola Jabatan','icon'=>'lni lni-briefcase','link'=>'../../module/jabatan/index.php','active'=>false],
     'pendaftar' => ['title'=>'Kelola Pendaftar','icon'=>'lni lni-list','link'=>'../../module/pendaftar/index.php','active'=>false],
     'blog' => ['title'=>'Kelola Blog','icon'=>'lni lni-text-format','link'=>'../../module/blog/index.php','active'=>false],
-    'profil' => ['title'=>'Kelola Profil','icon'=>'lni lni-cog','link'=>'../../module/profil/index.php','active'=>false],
-    'roadmap' => ['title'=>'Kelola Roadmap','icon'=>'lni lni-map-marker','link'=>'../../module/profil/kelola_roadmap.php','active'=>true],
+    'profil' => ['title'=>'Kelola Profil','icon'=>'lni lni-cog','link'=>'../../module/profil/index.php','active'=>true],
+    'penelitian' => ['title'=>'Kelola Penelitian','icon'=>'lni lni-microscope','link'=>'../../module/penelitian/index.php','active'=>false],
+    'publikasi' => ['title'=>'Kelola Publikasi','icon'=>'lni lni-book','link'=>'../../module/publikasi/index.php','active'=>false],
 ];
 
 // --------------------------------------------------

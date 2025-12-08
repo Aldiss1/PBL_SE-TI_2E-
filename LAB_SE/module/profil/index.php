@@ -58,10 +58,16 @@ $menu_items = [
         'link' => '../../module/profil/index.php',
         'active' => true
     ],
-    'roadmap' => [
-        'title' => 'Kelola Roadmap',
-        'icon' => 'lni lni-map-marker',
-        'link' => '../../module/profil/kelola_roadmap.php',
+    'penelitian' => [
+        'title' => 'Kelola Penelitian',
+        'icon' => 'lni lni-microscope',
+        'link' => '../../module/penelitian/index.php',
+        'active' => false
+    ],
+    'publikasi' => [
+        'title' => 'Kelola Publikasi',
+        'icon' => 'lni lni-book',
+        'link' => '../../module/publikasi/index.php',
         'active' => false
     ]
 ];

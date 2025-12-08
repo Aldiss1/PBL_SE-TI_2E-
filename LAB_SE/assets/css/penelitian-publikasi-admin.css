@@ -1,0 +1,393 @@
+/* ============================================
+   PENELITIAN & PUBLIKASI ADMIN STYLING
+   Enhanced styling untuk modul admin penelitian dan publikasi
+   ============================================ */
+
+/* Section Title Enhancement */
+.section-title h2 {
+    font-size: 2.5rem !important;
+    font-weight: 800 !important;
+    color: #2c3e50 !important;
+    margin-bottom: 10px !important;
+    letter-spacing: -0.5px;
+}
+
+.section-title p {
+    font-size: 1.1rem !important;
+    color: #6c757d !important;
+    margin-top: 8px !important;
+}
+
+/* Stat Cards - Enhanced dengan animasi */
+.stat-card {
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 28px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 20px !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    height: 100% !important;
+    border: 1px solid rgba(47, 128, 237, 0.1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-6px) !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15) !important;
+    border-color: rgba(47, 128, 237, 0.3) !important;
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-card-icon {
+    width: 70px !important;
+    height: 70px !important;
+    border-radius: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 32px !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+    transition: all 0.3s ease !important;
+}
+
+.stat-card:hover .stat-card-icon {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2) !important;
+}
+
+.stat-card-content {
+    flex: 1 !important;
+}
+
+.stat-card-number {
+    font-size: 36px !important;
+    font-weight: 800 !important;
+    color: #2c3e50 !important;
+    margin: 0 0 8px 0 !important;
+    line-height: 1 !important;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-card-label {
+    font-size: 15px !important;
+    color: #6c757d !important;
+    margin: 0 !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px;
+}
+
+/* Search Box Enhancement */
+.jabatan-search-box {
+    background: white !important;
+    border-radius: 12px !important;
+    padding: 12px 20px !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+    border: 2px solid #e9ecef !important;
+    transition: all 0.3s ease !important;
+}
+
+.jabatan-search-box:focus-within {
+    border-color: #2F80ED !important;
+    box-shadow: 0 4px 20px rgba(47, 128, 237, 0.15) !important;
+}
+
+.jabatan-search-input {
+    border: none !important;
+    outline: none !important;
+    font-size: 15px !important;
+    padding-left: 35px !important;
+    width: 100% !important;
+}
+
+.jabatan-search-box i.lni-search {
+    color: #2F80ED !important;
+    font-size: 20px !important;
+}
+
+/* Button Enhancement */
+.btn-primary.btn-lg {
+    background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+    border: none !important;
+    padding: 14px 28px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3) !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.btn-primary.btn-lg:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(47, 128, 237, 0.4) !important;
+}
+
+.btn-primary.btn-lg i {
+    font-size: 18px !important;
+}
+
+/* Table Enhancement */
+.admin-table {
+    background: white !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+    border: 1px solid #e9ecef !important;
+}
+
+.admin-table thead {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+    color: white !important;
+}
+
+.admin-table th {
+    padding: 18px 20px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
+    letter-spacing: 1px !important;
+    border: none !important;
+}
+
+.admin-table td {
+    padding: 18px 20px !important;
+    vertical-align: middle !important;
+    border-bottom: 1px solid #f1f1f1 !important;
+}
+
+.admin-table tbody tr {
+    transition: all 0.2s ease !important;
+}
+
+.admin-table tbody tr:hover {
+    background-color: rgba(47, 128, 237, 0.05) !important;
+    transform: scale(1.01);
+}
+
+/* Status Badge Enhancement */
+.status-badge {
+    padding: 8px 16px !important;
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    display: inline-block !important;
+    letter-spacing: 0.5px !important;
+    text-transform: uppercase !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+    transition: all 0.3s ease !important;
+}
+
+.status-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}
+
+/* Button Group Enhancement */
+.btn-group {
+    display: inline-flex !important;
+    gap: 6px !important;
+}
+
+.btn-group .btn {
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+.btn-group .btn-primary {
+    background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+    color: white !important;
+}
+
+.btn-group .btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(47, 128, 237, 0.4) !important;
+}
+
+.btn-group .btn-danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+    color: white !important;
+}
+
+.btn-group .btn-danger:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4) !important;
+}
+
+/* Empty State Enhancement */
+.empty-state {
+    background: white !important;
+    border-radius: 20px !important;
+    padding: 60px 40px !important;
+    text-align: center !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+    border: 2px dashed #e9ecef !important;
+    transition: all 0.3s ease !important;
+}
+
+.empty-state:hover {
+    border-color: #2F80ED !important;
+    box-shadow: 0 6px 24px rgba(47, 128, 237, 0.15) !important;
+}
+
+.empty-state-icon {
+    font-size: 80px !important;
+    color: #dee2e6 !important;
+    margin-bottom: 25px !important;
+    display: block !important;
+    transition: all 0.3s ease !important;
+}
+
+.empty-state:hover .empty-state-icon {
+    color: #2F80ED !important;
+    transform: scale(1.1);
+}
+
+.empty-state-title {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #2c3e50 !important;
+    margin-bottom: 12px !important;
+}
+
+.empty-state-message {
+    font-size: 15px !important;
+    color: #6c757d !important;
+    margin-bottom: 30px !important;
+    line-height: 1.6 !important;
+}
+
+.empty-state-action {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 14px 28px !important;
+    background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.empty-state-action:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(47, 128, 237, 0.4) !important;
+    color: white !important;
+}
+
+.empty-state-action i {
+    font-size: 18px !important;
+}
+
+/* Form Card Enhancement */
+.card-profile {
+    background: white !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+    border: 1px solid #e9ecef !important;
+    overflow: hidden !important;
+}
+
+.card-body-profile {
+    padding: 40px !important;
+}
+
+.card-body-profile .form-group {
+    margin-bottom: 25px !important;
+}
+
+.card-body-profile label {
+    font-weight: 600 !important;
+    color: #2c3e50 !important;
+    margin-bottom: 8px !important;
+    font-size: 14px !important;
+    display: block !important;
+}
+
+.card-body-profile .form-control {
+    border: 2px solid #e9ecef !important;
+    border-radius: 10px !important;
+    padding: 12px 16px !important;
+    font-size: 15px !important;
+    transition: all 0.3s ease !important;
+}
+
+.card-body-profile .form-control:focus {
+    border-color: #2F80ED !important;
+    box-shadow: 0 0 0 4px rgba(47, 128, 237, 0.1) !important;
+    outline: none !important;
+}
+
+.card-body-profile textarea.form-control {
+    min-height: 120px !important;
+    resize: vertical !important;
+}
+
+.card-body-profile select.form-control {
+    cursor: pointer !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232c3e50' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 12px center !important;
+    padding-right: 40px !important;
+    appearance: none !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stat-card {
+        flex-direction: column !important;
+        text-align: center !important;
+        padding: 24px !important;
+    }
+    
+    .stat-card-icon {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 28px !important;
+    }
+    
+    .stat-card-number {
+        font-size: 28px !important;
+    }
+    
+    .section-title h2 {
+        font-size: 2rem !important;
+    }
+    
+    .card-body-profile {
+        padding: 25px !important;
+    }
+}
+
+

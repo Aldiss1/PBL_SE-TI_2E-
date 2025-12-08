@@ -439,6 +439,39 @@
     border-radius: 5px;
 }
 
+.status-badge-warning {
+    background: linear-gradient(135deg, #F2994A 0%, #E67E22 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(242, 153, 74, 0.3);
+}
+
+.status-badge-success {
+    background: linear-gradient(135deg, #27AE60 0%, #1E8E4F 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+.status-badge-info {
+    background: linear-gradient(135deg, #2F80ED 0%, #56CCF2 100%);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(47, 128, 237, 0.3);
+}
+
 .detail-status-badge {
     padding: 6px 12px;
     border-radius: 16px;

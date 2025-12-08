@@ -43,6 +43,24 @@ $menu_items = [
         'icon' => 'lni lni-text-format',
         'link' => '../../module/blog/index.php',
         'active' => false
+    ],
+    'profil' => [ 
+        'title' => 'Kelola Profil', 
+        'icon'  => 'lni lni-cog', 
+        'link'  => '../../module/profil/index.php',
+        'active' => false
+    ],
+    'penelitian' => [
+        'title' => 'Kelola Penelitian',
+        'icon' => 'lni lni-microscope',
+        'link' => '../../module/penelitian/index.php',
+        'active' => false
+    ],
+    'publikasi' => [
+        'title' => 'Kelola Publikasi',
+        'icon' => 'lni lni-book',
+        'link' => '../../module/publikasi/index.php',
+        'active' => false
     ]
 ];
 

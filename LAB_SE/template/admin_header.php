@@ -19,6 +19,14 @@
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-layout.css"/>
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-dashboard.css"/>
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-modules.css"/>
+    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/anggota-ui.css"/>
+    <?php 
+    // Load CSS khusus untuk modul penelitian dan publikasi
+    $current_page_uri = $_SERVER['REQUEST_URI'] ?? '';
+    if (strpos($current_page_uri, 'penelitian') !== false || strpos($current_page_uri, 'publikasi') !== false):
+    ?>
+    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/penelitian-publikasi-admin.css"/>
+    <?php endif; ?>
 </head>
 <body>
     <?php
