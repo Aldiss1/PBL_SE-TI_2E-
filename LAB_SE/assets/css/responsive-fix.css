@@ -1,0 +1,201 @@
+/* ============================================
+   RESPONSIVE FIX - AGGRESSIVE FIXES
+   ============================================
+   File ini berisi perbaikan agresif untuk 
+   memastikan semua elemen responsive di mobile
+   ============================================ */
+
+/* Global Box Sizing */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+/* Prevent Horizontal Scroll - AGGRESSIVE */
+html {
+	overflow-x: hidden !important;
+	max-width: 100vw !important;
+	width: 100% !important;
+}
+
+body {
+	overflow-x: hidden !important;
+	max-width: 100vw !important;
+	width: 100% !important;
+	position: relative !important;
+}
+
+/* Mobile First - Force Responsive */
+@media (max-width: 767px) {
+	/* Force container and layout elements only */
+	.container,
+	.container-fluid,
+	.row,
+	[class*="col-"],
+	section,
+	.hero-section-wrapper-2,
+	.hero-mascot {
+		max-width: 100% !important;
+	}
+	
+	/* Exception: Images and videos */
+	img, video, iframe {
+		max-width: 100% !important;
+		height: auto !important;
+	}
+	
+	/* Container fixes */
+	.container,
+	.container-fluid {
+		max-width: 100% !important;
+		width: 100% !important;
+		padding-left: 15px !important;
+		padding-right: 15px !important;
+		margin-left: 0 !important;
+		margin-right: 0 !important;
+	}
+	
+	/* Row fixes */
+	.row {
+		margin-left: -15px !important;
+		margin-right: -15px !important;
+		max-width: 100% !important;
+		width: 100% !important;
+	}
+	
+	/* All Bootstrap columns to full width */
+	[class*="col-"] {
+		flex: 0 0 100% !important;
+		max-width: 100% !important;
+		width: 100% !important;
+		padding-left: 15px !important;
+		padding-right: 15px !important;
+	}
+	
+	/* Specific column overrides */
+	.col-lg-6,
+	.col-lg-4,
+	.col-lg-8,
+	.col-lg-10,
+	.col-lg-12,
+	.col-md-6,
+	.col-md-12,
+	.col-xl-4,
+	.col-xl-10,
+	.col-12 {
+		flex: 0 0 100% !important;
+		max-width: 100% !important;
+		width: 100% !important;
+	}
+	
+	/* Section fixes */
+	section {
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+		max-width: 100% !important;
+		overflow-x: hidden !important;
+	}
+	
+	/* Hero section fixes */
+	.hero-section-wrapper-2 {
+		max-width: 100% !important;
+		overflow-x: hidden !important;
+	}
+	
+	.hero-section-wrapper-2 .text-center {
+		padding-left: 15px !important;
+		padding-right: 15px !important;
+		max-width: 100% !important;
+	}
+	
+	/* Mascot fixes */
+	.hero-mascot {
+		width: 100% !important;
+		max-width: 100% !important;
+		padding: 15px !important;
+	}
+	
+	.hero-mascot .mascot-container {
+		max-width: 100% !important;
+		width: 100% !important;
+	}
+	
+	.hero-mascot .mascot-illustration {
+		max-width: 100% !important;
+		width: 100% !important;
+		height: auto !important;
+	}
+	
+	/* Images */
+	img {
+		max-width: 100% !important;
+		height: auto !important;
+		width: auto !important;
+	}
+	
+	/* Text elements */
+	.text-center,
+	.text-left,
+	.text-right {
+		padding-left: 15px !important;
+		padding-right: 15px !important;
+		max-width: 100% !important;
+	}
+	
+	/* Buttons */
+	.button,
+	.btn,
+	a[href*="daftar"] {
+		max-width: 100% !important;
+		word-wrap: break-word !important;
+		white-space: normal !important;
+	}
+	
+	/* Cards */
+	.card,
+	.single-feature {
+		max-width: 100% !important;
+		margin-left: 0 !important;
+		margin-right: 0 !important;
+	}
+	
+	/* Tables */
+	.table-responsive {
+		overflow-x: auto !important;
+		-webkit-overflow-scrolling: touch;
+		width: 100% !important;
+		max-width: 100% !important;
+	}
+	
+	/* Forms */
+	.form-control,
+	.form-select,
+	input,
+	textarea,
+	select {
+		max-width: 100% !important;
+		width: 100% !important;
+		font-size: 16px !important; /* Prevent zoom on iOS */
+	}
+}
+
+/* Tablet fixes */
+@media (min-width: 768px) and (max-width: 991px) {
+	.container {
+		max-width: 100% !important;
+		padding-left: 20px !important;
+		padding-right: 20px !important;
+	}
+	
+	.row {
+		margin-left: -20px !important;
+		margin-right: -20px !important;
+	}
+	
+	[class*="col-"] {
+		padding-left: 20px !important;
+		padding-right: 20px !important;
+	}
+}
+

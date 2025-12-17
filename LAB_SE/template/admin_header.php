@@ -20,6 +20,8 @@
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-dashboard.css"/>
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/admin-modules.css"/>
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/anggota-ui.css"/>
+    <!-- Responsive Fix - Load last to override all -->
+    <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/responsive-fix.css"/>
     <?php 
     // Load CSS khusus untuk modul penelitian dan publikasi
     $current_page_uri = $_SERVER['REQUEST_URI'] ?? '';

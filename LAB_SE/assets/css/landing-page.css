@@ -59,6 +59,8 @@
 /* Hero Text Container */
 .hero-section-wrapper-2 .text-center {
 	padding: 60px 24px 100px 24px !important;
+	max-width: 100%;
+	box-sizing: border-box;
 }
 
 .hero-section-wrapper-2 .text-center h4 {
@@ -77,9 +79,23 @@
 .hero-section-wrapper-2 .text-center h2 {
 	font-size: 2.8rem !important;
 	font-weight: 800 !important;
-	color: #22243e !important;
 	margin-bottom: 22px !important;
 	line-height: 1.2 !important;
+	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+	-webkit-background-clip: text !important;
+	-webkit-text-fill-color: transparent !important;
+	background-clip: text !important;
+	color: transparent !important;
+}
+
+.hero-section-wrapper-2 .text-center h2,
+.hero-section-wrapper-2 h2.text-center,
+.text-center h2 {
+	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+	-webkit-background-clip: text !important;
+	-webkit-text-fill-color: transparent !important;
+	background-clip: text !important;
+	color: transparent !important;
 }
 
 .hero-section-wrapper-2 p {
@@ -999,25 +1015,56 @@ footer .footer-style-1 .footer-widget .links li a.border-button:hover {
 	content: none !important;
 }
 
+/* ========================= Global Responsive Fix ========================= */
+* {
+	box-sizing: border-box;
+}
+
 /* ========================= Responsive ========================= */
 @media (max-width: 991px) {
+	/* Force all elements to be responsive */
+	* {
+		max-width: 100% !important;
+	}
+	
+	/* Exception for images and videos */
+	img, video {
+		max-width: 100% !important;
+		height: auto !important;
+	}
+	/* Container responsive */
+	.container {
+		max-width: 100% !important;
+		padding-left: 20px !important;
+		padding-right: 20px !important;
+	}
+	
+	/* Hero section responsive */
 	.hero-section-wrapper-2 h2 {
 		font-size: 2.2rem !important;
+		line-height: 1.3 !important;
 	}
 	
 	.hero-section-wrapper-2 h4 {
 		font-size: 1.2rem !important;
 	}
 	
+	.hero-section-wrapper-2 .text-center {
+		padding: 50px 20px 80px 20px !important;
+	}
+	
+	/* Section title responsive */
 	.section-title h3.gradient-text {
 		font-size: 2rem !important;
 	}
 	
+	/* Feature cards responsive */
 	.single-feature {
 		padding: 30px 25px !important;
 		margin-bottom: 25px;
 	}
 	
+	/* Hero mascot responsive */
 	.hero-mascot {
 		padding: 20px !important;
 	}
@@ -1027,30 +1074,134 @@ footer .footer-style-1 .footer-widget .links li a.border-button:hover {
 	}
 	
 	.hero-mascot .mascot-illustration {
-		max-width: calc(300px - 20px) !important;
-		width: calc(300px - 20px) !important;
+		max-width: 100% !important;
+		width: 100% !important;
+		height: auto !important;
 	}
 	
 	.hero-mascot .mascot-bg-circle {
 		display: none !important;
 	}
+	
+	/* Section padding responsive */
+	.pt-100 {
+		padding-top: 60px !important;
+	}
+	
+	.pb-70 {
+		padding-bottom: 50px !important;
+	}
+	
+	.pb-100 {
+		padding-bottom: 70px !important;
+	}
 }
 
 @media (max-width: 767px) {
+	/* Prevent horizontal scroll - Force container and layout elements */
+	.container,
+	.container-fluid,
+	.row,
+	[class*="col-"],
+	section {
+		max-width: 100% !important;
+	}
+	
+	html, body {
+		overflow-x: hidden !important;
+		max-width: 100vw !important;
+		width: 100% !important;
+		position: relative !important;
+	}
+	
+	/* Container responsive */
+	.container,
+	.container-fluid {
+		max-width: 100% !important;
+		width: 100% !important;
+		padding-left: 15px !important;
+		padding-right: 15px !important;
+		margin-left: 0 !important;
+		margin-right: 0 !important;
+	}
+	
+	/* Row responsive */
+	.row {
+		margin-left: -15px !important;
+		margin-right: -15px !important;
+		max-width: 100% !important;
+	}
+	
+	/* All columns responsive */
+	[class*="col-"] {
+		padding-left: 15px !important;
+		padding-right: 15px !important;
+		max-width: 100% !important;
+		flex: 0 0 100% !important;
+		width: 100% !important;
+	}
+	
+	/* Override for specific columns on mobile */
+	.col-lg-6,
+	.col-lg-4,
+	.col-lg-8,
+	.col-lg-10,
+	.col-lg-12,
+	.col-md-6,
+	.col-md-12,
+	.col-xl-4,
+	.col-xl-10 {
+		flex: 0 0 100% !important;
+		max-width: 100% !important;
+		width: 100% !important;
+	}
+	
+	/* Hero section responsive */
+	.hero-section-wrapper-2 {
+		padding-bottom: 60px !important;
+	}
+	
+	.hero-section-wrapper-2 .text-center {
+		padding: 40px 15px 60px 15px !important;
+	}
+	
 	.hero-section-wrapper-2 h2 {
 		font-size: 1.8rem !important;
+		line-height: 1.3 !important;
+	}
+	
+	.hero-section-wrapper-2 h4 {
+		font-size: 1rem !important;
+		margin-bottom: 15px !important;
 	}
 	
 	.hero-section-wrapper-2 p {
-		font-size: 1rem !important;
+		font-size: 0.95rem !important;
+		margin-bottom: 30px !important;
+		padding: 0 10px;
 	}
 	
+	/* Hero button responsive */
+	.hero-section-wrapper-2 a[href*="daftar"] {
+		padding: 14px 32px !important;
+		font-size: 1rem !important;
+		width: auto;
+		max-width: 100%;
+	}
+	
+	/* Section title responsive */
 	.section-title h3.gradient-text {
 		font-size: 1.75rem !important;
 	}
 	
+	.section-title {
+		margin-bottom: 30px !important;
+	}
+	
+	/* Feature cards responsive */
 	.single-feature {
 		padding: 25px 20px !important;
+		margin-bottom: 20px;
 	}
 	
 	.single-feature .icon {
@@ -1062,25 +1213,78 @@ footer .footer-style-1 .footer-widget .links li a.border-button:hover {
 		font-size: 30px;
 	}
 	
+	/* Contact section responsive */
 	#contact .section-title h2 {
 		font-size: 2rem !important;
 	}
 	
+	/* Hero mascot responsive */
 	.hero-mascot {
 		padding: 20px 10px !important;
+		width: 100% !important;
+		max-width: 100% !important;
 	}
 	
 	.hero-mascot .mascot-container {
-		max-width: calc(280px - 20px) !important;
+		max-width: 100% !important;
+		width: 100% !important;
 	}
 	
 	.hero-mascot .mascot-illustration {
-		max-width: calc(250px - 20px) !important;
-		width: calc(250px - 20px) !important;
+		max-width: 100% !important;
+		width: 100% !important;
+		height: auto !important;
 	}
 	
 	.hero-mascot .mascot-bg-circle {
 		display: none !important;
+	}
+	
+	/* Ensure images are responsive */
+	img {
+		max-width: 100% !important;
+		height: auto !important;
+		width: auto !important;
+	}
+	
+	/* Section padding responsive */
+	section {
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+		max-width: 100% !important;
+		overflow-x: hidden !important;
+	}
+	
+	.pt-100 {
+		padding-top: 50px !important;
+	}
+	
+	.pb-70 {
+		padding-bottom: 40px !important;
+	}
+	
+	.pb-100 {
+		padding-bottom: 50px !important;
+	}
+	
+	/* Text responsive */
+	.text-center {
+		padding-left: 15px !important;
+		padding-right: 15px !important;
+		max-width: 100% !important;
+	}
+	
+	/* Force all divs to be responsive */
+	div {
+		max-width: 100% !important;
+	}
+	
+	/* Buttons responsive */
+	.button,
+	.btn,
+	a[href*="daftar"] {
+		max-width: 100% !important;
+		word-wrap: break-word !important;
 	}
 }
 

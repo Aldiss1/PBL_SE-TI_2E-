@@ -26,6 +26,14 @@ function ambil_konten($koneksi, $key) {
 // Ambil data konten 'Tentang Kami'
 $tentang_kami_data = ambil_konten($koneksi, 'tentang_kami');
 
+// Ambil data 4 kartu feature
+$tentang_kami_features = [
+    'rekayasa' => ambil_konten($koneksi, 'tentang_kami_feature_rekayasa'),
+    'publikasi' => ambil_konten($koneksi, 'tentang_kami_feature_publikasi'),
+    'kemitraan' => ambil_konten($koneksi, 'tentang_kami_feature_kemitraan'),
+    'pembinaan' => ambil_konten($koneksi, 'tentang_kami_feature_pembinaan')
+];
+
 ?>
 
 <?php 
@@ -78,8 +86,8 @@ $is_tentang_kami_page = true;
                 <i class="lni lni-code-alt"></i>
               </div>
               <div class="feature-content">
-                <h5>Rekayasa Perangkat Lunak</h5>
-                <p>Fokus pada pengembangan perangkat lunak berkualitas tinggi dengan metodologi terkini</p>
+                <h5><?php echo $tentang_kami_features['rekayasa']['title'] ?? 'Rekayasa Perangkat Lunak'; ?></h5>
+                <p><?php echo $tentang_kami_features['rekayasa']['content'] ?? 'Fokus pada pengembangan perangkat lunak berkualitas tinggi dengan metodologi terkini'; ?></p>
               </div>
             </div>
             
@@ -88,8 +96,8 @@ $is_tentang_kami_page = true;
                 <i class="lni lni-book"></i>
               </div>
               <div class="feature-content">
-                <h5>Publikasi Ilmiah</h5>
-                <p>Mendorong penelitian dan publikasi hasil riset di bidang software engineering</p>
+                <h5><?php echo $tentang_kami_features['publikasi']['title'] ?? 'Publikasi Ilmiah'; ?></h5>
+                <p><?php echo $tentang_kami_features['publikasi']['content'] ?? 'Mendorong penelitian dan publikasi hasil riset di bidang software engineering'; ?></p>
               </div>
             </div>
             
@@ -98,8 +106,8 @@ $is_tentang_kami_page = true;
                 <i class="lni lni-handshake"></i>
               </div>
               <div class="feature-content">
-                <h5>Kemitraan Industri</h5>
-                <p>Membangun kerjasama dengan industri untuk implementasi teknologi nyata</p>
+                <h5><?php echo $tentang_kami_features['kemitraan']['title'] ?? 'Kemitraan Industri'; ?></h5>
+                <p><?php echo $tentang_kami_features['kemitraan']['content'] ?? 'Membangun kerjasama dengan industri untuk implementasi teknologi nyata'; ?></p>
               </div>
             </div>
             
@@ -108,8 +116,8 @@ $is_tentang_kami_page = true;
                 <i class="lni lni-graduation"></i>
               </div>
               <div class="feature-content">
-                <h5>Pembinaan Kompetensi</h5>
-                <p>Membina mahasiswa melalui proyek nyata dan pengembangan skill praktis</p>
+                <h5><?php echo $tentang_kami_features['pembinaan']['title'] ?? 'Pembinaan Kompetensi'; ?></h5>
+                <p><?php echo $tentang_kami_features['pembinaan']['content'] ?? 'Membina mahasiswa melalui proyek nyata dan pengembangan skill praktis'; ?></p>
               </div>
             </div>
           </div>

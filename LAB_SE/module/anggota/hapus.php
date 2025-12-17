@@ -13,6 +13,13 @@ if ($id > 0) {
     if ($check && pg_num_rows($check) > 0) {
         $del = pg_query($koneksi, "DELETE FROM anggota WHERE id = $id");
         if ($del) {
+            // Refresh materialized views setelah delete anggota
+            if (file_exists(__DIR__ . '/../../fungsi/materialized_views_complete.php')) {
+                require_once __DIR__ . '/../../fungsi/materialized_views_complete.php';
+                if (function_exists('refresh_views_complete')) {
+                    @refresh_views_complete();
+                }
+            }
             if ($is_ajax) {
                 header('Content-Type: application/json');
                 echo json_encode(['success' => true, 'message' => 'Anggota berhasil dihapus!']);

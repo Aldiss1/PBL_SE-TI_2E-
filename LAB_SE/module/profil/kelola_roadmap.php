@@ -342,13 +342,13 @@ include __DIR__ . '/../../template/admin_header.php';
 }
 
 .table thead th {
-    background-color: #f8f9fa;
-    font-weight: 700;
-    color: #2c3e50;
-    border-bottom: 2px solid #dee2e6;
+    background-color: #f8f9fa !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    border-bottom: 2px solid #dee2e6 !important;
     padding: 15px 12px;
     text-transform: uppercase;
-    font-size: 12px;
+    font-size: 14px !important;
     letter-spacing: 0.5px;
     white-space: nowrap;
 }
@@ -557,7 +557,7 @@ include __DIR__ . '/../../template/admin_header.php';
 .modal-header {
     background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%);
     color: white;
-    border-radius: 0;
+    border-radius: 12px 12px 0 0;
     padding: 20px 25px;
     border-bottom: none;
     display: flex;
@@ -569,12 +569,13 @@ include __DIR__ . '/../../template/admin_header.php';
 }
 
 .modal-header .modal-title {
-    font-weight: 700;
-    font-size: 20px;
+    font-weight: 600;
+    font-size: 18px;
     display: flex;
     align-items: center;
     gap: 10px;
     margin: 0;
+    color: white;
 }
 
 .modal-header .modal-title i {
@@ -596,10 +597,11 @@ include __DIR__ . '/../../template/admin_header.php';
     height: auto !important;
     line-height: 1 !important;
     font-size: 1.5rem !important;
+    transition: all 0.3s ease;
 }
 
 .modal-header .btn-close:hover {
-    opacity: 1;
+    opacity: 1 !important;
     transform: scale(1.1);
     cursor: pointer !important;
 }
@@ -611,7 +613,7 @@ include __DIR__ . '/../../template/admin_header.php';
 
 .modal-body {
     padding: 30px 25px;
-    background: #ffffff;
+    background: #fafbfc;
 }
 
 .modal-body .mb-3 {
@@ -630,7 +632,7 @@ include __DIR__ . '/../../template/admin_header.php';
 .modal-body .form-control {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #e0e0e0;
+    border: 1px solid #ced4da;
     border-radius: 8px;
     font-size: 14px;
     transition: all 0.3s ease;
@@ -658,9 +660,9 @@ textarea.form-control {
 
 .modal-footer {
     padding: 20px 25px;
-    border-top: 1px solid #f0f0f0;
-    border-radius: 0;
-    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    border-radius: 0 0 12px 12px;
+    background: #ffffff;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -671,8 +673,9 @@ textarea.form-control {
 
 .modal-footer .btn {
     min-width: 120px;
-    padding: 10px 20px;
+    padding: 10px 24px;
     font-weight: 600;
+    border-radius: 8px;
     cursor: pointer !important;
     z-index: 9999 !important;
     position: relative !important;
@@ -682,14 +685,38 @@ textarea.form-control {
     display: inline-flex !important;
     align-items: center !important;
     gap: 6px !important;
+    transition: all 0.3s ease;
 }
 
-.modal-footer .btn:hover {
+.modal-footer .btn-secondary {
+    background: #6c757d !important;
+    color: white !important;
+}
+
+.modal-footer .btn-secondary:hover {
+    background: #5a6268 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+.modal-footer .btn-primary {
+    background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3);
+}
+
+.modal-footer .btn-primary:hover {
+    background: linear-gradient(135deg, #1E5FCC 0%, #1A4FA0 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(47, 128, 237, 0.4);
     cursor: pointer !important;
     pointer-events: auto !important;
 }
 
 .modal-footer .btn:active {
+    transform: translateY(0);
     cursor: pointer !important;
     pointer-events: auto !important;
 }
@@ -812,9 +839,9 @@ textarea.form-control {
                                 <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
-                                            <th style="width:50px">Urutan</th>
-                                            <th>Deskripsi Tugas</th>
-                                            <th style="width:150px">Aksi</th>
+                                            <th style="width:50px; color: #000000 !important; font-weight: 700 !important;">Urutan</th>
+                                            <th style="color: #000000 !important; font-weight: 700 !important;">Deskripsi Tugas</th>
+                                            <th style="width:150px; color: #000000 !important; font-weight: 700 !important;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -861,10 +888,10 @@ textarea.form-control {
                                 <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
-                                            <th style="width:50px">Urutan</th>
-                                            <th>Tahun & Periode</th>
-                                            <th>Judul Fase</th>
-                                            <th style="width:250px">Aksi</th>
+                                            <th style="width:50px; color: #000000 !important; font-weight: 700 !important;">Urutan</th>
+                                            <th style="color: #000000 !important; font-weight: 700 !important;">Tahun & Periode</th>
+                                            <th style="color: #000000 !important; font-weight: 700 !important;">Judul Fase</th>
+                                            <th style="width:250px; color: #000000 !important; font-weight: 700 !important;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>

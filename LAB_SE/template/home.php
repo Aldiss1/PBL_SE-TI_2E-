@@ -89,6 +89,70 @@ $visi_content = htmlspecialchars($visi_data['content'] ?? 'Menjadi pusat penelit
 
 // Ambil data Misi (maksimal 3 untuk preview)
 $misi_items = ambil_misi_items($koneksi, 3);
+
+// Fungsi untuk mengambil data Focus & Scope
+if (!function_exists('ambil_focus_scope')) {
+    function ambil_focus_scope($koneksi) {
+        if (!$koneksi) {
+            return [];
+        }
+        $focus_keys = ['focus_qa', 'focus_hci', 'focus_ml'];
+        $focus_data = [];
+        
+        foreach ($focus_keys as $key) {
+            $query = "SELECT page_key, title, content FROM konten_page WHERE page_key = $1";
+            $result = pg_query_params($koneksi, $query, array($key));
+            if ($result && pg_num_rows($result) > 0) {
+                $row = pg_fetch_assoc($result);
+                $parsed = json_decode($row['content'], true);
+                if ($parsed) {
+                    $focus_data[$key] = [
+                        'title' => $parsed['title'] ?? $row['title'],
+                        'content' => $parsed['content'] ?? '',
+                        'icon' => $parsed['icon'] ?? 'lni-vector'
+                    ];
+                } else {
+                    // Fallback jika bukan JSON
+                    $focus_data[$key] = [
+                        'title' => $row['title'],
+                        'content' => $row['content'],
+                        'icon' => 'lni-vector'
+                    ];
+                }
+            }
+        }
+        return $focus_data;
+    }
+}
+
+// Ambil data Focus & Scope
+$focus_scope = ambil_focus_scope($koneksi);
+
+// Default values jika belum ada di database
+$focus_defaults = [
+    'focus_qa' => [
+        'title' => 'Quality Assurance (QA)',
+        'content' => 'Pengujian dan jaminan kualitas perangkat lunak menggunakan metodologi terkini',
+        'icon' => 'lni-vector'
+    ],
+    'focus_hci' => [
+        'title' => 'Human-Computer Interaction (HCI)',
+        'content' => 'Desain interaksi dan pengalaman pengguna untuk aplikasi yang user-friendly',
+        'icon' => 'lni-layers'
+    ],
+    'focus_ml' => [
+        'title' => 'Machine Learning untuk Software Engineering',
+        'content' => 'Penerapan ML dalam optimasi proses pengembangan perangkat lunak',
+        'icon' => 'lni-code-alt'
+    ]
+];
+
+// Merge dengan default jika belum ada
+foreach ($focus_defaults as $key => $default) {
+    if (!isset($focus_scope[$key])) {
+        $focus_scope[$key] = $default;
+    }
+}
 ?>
       <!-- ========================= hero-2 start ========================= -->
         <!-- Start of Selection -->
@@ -97,8 +161,8 @@ $misi_items = ambil_misi_items($koneksi, 3);
             <div class="row align-items-center">
               <div class="col-lg-6 d-flex align-items-center">
                 <div class="text-center w-100">
-                  <h4>Selamat Datang</h4>
-                  <h2>
+                  <h4 style="color: #2F80ED !important;">Selamat Datang</h4>
+                  <h2 style="background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important; -webkit-background-clip: text !important; -webkit-text-fill-color: transparent !important; background-clip: text !important; color: transparent !important;">
                     Web Profile Laboratorium<br>Software Engineering
                   </h2>
                 </div>
@@ -117,8 +181,6 @@ $misi_items = ambil_misi_items($koneksi, 3);
       </div>
       <!-- ========================= hero-2 end ========================= -->
 
-    </section>
-    <!-- ========================= hero-section-wrapper-2 end ========================= -->
 
 <!-- ========================= feature style-2 start ========================= -->
 <?php $labseHomeBase = defined('LABSE_BASE_PATH') ? LABSE_BASE_PATH : ''; ?>
@@ -169,39 +231,27 @@ $misi_items = ambil_misi_items($koneksi, 3);
       </div>
     </div>
     <div class="row">
+      <?php 
+      $focus_items = [
+        ['key' => 'focus_qa', 'delay' => 0.2],
+        ['key' => 'focus_hci', 'delay' => 0.3],
+        ['key' => 'focus_ml', 'delay' => 0.4]
+      ];
+      foreach ($focus_items as $item): 
+        $focus = $focus_scope[$item['key']] ?? $focus_defaults[$item['key']];
+      ?>
       <div class="col-lg-4 col-md-6">
-        <div class="single-feature wow fadeInUp" data-wow-delay=".2s">
+        <div class="single-feature wow fadeInUp" data-wow-delay="<?php echo $item['delay']; ?>s">
           <div class="icon">
-            <i class="lni lni-vector"></i>
+            <i class="lni <?php echo htmlspecialchars($focus['icon']); ?>"></i>
           </div>
           <div class="content">
-            <h5>Quality Assurance (QA)</h5>
-            <p>Pengujian dan jaminan kualitas perangkat lunak menggunakan metodologi terkini</p>
+            <h5><?php echo htmlspecialchars($focus['title']); ?></h5>
+            <p><?php echo htmlspecialchars($focus['content']); ?></p>
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6">
-        <div class="single-feature wow fadeInUp" data-wow-delay=".3s">
-          <div class="icon">
-            <i class="lni lni-layers"></i>
-          </div>
-          <div class="content">
-            <h5>Human-Computer Interaction (HCI)</h5>
-            <p>Desain interaksi dan pengalaman pengguna untuk aplikasi yang user-friendly</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-lg-4 col-md-6">
-        <div class="single-feature wow fadeInUp" data-wow-delay=".4s">
-          <div class="icon">
-            <i class="lni lni-code-alt"></i>
-          </div>
-          <div class="content">
-            <h5>Machine Learning untuk Software Engineering</h5>
-            <p>Penerapan ML dalam optimasi proses pengembangan perangkat lunak</p>
-          </div>
-        </div>
-      </div>
+      <?php endforeach; ?>
     </div>
   </div>
 </section>

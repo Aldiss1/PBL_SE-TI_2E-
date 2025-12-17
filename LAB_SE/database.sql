@@ -319,7 +319,11 @@ INSERT INTO konten_page (page_key, title, content) VALUES
 ('roadmap_judul', 'Roadmap Laboratorium SE', 'Perjalanan dan Rencana Pengembangan Laboratorium Software Engineering.'),
 ('visi_deskripsi', 'Visi Kami', 'Menjadi pusat penelitian software engineering yang relevan dan berdaya guna bagi pengembangan teknologi informasi di Indonesia.'),
 ('misi_item_1', 'Misi Utama', 'Melakukan penelitian berkualitas di bidang perangkat lunak yang memberikan kontribusi nyata bagi industri dan akademisi.'),
-('tentang_kami', 'Tentang Lab SE', 'Laboratorium Software Engineering merupakan wadah kolaborasi mahasiswa dan dosen untuk penelitian dan pengembangan.');
+('tentang_kami', 'Tentang Lab SE', 'Laboratorium Software Engineering merupakan wadah kolaborasi mahasiswa dan dosen untuk penelitian dan pengembangan.'),
+('tentang_kami_feature_rekayasa', 'Rekayasa Perangkat Lunak', 'Fokus pada pengembangan perangkat lunak berkualitas tinggi dengan metodologi terkini'),
+('tentang_kami_feature_publikasi', 'Publikasi Ilmiah', 'Mendorong penelitian dan publikasi hasil riset di bidang software engineering'),
+('tentang_kami_feature_kemitraan', 'Kemitraan Industri', 'Membangun kerjasama dengan industri untuk implementasi teknologi nyata'),
+('tentang_kami_feature_pembinaan', 'Pembinaan Kompetensi', 'Membina mahasiswa melalui proyek nyata dan pengembangan skill praktis');
 
 -- Insert data roadmap default
 INSERT INTO roadmap_periode (tahun_periode, judul_fase, urutan)

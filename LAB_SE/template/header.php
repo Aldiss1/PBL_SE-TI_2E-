@@ -37,9 +37,83 @@ if (!isset($koneksi)) {
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
     <title>Web Profile Laboratorium Software Engineering</title>
     <meta name="description" content="" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
+    
+    <!-- Inline CSS untuk force responsive - Load sebelum CSS lain -->
+    <style>
+    /* Force responsive - Prevent horizontal scroll */
+    html, body {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+    }
+    
+    /* Force all containers responsive */
+    @media (max-width: 767px) {
+        * {
+            box-sizing: border-box !important;
+        }
+        
+        .container,
+        .container-fluid {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        .row {
+            margin-left: -15px !important;
+            margin-right: -15px !important;
+            max-width: 100% !important;
+        }
+        
+        [class*="col-"] {
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            padding-left: 15px !important;
+            padding-right: 15px !important;
+        }
+        
+        img {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+        
+        section {
+            max-width: 100% !important;
+            overflow-x: hidden !important;
+        }
+        
+        .hero-mascot,
+        .hero-mascot .mascot-container,
+        .hero-mascot .mascot-illustration {
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+    }
+    </style>
 
     <?php
+    // Ambil logo navbar dari database
+    $navbar_logo_path = (LABSE_BASE_PATH ? rtrim(LABSE_BASE_PATH, '/') . '/' : '') . 'assets/img/logo/logo.png'; // Default
+    if (isset($koneksi) && $koneksi) {
+        $query_navbar_logo = "SELECT content FROM konten_page WHERE page_key = 'navbar_logo'";
+        $result_navbar_logo = pg_query($koneksi, $query_navbar_logo);
+        if ($result_navbar_logo && pg_num_rows($result_navbar_logo) > 0) {
+            $navbar_logo_data = pg_fetch_assoc($result_navbar_logo);
+            if (!empty($navbar_logo_data['content'])) {
+                // Path dari database sudah dalam format 'assets/img/logo/...'
+                $logo_content = $navbar_logo_data['content'];
+                $base = LABSE_BASE_PATH ? rtrim(LABSE_BASE_PATH, '/') . '/' : '';
+                $navbar_logo_path = $base . $logo_content;
+            }
+        }
+    }
+    
     // Ambil statistik untuk navbar (sebelum CSS dimuat)
     $stats = ['anggota' => 0, 'pendaftar' => 0, 'blog' => 0];
     
@@ -90,6 +164,8 @@ if (!isset($koneksi)) {
     <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/dosen-pengampu.css"/>
     <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/landing-page.css"/>
     <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/footer-modern.css"/>
+    <!-- Responsive Fix - Load last to override all -->
+    <link rel="stylesheet" href="<?php echo LABSE_BASE_PATH; ?>/assets/css/responsive-fix.css"/>
     
     <?php 
     // Deteksi halaman dan inject CSS styling
@@ -151,7 +227,7 @@ if (!isset($koneksi)) {
         <div class="container">
           <div class="navbar-content-new">
             <a class="navbar-brand-new" href="<?php echo LABSE_BASE_PATH; ?>/index.php">
-              <img src="<?php echo LABSE_BASE_PATH; ?>/assets/img/logo/logo.png" alt="Logo" />
+              <img src="<?php echo htmlspecialchars($navbar_logo_path); ?>" alt="Logo" onerror="this.src='<?php echo LABSE_BASE_PATH; ?>/assets/img/logo/logo.png';" style="max-height: 60px; height: auto; width: auto; object-fit: contain; display: block;" />
             </a>
             <button class="navbar-toggler-new" type="button" id="navbarToggleNew">
               <span></span>
@@ -186,7 +262,4 @@ if (!isset($koneksi)) {
       </div>
     </div>
     <!-- ========================= preloader end ========================= -->
-
-    <!-- ========================= hero-section-wrapper-2 start ========================= -->
-    <section id="home" class="hero-section-wrapper-2">
 

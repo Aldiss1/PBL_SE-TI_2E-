@@ -155,6 +155,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 		
 		$action_text = $bulk_action === 'accept' ? 'diterima' : ($bulk_action === 'reject' ? 'ditolak' : 'dihapus');
 		if ($success_count > 0) {
+			// Refresh materialized views setelah bulk action
+			if (file_exists(__DIR__ . '/../../fungsi/materialized_views_complete.php')) {
+				require_once __DIR__ . '/../../fungsi/materialized_views_complete.php';
+				if (function_exists('refresh_views_complete')) {
+					@refresh_views_complete();
+				}
+			}
 			pesan_kilat("$success_count pendaftar berhasil $action_text!", 'success');
 		}
 		if ($error_count > 0) {
@@ -419,6 +426,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 					pg_query($koneksi, "INSERT INTO riwayat_pendaftaran (pendaftaran_id, status_lama, status_baru, changed_by, catatan) VALUES ($id_escaped, '{$old_data['status']}', '$status_escaped', $user_id, 'Update data: Status diubah')");
 				}
 				
+				// Refresh materialized views setelah update pendaftaran
+				if (file_exists(__DIR__ . '/../../fungsi/materialized_views_complete.php')) {
+					require_once __DIR__ . '/../../fungsi/materialized_views_complete.php';
+					if (function_exists('refresh_views_complete')) {
+						@refresh_views_complete();
+					}
+				}
+				
 				pesan_kilat('Data pendaftar berhasil diupdate!', 'success');
 			} else {
 				pesan_kilat('Gagal mengupdate data. Error: ' . pg_last_error($koneksi), 'error');
@@ -449,6 +464,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 		
 		$delete = pg_query($koneksi, "DELETE FROM pendaftaran WHERE id = $id_escaped");
 		if ($delete) {
+			// Refresh materialized views setelah delete pendaftaran
+			if (file_exists(__DIR__ . '/../../fungsi/materialized_views_complete.php')) {
+				require_once __DIR__ . '/../../fungsi/materialized_views_complete.php';
+				if (function_exists('refresh_views_complete')) {
+					@refresh_views_complete();
+				}
+			}
 			pesan_kilat('Pendaftar berhasil dihapus.', 'success');
 		} else {
 			pesan_kilat('Gagal menghapus pendaftar: ' . pg_last_error($koneksi), 'error');

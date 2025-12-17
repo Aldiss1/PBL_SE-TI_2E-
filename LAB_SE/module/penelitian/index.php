@@ -76,6 +76,13 @@ if (isset($_GET['hapus']) && isset($_GET['id'])) {
         $row = pg_fetch_row($result);
         $deleted = $row[0] ?? false;
         if ($deleted) {
+            // Refresh materialized views setelah delete penelitian
+            if (file_exists(__DIR__ . '/../../fungsi/materialized_views_complete.php')) {
+                require_once __DIR__ . '/../../fungsi/materialized_views_complete.php';
+                if (function_exists('refresh_views_complete')) {
+                    @refresh_views_complete();
+                }
+            }
             pesan_kilat('Penelitian berhasil dihapus!', 'success');
         } else {
             pesan_kilat('Gagal menghapus penelitian! Data tidak ditemukan.', 'error');

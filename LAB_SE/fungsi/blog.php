@@ -8,6 +8,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Include fungsi materialized views untuk refresh setelah perubahan data
+if (file_exists(__DIR__ . '/materialized_views_complete.php')) {
+    require_once __DIR__ . '/materialized_views_complete.php';
+}
+
 // Fungsi untuk generate slug
 function generateBlogSlug($text) {
     // Convert to lowercase
@@ -89,6 +94,10 @@ function tambahBlog($data) {
     $result = pg_query($koneksi, $query);
     
     if ($result) {
+        // Refresh materialized views setelah insert blog
+        if (function_exists('refresh_views_complete')) {
+            @refresh_views_complete();
+        }
         return ['success' => true, 'message' => 'Blog berhasil ditambahkan!'];
     } else {
         return ['success' => false, 'message' => 'Gagal menambahkan blog. Error: ' . pg_last_error($koneksi)];
@@ -191,6 +200,10 @@ function updateBlog($id, $data) {
     $result = pg_query($koneksi, $query);
     
     if ($result) {
+        // Refresh materialized views setelah update blog
+        if (function_exists('refresh_views_complete')) {
+            @refresh_views_complete();
+        }
         return ['success' => true, 'message' => 'Blog berhasil diperbarui!'];
     } else {
         return ['success' => false, 'message' => 'Gagal memperbarui blog. Error: ' . pg_last_error($koneksi)];
@@ -216,6 +229,10 @@ function hapusBlog($id) {
     $result = pg_query($koneksi, $query);
     
     if ($result) {
+        // Refresh materialized views setelah delete blog
+        if (function_exists('refresh_views_complete')) {
+            @refresh_views_complete();
+        }
         return ['success' => true, 'message' => 'Blog berhasil dihapus!'];
     } else {
         return ['success' => false, 'message' => 'Gagal menghapus blog. Error: ' . pg_last_error($koneksi)];

@@ -149,6 +149,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $result = pg_query($koneksi, $query);
         if ($result) {
+            // Refresh materialized views setelah update anggota
+            if (file_exists(__DIR__ . '/../../fungsi/materialized_views_complete.php')) {
+                require_once __DIR__ . '/../../fungsi/materialized_views_complete.php';
+                if (function_exists('refresh_views_complete')) {
+                    @refresh_views_complete();
+                }
+            }
             pesan_kilat('Anggota berhasil diperbarui!', 'success');
             header('Location: index.php');
             exit;
