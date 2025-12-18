@@ -70,8 +70,14 @@ if (empty($blogs) && $koneksi) {
         }
     }
 }
+
 ?>
 <?php include __DIR__ . '/../../template/header.php'; ?>
+
+<?php
+// Definisikan base path untuk link (setelah header di-include agar LABSE_BASE_PATH sudah terdefinisi)
+$labseHomeBase = defined('LABSE_BASE_PATH') ? LABSE_BASE_PATH : '';
+?>
 
 <link rel="stylesheet" href="../../assets/css/blog-list.css?<?php echo time(); ?>" />
 
@@ -97,11 +103,29 @@ if (empty($blogs) && $koneksi) {
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="blog-card wow fadeInUp" data-wow-delay=".2s">
                             <div class="blog-image">
-                                <?php if (!empty($blog['featured_image'])): ?>
-                                    <img src="<?php echo htmlspecialchars($blog['featured_image']); ?>" alt="<?php echo htmlspecialchars($blog['title']); ?>">
-                                <?php else: ?>
-                                    <img src="../../assets/img/blog/blog-1-1.jpg" alt="Blog Image">
-                                <?php endif; ?>
+                                <?php 
+                                $featured_image_raw = $blog['featured_image'] ?? '';
+                                $featured_image_src = '';
+                                if (!empty($featured_image_raw)) {
+                                    $is_abs = preg_match('/^https?:\/\//', $featured_image_raw) || (strlen($featured_image_raw) > 0 && $featured_image_raw[0] === '/');
+                                    if ($is_abs) {
+                                        $featured_image_src = $featured_image_raw;
+                                    } else {
+                                        // Jika path sudah dimulai dengan ../../, gunakan langsung
+                                        if (strpos($featured_image_raw, '../../') === 0) {
+                                            $featured_image_src = $featured_image_raw;
+                                        } else {
+                                            // Path relatif dari root, tambahkan ../../ untuk pages/blog/
+                                            $featured_image_src = '../../' . ltrim($featured_image_raw, '/');
+                                        }
+                                    }
+                                } else {
+                                    $featured_image_src = '../../assets/img/blog/blog-1-1.jpg';
+                                }
+                                ?>
+                                <img src="<?php echo htmlspecialchars($featured_image_src); ?>" 
+                                     alt="<?php echo htmlspecialchars($blog['title']); ?>"
+                                     onerror="this.src='../../assets/img/blog/blog-1-1.jpg';">
                                 <div class="blog-category">
                                     <?php echo htmlspecialchars(ucfirst($blog['category'] ?? 'Uncategorized')); ?>
                                 </div>
@@ -112,14 +136,24 @@ if (empty($blogs) && $koneksi) {
                                     <span><i class="lni lni-eye"></i> <?php echo number_format($blog['views']); ?> views</span>
                                 </div>
                                 <h3 class="blog-title">
-                                    <a href="<?php echo $labseHomeBase; ?>/pages/blog/blog-detail.php?slug=<?php echo urlencode($blog['slug']); ?>">
+                                    <?php 
+                                    // Gunakan slug jika ada, fallback ke id
+                                    // Path relatif: blog-list.php dan blog-detail.php ada di folder yang sama
+                                    $blog_detail_link = '';
+                                    if (!empty($blog['slug'])) {
+                                        $blog_detail_link = 'blog-detail.php?slug=' . urlencode($blog['slug']);
+                                    } else {
+                                        $blog_detail_link = 'blog-detail.php?id=' . (int)$blog['id'];
+                                    }
+                                    ?>
+                                    <a href="<?php echo $blog_detail_link; ?>">
                                         <?php echo htmlspecialchars($blog['title']); ?>
                                     </a>
                                 </h3>
                                 <p class="blog-excerpt">
                                     <?php echo htmlspecialchars($blog['excerpt'] ?? substr(strip_tags($blog['content'] ?? ''), 0, 150) . '...'); ?>
                                 </p>
-                                <a href="<?php echo $labseHomeBase; ?>/pages/blog/blog-detail.php?slug=<?php echo urlencode($blog['slug']); ?>" class="read-more">
+                                <a href="<?php echo $blog_detail_link; ?>" class="read-more">
                                     Baca Selengkapnya <i class="lni lni-arrow-right"></i>
                                 </a>
                             </div>

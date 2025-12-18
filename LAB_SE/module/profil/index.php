@@ -86,8 +86,9 @@ if ($result_tentang_kami && pg_num_rows($result_tentang_kami) > 0) {
 $feature_keys = ['tentang_kami_feature_rekayasa', 'tentang_kami_feature_publikasi', 'tentang_kami_feature_kemitraan', 'tentang_kami_feature_pembinaan'];
 foreach ($feature_keys as $key) {
     $query_feature = "SELECT page_key, title, content FROM konten_page WHERE page_key = $1";
-    $result_feature = pg_query_params($koneksi, $query_feature, array($key));
-    if ($result_feature && pg_num_rows($result_feature) > 0) {
+    // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+    $result_feature = function_exists('pg_query_params') ? pg_query_params($koneksi, $query_feature, array($key)) : false;
+    if ($result_feature !== false && pg_num_rows($result_feature) > 0) {
         $feature_data = pg_fetch_assoc($result_feature);
         // Extract feature type from key
         if (strpos($key, 'rekayasa') !== false) {
@@ -114,14 +115,18 @@ if (isset($_POST['update_tentang_kami'])) {
         $result_cek = pg_query($koneksi, $cek_tentang_kami);
         $count = 0;
         if ($result_cek) {
-            $row_cek = pg_fetch_row($result_cek);
-            $count = $row_cek[0];
+            // @phpstan-ignore-next-line - pg_fetch_row is a valid PostgreSQL function
+            $row_cek = function_exists('pg_fetch_row') ? pg_fetch_row($result_cek) : null;
+            if ($row_cek && isset($row_cek[0])) {
+                $count = (int)$row_cek[0];
+            }
         }
         
         if ($count > 0) {
             // Update
             $update_tentang_kami = "UPDATE konten_page SET title = $1, content = $2, last_updated = NOW() WHERE page_key = 'tentang_kami'";
-            $result_update = pg_query_params($koneksi, $update_tentang_kami, array($tentang_kami_title ?: 'Tentang Kami', $tentang_kami_content));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result_update = function_exists('pg_query_params') ? pg_query_params($koneksi, $update_tentang_kami, array($tentang_kami_title ?: 'Tentang Kami', $tentang_kami_content)) : false;
             if ($result_update) {
                 $pesan = "<div class='alert alert-success'>✅ Tentang Kami berhasil diperbarui!</div>";
                 // Refresh data
@@ -135,7 +140,8 @@ if (isset($_POST['update_tentang_kami'])) {
         } else {
             // Insert
             $insert_tentang_kami = "INSERT INTO konten_page (page_key, title, content) VALUES ('tentang_kami', $1, $2)";
-            $result_insert = pg_query_params($koneksi, $insert_tentang_kami, array($tentang_kami_title ?: 'Tentang Kami', $tentang_kami_content));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result_insert = function_exists('pg_query_params') ? pg_query_params($koneksi, $insert_tentang_kami, array($tentang_kami_title ?: 'Tentang Kami', $tentang_kami_content)) : false;
             if ($result_insert) {
                 $pesan = "<div class='alert alert-success'>✅ Tentang Kami berhasil ditambahkan!</div>";
                 // Refresh data
@@ -160,17 +166,22 @@ if (isset($_POST['update_feature'])) {
     } else {
         // Cek apakah sudah ada
         $cek_feature = "SELECT COUNT(*) FROM konten_page WHERE page_key = $1";
-        $result_cek = pg_query_params($koneksi, $cek_feature, array($feature_key));
+        // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+        $result_cek = function_exists('pg_query_params') ? pg_query_params($koneksi, $cek_feature, array($feature_key)) : false;
         $count = 0;
         if ($result_cek) {
-            $row_cek = pg_fetch_row($result_cek);
-            $count = $row_cek[0];
+            // @phpstan-ignore-next-line - pg_fetch_row is a valid PostgreSQL function
+            $row_cek = function_exists('pg_fetch_row') ? pg_fetch_row($result_cek) : null;
+            if ($row_cek && isset($row_cek[0])) {
+                $count = (int)$row_cek[0];
+            }
         }
         
         if ($count > 0) {
             // Update
             $update_feature = "UPDATE konten_page SET title = $1, content = $2, last_updated = NOW() WHERE page_key = $3";
-            $result_update = pg_query_params($koneksi, $update_feature, array($feature_title, $feature_content, $feature_key));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result_update = function_exists('pg_query_params') ? pg_query_params($koneksi, $update_feature, array($feature_title, $feature_content, $feature_key)) : false;
             if ($result_update) {
                 $pesan = "<div class='alert alert-success'>✅ Kartu feature berhasil diperbarui!</div>";
             } else {
@@ -179,7 +190,8 @@ if (isset($_POST['update_feature'])) {
         } else {
             // Insert
             $insert_feature = "INSERT INTO konten_page (page_key, title, content) VALUES ($1, $2, $3)";
-            $result_insert = pg_query_params($koneksi, $insert_feature, array($feature_key, $feature_title, $feature_content));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result_insert = function_exists('pg_query_params') ? pg_query_params($koneksi, $insert_feature, array($feature_key, $feature_title, $feature_content)) : false;
             if ($result_insert) {
                 $pesan = "<div class='alert alert-success'>✅ Kartu feature berhasil ditambahkan!</div>";
             } else {
@@ -192,7 +204,8 @@ if (isset($_POST['update_feature'])) {
             // Refresh data features
             foreach ($feature_keys as $key) {
                 $query_feature = "SELECT page_key, title, content FROM konten_page WHERE page_key = $1";
-                $result_feature = pg_query_params($koneksi, $query_feature, array($key));
+                // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+                $result_feature = function_exists('pg_query_params') ? pg_query_params($koneksi, $query_feature, array($key)) : false;
                 if ($result_feature && pg_num_rows($result_feature) > 0) {
                     $feature_data = pg_fetch_assoc($result_feature);
                     if (strpos($key, 'rekayasa') !== false) {
@@ -242,14 +255,18 @@ if (isset($_POST['update_visi'])) {
         $result_cek = pg_query($koneksi, $cek_visi);
         $count = 0;
         if ($result_cek) {
-            $row_cek = pg_fetch_row($result_cek);
-            $count = $row_cek[0];
+            // @phpstan-ignore-next-line - pg_fetch_row is a valid PostgreSQL function
+            $row_cek = function_exists('pg_fetch_row') ? pg_fetch_row($result_cek) : null;
+            if ($row_cek && isset($row_cek[0])) {
+                $count = (int)$row_cek[0];
+            }
         }
         
         if ($count > 0) {
             // Update
             $update_visi = "UPDATE konten_page SET content = $1, last_updated = NOW() WHERE page_key = 'visi_deskripsi'";
-            $result_update = pg_query_params($koneksi, $update_visi, array($visi_content));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result_update = function_exists('pg_query_params') ? pg_query_params($koneksi, $update_visi, array($visi_content)) : false;
             if ($result_update) {
                 $pesan = "<div class='alert alert-success'>✅ Visi berhasil diperbarui!</div>";
                 // Refresh data
@@ -263,7 +280,8 @@ if (isset($_POST['update_visi'])) {
         } else {
             // Insert
             $insert_visi = "INSERT INTO konten_page (page_key, title, content) VALUES ('visi_deskripsi', 'Visi Kami', $1)";
-            $result_insert = pg_query_params($koneksi, $insert_visi, array($visi_content));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result_insert = function_exists('pg_query_params') ? pg_query_params($koneksi, $insert_visi, array($visi_content)) : false;
             if ($result_insert) {
                 $pesan = "<div class='alert alert-success'>✅ Visi berhasil ditambahkan!</div>";
                 // Refresh data
@@ -297,7 +315,8 @@ if (isset($_POST['tambah_misi'])) {
         $new_key = 'misi_item_' . ($max_num + 1);
         
         $insert_misi = "INSERT INTO konten_page (page_key, title, content) VALUES ($1, 'Misi', $2)";
-        $result_insert = pg_query_params($koneksi, $insert_misi, array($new_key, $misi_content));
+        // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+        $result_insert = function_exists('pg_query_params') ? pg_query_params($koneksi, $insert_misi, array($new_key, $misi_content)) : false;
         if ($result_insert) {
             $pesan = "<div class='alert alert-success'>✅ Misi berhasil ditambahkan!</div>";
             // Refresh data
@@ -319,7 +338,8 @@ if (isset($_POST['tambah_misi'])) {
 if (isset($_GET['edit_misi'])) {
     $edit_key = $_GET['edit_misi'];
     $query_edit = "SELECT page_key, title, content FROM konten_page WHERE page_key = $1";
-    $result_edit = pg_query_params($koneksi, $query_edit, array($edit_key));
+    // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+    $result_edit = function_exists('pg_query_params') ? pg_query_params($koneksi, $query_edit, array($edit_key)) : false;
     if ($result_edit && pg_num_rows($result_edit) > 0) {
         $misi_edit = pg_fetch_assoc($result_edit);
     }
@@ -333,7 +353,8 @@ if (isset($_POST['update_misi'])) {
         $pesan = "<div class='alert alert-danger'>❌ Data tidak valid!</div>";
     } else {
         $update_misi = "UPDATE konten_page SET content = $1, last_updated = NOW() WHERE page_key = $2";
-        $result_update = pg_query_params($koneksi, $update_misi, array($misi_content, $misi_key));
+        // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+        $result_update = function_exists('pg_query_params') ? pg_query_params($koneksi, $update_misi, array($misi_content, $misi_key)) : false;
         if ($result_update) {
             $pesan = "<div class='alert alert-success'>✅ Misi berhasil diperbarui!</div>";
             // Refresh data
@@ -356,7 +377,8 @@ if (isset($_POST['update_misi'])) {
 if (isset($_GET['hapus_misi'])) {
     $hapus_key = $_GET['hapus_misi'];
     $delete_misi = "DELETE FROM konten_page WHERE page_key = $1";
-    $result_delete = pg_query_params($koneksi, $delete_misi, array($hapus_key));
+    // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+    $result_delete = function_exists('pg_query_params') ? pg_query_params($koneksi, $delete_misi, array($hapus_key)) : false;
     if ($result_delete) {
         $pesan = "<div class='alert alert-success'>✅ Misi berhasil dihapus!</div>";
         // Refresh data
@@ -397,7 +419,8 @@ $footer_data = [
 $footer_keys = ['footer_deskripsi', 'footer_copyright', 'footer_social_links', 'footer_tautan_cepat', 'footer_layanan', 'footer_informasi'];
 foreach ($footer_keys as $key) {
     $query_footer = "SELECT page_key, title, content FROM konten_page WHERE page_key = $1";
-    $result_footer = pg_query_params($koneksi, $query_footer, array($key));
+    // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+    $result_footer = function_exists('pg_query_params') ? pg_query_params($koneksi, $query_footer, array($key)) : false;
     if ($result_footer && pg_num_rows($result_footer) > 0) {
         $footer_row = pg_fetch_assoc($result_footer);
         $content = $footer_row['content'];
@@ -428,13 +451,17 @@ if (isset($_POST['update_footer_deskripsi'])) {
         $result_cek = pg_query($koneksi, $cek);
         $count = 0;
         if ($result_cek) {
-            $row_cek = pg_fetch_row($result_cek);
-            $count = $row_cek[0];
+            // @phpstan-ignore-next-line - pg_fetch_row is a valid PostgreSQL function
+            $row_cek = function_exists('pg_fetch_row') ? pg_fetch_row($result_cek) : null;
+            if ($row_cek && isset($row_cek[0])) {
+                $count = (int)$row_cek[0];
+            }
         }
         
         if ($count > 0) {
             $update = "UPDATE konten_page SET content = $1, last_updated = NOW() WHERE page_key = 'footer_deskripsi'";
-            $result = pg_query_params($koneksi, $update, array($deskripsi));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result = function_exists('pg_query_params') ? pg_query_params($koneksi, $update, array($deskripsi)) : false;
             if ($result) {
                 $pesan = "<div class='alert alert-success'>✅ Deskripsi footer berhasil diperbarui!</div>";
                 $footer_data['deskripsi'] = $deskripsi;
@@ -443,7 +470,8 @@ if (isset($_POST['update_footer_deskripsi'])) {
             }
         } else {
             $insert = "INSERT INTO konten_page (page_key, title, content) VALUES ('footer_deskripsi', 'Footer Deskripsi', $1)";
-            $result = pg_query_params($koneksi, $insert, array($deskripsi));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result = function_exists('pg_query_params') ? pg_query_params($koneksi, $insert, array($deskripsi)) : false;
             if ($result) {
                 $pesan = "<div class='alert alert-success'>✅ Deskripsi footer berhasil ditambahkan!</div>";
                 $footer_data['deskripsi'] = $deskripsi;
@@ -464,13 +492,17 @@ if (isset($_POST['update_footer_copyright'])) {
         $result_cek = pg_query($koneksi, $cek);
         $count = 0;
         if ($result_cek) {
-            $row_cek = pg_fetch_row($result_cek);
-            $count = $row_cek[0];
+            // @phpstan-ignore-next-line - pg_fetch_row is a valid PostgreSQL function
+            $row_cek = function_exists('pg_fetch_row') ? pg_fetch_row($result_cek) : null;
+            if ($row_cek && isset($row_cek[0])) {
+                $count = (int)$row_cek[0];
+            }
         }
         
         if ($count > 0) {
             $update = "UPDATE konten_page SET content = $1, last_updated = NOW() WHERE page_key = 'footer_copyright'";
-            $result = pg_query_params($koneksi, $update, array($copyright));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result = function_exists('pg_query_params') ? pg_query_params($koneksi, $update, array($copyright)) : false;
             if ($result) {
                 $pesan = "<div class='alert alert-success'>✅ Copyright berhasil diperbarui!</div>";
                 $footer_data['copyright'] = $copyright;
@@ -479,7 +511,8 @@ if (isset($_POST['update_footer_copyright'])) {
             }
         } else {
             $insert = "INSERT INTO konten_page (page_key, title, content) VALUES ('footer_copyright', 'Footer Copyright', $1)";
-            $result = pg_query_params($koneksi, $insert, array($copyright));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result = function_exists('pg_query_params') ? pg_query_params($koneksi, $insert, array($copyright)) : false;
             if ($result) {
                 $pesan = "<div class='alert alert-success'>✅ Copyright berhasil ditambahkan!</div>";
                 $footer_data['copyright'] = $copyright;
@@ -513,16 +546,21 @@ if (isset($_POST['update_footer_links'])) {
             $pesan = "<div class='alert alert-danger'>❌ Format JSON tidak valid!</div>";
         } else {
             $cek = "SELECT COUNT(*) FROM konten_page WHERE page_key = $1";
-            $result_cek = pg_query_params($koneksi, $cek, array($page_key));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result_cek = function_exists('pg_query_params') ? pg_query_params($koneksi, $cek, array($page_key)) : false;
             $count = 0;
             if ($result_cek) {
-                $row_cek = pg_fetch_row($result_cek);
-                $count = $row_cek[0];
+                // @phpstan-ignore-next-line - pg_fetch_row is a valid PostgreSQL function
+                $row_cek = function_exists('pg_fetch_row') ? pg_fetch_row($result_cek) : null;
+                if ($row_cek && isset($row_cek[0])) {
+                    $count = (int)$row_cek[0];
+                }
             }
             
             if ($count > 0) {
                 $update = "UPDATE konten_page SET content = $1, last_updated = NOW() WHERE page_key = $2";
-                $result = pg_query_params($koneksi, $update, array($links_json, $page_key));
+                // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+                $result = function_exists('pg_query_params') ? pg_query_params($koneksi, $update, array($links_json, $page_key)) : false;
                 if ($result) {
                     $pesan = "<div class='alert alert-success'>✅ Link footer berhasil diperbarui!</div>";
                     $footer_data[$link_type] = $links_array;
@@ -531,7 +569,8 @@ if (isset($_POST['update_footer_links'])) {
                 }
             } else {
                 $insert = "INSERT INTO konten_page (page_key, title, content) VALUES ($1, $2, $3)";
-                $result = pg_query_params($koneksi, $insert, array($page_key, $title, $links_json));
+                // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+                $result = function_exists('pg_query_params') ? pg_query_params($koneksi, $insert, array($page_key, $title, $links_json)) : false;
                 if ($result) {
                     $pesan = "<div class='alert alert-success'>✅ Link footer berhasil ditambahkan!</div>";
                     $footer_data[$link_type] = $links_array;
@@ -554,15 +593,18 @@ $focus_scope_data = [
 $focus_keys = ['focus_qa', 'focus_hci', 'focus_ml'];
 foreach ($focus_keys as $key) {
     $query_focus = "SELECT page_key, title, content FROM konten_page WHERE page_key = $1";
-    $result_focus = pg_query_params($koneksi, $query_focus, array($key));
-    if ($result_focus && pg_num_rows($result_focus) > 0) {
+    // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+    $result_focus = function_exists('pg_query_params') ? pg_query_params($koneksi, $query_focus, array($key)) : false;
+    if ($result_focus !== false && pg_num_rows($result_focus) > 0) {
         $focus_row = pg_fetch_assoc($result_focus);
-        if ($key === 'focus_qa') {
-            $focus_scope_data['qa'] = $focus_row;
-        } elseif ($key === 'focus_hci') {
-            $focus_scope_data['hci'] = $focus_row;
-        } elseif ($key === 'focus_ml') {
-            $focus_scope_data['ml'] = $focus_row;
+        if ($focus_row) {
+            if ($key === 'focus_qa') {
+                $focus_scope_data['qa'] = $focus_row;
+            } elseif ($key === 'focus_hci') {
+                $focus_scope_data['hci'] = $focus_row;
+            } elseif ($key === 'focus_ml') {
+                $focus_scope_data['ml'] = $focus_row;
+            }
         }
     }
 }
@@ -586,11 +628,15 @@ if (isset($_POST['update_focus_scope'])) {
         $focus_json = json_encode($focus_data);
         
         $cek = "SELECT COUNT(*) FROM konten_page WHERE page_key = $1";
-        $result_cek = pg_query_params($koneksi, $cek, array($focus_key));
+        // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+        $result_cek = function_exists('pg_query_params') ? pg_query_params($koneksi, $cek, array($focus_key)) : false;
         $count = 0;
         if ($result_cek) {
-            $row_cek = pg_fetch_row($result_cek);
-            $count = $row_cek[0];
+            // @phpstan-ignore-next-line - pg_fetch_row is a valid PostgreSQL function
+            $row_cek = function_exists('pg_fetch_row') ? pg_fetch_row($result_cek) : null;
+            if ($row_cek && isset($row_cek[0])) {
+                $count = (int)$row_cek[0];
+            }
         }
         
         if ($count > 0) {
@@ -601,12 +647,14 @@ if (isset($_POST['update_focus_scope'])) {
             ];
             $title = $title_map[$focus_key] ?? 'Focus & Scope';
             $update = "UPDATE konten_page SET title = $1, content = $2, last_updated = NOW() WHERE page_key = $3";
-            $result = pg_query_params($koneksi, $update, array($title, $focus_json, $focus_key));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result = function_exists('pg_query_params') ? pg_query_params($koneksi, $update, array($title, $focus_json, $focus_key)) : false;
             if ($result) {
                 $pesan = "<div class='alert alert-success'>✅ Focus & Scope berhasil diperbarui!</div>";
                 // Refresh data
                 $query_refresh = "SELECT page_key, title, content FROM konten_page WHERE page_key = $1";
-                $result_refresh = pg_query_params($koneksi, $query_refresh, array($focus_key));
+                // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+                $result_refresh = function_exists('pg_query_params') ? pg_query_params($koneksi, $query_refresh, array($focus_key)) : false;
                 if ($result_refresh && pg_num_rows($result_refresh) > 0) {
                     $refresh_row = pg_fetch_assoc($result_refresh);
                     if ($focus_key === 'focus_qa') {
@@ -628,12 +676,14 @@ if (isset($_POST['update_focus_scope'])) {
             ];
             $title = $title_map[$focus_key] ?? 'Focus & Scope';
             $insert = "INSERT INTO konten_page (page_key, title, content) VALUES ($1, $2, $3)";
-            $result = pg_query_params($koneksi, $insert, array($focus_key, $title, $focus_json));
+            // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+            $result = function_exists('pg_query_params') ? pg_query_params($koneksi, $insert, array($focus_key, $title, $focus_json)) : false;
             if ($result) {
                 $pesan = "<div class='alert alert-success'>✅ Focus & Scope berhasil ditambahkan!</div>";
                 // Refresh data
                 $query_refresh = "SELECT page_key, title, content FROM konten_page WHERE page_key = $1";
-                $result_refresh = pg_query_params($koneksi, $query_refresh, array($focus_key));
+                // @phpstan-ignore-next-line - pg_query_params is a valid PostgreSQL function
+                $result_refresh = function_exists('pg_query_params') ? pg_query_params($koneksi, $query_refresh, array($focus_key)) : false;
                 if ($result_refresh && pg_num_rows($result_refresh) > 0) {
                     $refresh_row = pg_fetch_assoc($result_refresh);
                     if ($focus_key === 'focus_qa') {
@@ -773,8 +823,8 @@ table.custom-table tr:hover { background-color: #f1f1f1; }
                                 </div>
                                 <div style="margin-top: 15px;">
                                     <button type="submit" name="update_misi" class="btn btn-success" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #27AE60 0%, #229954 100%); border: none; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3); transition: all 0.3s; margin-right: 10px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(39, 174, 96, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(39, 174, 96, 0.3)';">
-                                        <i class="lni lni-save"></i> Simpan Perubahan
-                                    </button>
+                                    <i class="lni lni-save"></i> Simpan Perubahan
+                                </button>
                                     <a href="index.php" class="btn btn-secondary" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; background: #6c757d; border: none; text-decoration: none; display: inline-block; transition: all 0.3s;" onmouseover="this.style.background='#5a6268'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#6c757d'; this.style.transform='translateY(0)';">
                                         <i class="lni lni-close"></i> Batal
                                     </a>
@@ -823,16 +873,16 @@ table.custom-table tr:hover { background-color: #f1f1f1; }
                                                            style="padding: 8px 15px; border-radius: 6px; font-size: 13px; transition: all 0.3s; background: #2980b9; border: none; color: white; text-decoration: none; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;"
                                                            onmouseover="this.style.background='#1f6aa5'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';"
                                                            onmouseout="this.style.background='#2980b9'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                                                            <i class="lni lni-pencil"></i> Edit
-                                                        </a>
+                                                        <i class="lni lni-pencil"></i> Edit
+                                                    </a>
                                                         <a href="index.php?hapus_misi=<?php echo urlencode($item['page_key']); ?>" 
                                                            class="btn btn-sm btn-danger" 
                                                            onclick="return confirm('Yakin ingin menghapus misi ini?');"
                                                            style="padding: 8px 15px; border-radius: 6px; font-size: 13px; transition: all 0.3s; background: #e74c3c; border: none; color: white; text-decoration: none; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;"
                                                            onmouseover="this.style.background='#c0392b'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)';"
                                                            onmouseout="this.style.background='#e74c3c'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                                                            <i class="lni lni-trash"></i> Hapus
-                                                        </a>
+                                                        <i class="lni lni-trash"></i> Hapus
+                                                    </a>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -874,27 +924,27 @@ table.custom-table tr:hover { background-color: #f1f1f1; }
                         <h5 style="color: #2F80ED; margin-bottom: 20px; font-weight: 600; font-size: 16px; display: flex; align-items: center; gap: 10px;">
                             <i class="lni lni-information" style="font-size: 20px;"></i> Judul & Deskripsi Utama
                         </h5>
-                        <form method="POST" action="">
-                            <div class="form-group mb-3">
+                    <form method="POST" action="">
+                        <div class="form-group mb-3">
                                 <label for="tentang_kami_title" style="font-weight: 600; color: #2c3e50; margin-bottom: 10px; display: block; font-size: 14px;">Judul:</label>
-                                <input type="text" name="tentang_kami_title" id="tentang_kami_title" class="form-control" 
-                                       value="<?php echo $tentang_kami_data ? htmlspecialchars($tentang_kami_data['title']) : 'Tentang Kami'; ?>" 
+                            <input type="text" name="tentang_kami_title" id="tentang_kami_title" class="form-control" 
+                                   value="<?php echo $tentang_kami_data ? htmlspecialchars($tentang_kami_data['title']) : 'Tentang Kami'; ?>" 
                                        placeholder="Tentang Kami"
                                        style="border: 1px solid #ced4da; border-radius: 8px; padding: 12px; font-size: 14px; transition: all 0.3s;"
                                        onfocus="this.style.borderColor='#2F80ED'; this.style.boxShadow='0 0 0 3px rgba(47, 128, 237, 0.1)';"
                                        onblur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';">
                                 <small class="text-muted" style="font-size: 12px; margin-top: 5px; display: block;">Judul untuk konten tentang kami</small>
-                            </div>
-                            <div class="form-group mb-3">
+                        </div>
+                        <div class="form-group mb-3">
                                 <label for="tentang_kami_content" style="font-weight: 600; color: #2c3e50; margin-bottom: 10px; display: block; font-size: 14px;">Konten Tentang Kami:</label>
                                 <textarea name="tentang_kami_content" id="tentang_kami_content" class="form-control" rows="5" required style="border: 1px solid #ced4da; border-radius: 8px; padding: 12px; font-size: 14px; transition: all 0.3s; resize: vertical;" onfocus="this.style.borderColor='#2F80ED'; this.style.boxShadow='0 0 0 3px rgba(47, 128, 237, 0.1)';" onblur="this.style.borderColor='#ced4da'; this.style.boxShadow='none';"><?php echo $tentang_kami_data ? htmlspecialchars($tentang_kami_data['content']) : ''; ?></textarea>
                                 <small class="text-muted" style="font-size: 12px; margin-top: 5px; display: block;">Masukkan deskripsi lengkap tentang laboratorium</small>
-                            </div>
+                        </div>
                             <button type="submit" name="update_tentang_kami" class="btn btn-primary" style="padding: 10px 24px; border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%); border: none; box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(47, 128, 237, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(47, 128, 237, 0.3)';">
                                 <i class="lni lni-save"></i> Simpan Judul & Deskripsi
-                            </button>
-                        </form>
-                    </div>
+                        </button>
+                    </form>
+                </div>
 
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #e9ecef; padding: 20px 25px; background: #ffffff;">
@@ -1208,11 +1258,11 @@ table.custom-table tr:hover { background-color: #f1f1f1; }
                                 <i class="lni lni-folder" style="margin-right: 8px; color: #2F80ED;"></i> Pilih Logo Baru
                             </label>
                             <div style="position: relative;">
-                                <input type="file" 
-                                       name="file" 
-                                       id="navbar_logo_file" 
-                                       class="form-control" 
-                                       accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml"
+                            <input type="file" 
+                                   name="file" 
+                                   id="navbar_logo_file" 
+                                   class="form-control" 
+                                   accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml"
                                        required
                                        style="padding: 12px; border: 2px dashed #2F80ED; border-radius: 8px; background: white; cursor: pointer; transition: all 0.3s;"
                                        onmouseover="this.style.borderColor='#1E5FCC'; this.style.background='#f0f7ff';"
@@ -1887,9 +1937,9 @@ function closeModalNavbarLogo() {
                     });
                 }, 300);
             } else {
-                modalEl.style.display = 'none';
-                modalEl.classList.remove('show');
-                document.body.classList.remove('modal-open');
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        document.body.classList.remove('modal-open');
             }
         } else {
             modalEl.style.display = 'none';
@@ -1980,9 +2030,9 @@ function closeModalVisiMisi() {
             if (modal) {
                 modal.hide();
             } else {
-                modalEl.style.display = 'none';
-                modalEl.classList.remove('show');
-                document.body.classList.remove('modal-open');
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        document.body.classList.remove('modal-open');
             }
         } else {
             modalEl.style.display = 'none';
@@ -2061,9 +2111,9 @@ function closeModalTentangKami() {
             if (modal) {
                 modal.hide();
             } else {
-                modalEl.style.display = 'none';
-                modalEl.classList.remove('show');
-                document.body.classList.remove('modal-open');
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        document.body.classList.remove('modal-open');
             }
         } else {
             modalEl.style.display = 'none';

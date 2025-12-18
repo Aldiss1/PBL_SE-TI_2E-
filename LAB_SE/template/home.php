@@ -499,15 +499,41 @@ foreach ($focus_defaults as $key => $default) {
       
       if ($result_blog && pg_num_rows($result_blog) > 0) {
         while ($blog_item = pg_fetch_assoc($result_blog)) {
-          $blog_link = $labseHomeBase . "/pages/blog/blog-detail.php?id=" . $blog_item['id'];
-          $blog_image = $blog_item['featured_image'] ? $blog_item['featured_image'] : 'assets/img/blog/blog-1-1.jpg';
+          // Gunakan slug jika ada, fallback ke id
+          // Path relatif dari template/home.php ke pages/blog/blog-detail.php
+          if (!empty($blog_item['slug'])) {
+            $blog_link = ($labseHomeBase ? rtrim($labseHomeBase, '/') . '/' : '') . 'pages/blog/blog-detail.php?slug=' . urlencode($blog_item['slug']);
+          } else {
+            $blog_link = ($labseHomeBase ? rtrim($labseHomeBase, '/') . '/' : '') . 'pages/blog/blog-detail.php?id=' . (int)$blog_item['id'];
+          }
+          // Handle path gambar
+          $featured_image_raw = $blog_item['featured_image'] ?? '';
+          $blog_image = '';
+          if (!empty($featured_image_raw)) {
+              $is_abs = preg_match('/^https?:\/\//', $featured_image_raw) || (strlen($featured_image_raw) > 0 && $featured_image_raw[0] === '/');
+              if ($is_abs) {
+                  $blog_image = $featured_image_raw;
+              } else {
+                  // Jika path dimulai dengan ../../, hapus karena kita di root
+                  if (strpos($featured_image_raw, '../../') === 0) {
+                      $blog_image = ($labseHomeBase ? rtrim($labseHomeBase, '/') . '/' : '') . substr($featured_image_raw, 6); // Hapus '../../'
+                  } else {
+                      // Path relatif dari root
+                      $blog_image = ($labseHomeBase ? rtrim($labseHomeBase, '/') . '/' : '') . ltrim($featured_image_raw, '/');
+                  }
+              }
+          } else {
+              $blog_image = ($labseHomeBase ? rtrim($labseHomeBase, '/') . '/' : '') . 'assets/img/blog/blog-1-1.jpg';
+          }
           $blog_excerpt = $blog_item['excerpt'] ? htmlspecialchars(substr($blog_item['excerpt'], 0, 100)) . '...' : '';
           $blog_date = $blog_item['published_at'] ? date('d F Y', strtotime($blog_item['published_at'])) : date('d F Y', strtotime($blog_item['created_at']));
       ?>
       <div class="col-lg-4 col-md-6 mb-4">
         <div class="single-feature blog-card-item wow fadeInUp" data-wow-delay=".2s">
           <div class="image">
-            <img src="<?php echo htmlspecialchars($blog_image); ?>" alt="<?php echo htmlspecialchars($blog_item['title']); ?>">
+            <img src="<?php echo htmlspecialchars($blog_image); ?>" 
+                 alt="<?php echo htmlspecialchars($blog_item['title']); ?>"
+                 onerror="this.src='<?php echo ($labseHomeBase ? rtrim($labseHomeBase, '/') . '/' : '') . 'assets/img/blog/blog-1-1.jpg'; ?>';">
           </div>
           <div class="content">
             <?php if ($blog_item['category']): ?>

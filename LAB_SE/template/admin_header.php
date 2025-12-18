@@ -9,7 +9,15 @@
     <?php
     // Path relatif default dari template ke root (untuk module/* gunakan ../../)
     if (!isset($base_path)) {
-        $base_path = '../../';
+        // Gunakan LABSE_BASE_PATH jika tersedia, atau fallback ke path relatif
+        if (defined('LABSE_BASE_PATH')) {
+            $base_path = rtrim(LABSE_BASE_PATH, '/') . '/';
+        } else {
+            $base_path = '../../';
+        }
+    } else {
+        // Pastikan base_path memiliki trailing slash
+        $base_path = rtrim($base_path, '/') . '/';
     }
     ?>
     <link rel="stylesheet" href="<?php echo $base_path; ?>assets/css/bootstrap-5.0.0-alpha-2.min.css" />

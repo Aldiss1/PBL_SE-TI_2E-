@@ -286,22 +286,6 @@ if ($koneksi) {
     flex-shrink: 0;
 }
 
-.pendaftar-minat {
-    background: linear-gradient(135deg, #f8f9fa 0%, #f0f4f8 100%);
-    padding: 12px 15px;
-    border-radius: 12px;
-    font-size: 13px;
-    color: #444;
-    margin-top: 10px;
-    border-left: 4px solid #2d5aa0;
-    line-height: 1.6;
-}
-
-.pendaftar-minat strong {
-    color: #2d5aa0;
-    display: block;
-    margin-bottom: 5px;
-    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -532,12 +516,42 @@ if ($koneksi) {
                 <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                     <div class="pendaftar-card wow fadeInUp" data-wow-delay=".3s">
                         <div style="text-align: center;">
-                            <?php if (!empty($p['foto'])): ?>
-                                <img src="<?php echo htmlspecialchars($p['foto']); ?>" 
+                            <?php 
+                            // Handle path foto (relatif atau absolut)
+                            // Pastikan LABSE_BASE_PATH sudah terdefinisi (dari header.php)
+                            $foto_raw = $p['foto'] ?? '';
+                            $foto_src = '';
+                            if (!empty($foto_raw)) {
+                                // Cek apakah path sudah absolut (http/https atau mulai dengan /)
+                                $is_abs = preg_match('/^https?:\/\//', $foto_raw) || (strlen($foto_raw) > 0 && $foto_raw[0] === '/');
+                                if ($is_abs) {
+                                    $foto_src = $foto_raw;
+                                } else {
+                                    // Path relatif, tambahkan base path
+                                    // LABSE_BASE_PATH sudah didefinisikan di header.php yang di-include di atas
+                                    $base_path = defined('LABSE_BASE_PATH') ? LABSE_BASE_PATH : '';
+                                    // Pastikan tidak ada double slash
+                                    if (!empty($base_path)) {
+                                        $foto_src = rtrim($base_path, '/') . '/' . ltrim($foto_raw, '/');
+                                    } else {
+                                        // Fallback: gunakan path absolut dari root
+                                        $foto_src = '/' . ltrim($foto_raw, '/');
+                                    }
+                                }
+                            }
+                            ?>
+                            <?php 
+                            $initial = strtoupper(substr($p['nama'], 0, 1)); 
+                            ?>
+                            <?php if (!empty($foto_src)): ?>
+                                <img src="<?php echo htmlspecialchars($foto_src); ?>" 
                                      alt="<?php echo htmlspecialchars($p['nama']); ?>" 
-                                     class="pendaftar-avatar">
+                                     class="pendaftar-avatar"
+                                     onerror="this.onerror=null; this.style.display='none'; var fallback = this.nextElementSibling; if(fallback) fallback.style.display='flex';">
+                                <div class="pendaftar-initial" style="display: none;">
+                                    <?php echo $initial; ?>
+                                </div>
                             <?php else: ?>
-                                <?php $initial = strtoupper(substr($p['nama'], 0, 1)); ?>
                                 <div class="pendaftar-initial">
                                     <?php echo $initial; ?>
                                 </div>
@@ -562,13 +576,6 @@ if ($koneksi) {
                             </div>
                             <?php endif; ?>
                             
-                            <?php if (!empty($p['minat'])): ?>
-                            <div class="pendaftar-minat">
-                                <strong><i class="lni lni-bulb"></i> Minat:</strong><br>
-                                <?php echo htmlspecialchars(substr($p['minat'], 0, 100)); ?>
-                                <?php echo strlen($p['minat']) > 100 ? '...' : ''; ?>
-                            </div>
-                            <?php endif; ?>
                         </div>
                         
                         <div class="pendaftar-date">

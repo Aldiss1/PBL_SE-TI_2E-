@@ -1,5 +1,28 @@
 <?php
 $page_title = "Kelola Pendaftar - Admin";
+// Pastikan LABSE_BASE_PATH terdefinisi
+if (!defined('LABSE_BASE_PATH')) {
+    $documentRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath($_SERVER['DOCUMENT_ROOT']) : '';
+    $appRoot = realpath(__DIR__ . '/../..');
+    
+    if ($documentRoot) {
+        $documentRoot = str_replace('\\', '/', $documentRoot);
+    }
+    if ($appRoot) {
+        $appRoot = str_replace('\\', '/', $appRoot);
+    }
+    
+    $basePath = '';
+    if ($documentRoot && $appRoot && strpos($appRoot, $documentRoot) === 0) {
+        $basePath = substr($appRoot, strlen($documentRoot));
+        $basePath = '/' . trim($basePath, '/');
+        if ($basePath === '/') {
+            $basePath = '';
+        }
+    }
+    
+    define('LABSE_BASE_PATH', $basePath);
+}
 require_once __DIR__ . '/../../config/koneksi.php';
 require_once __DIR__ . '/../auth/cek_login.php';
 require_once __DIR__ . '/../../config/anti_injection.php';
@@ -168,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 			pesan_kilat("$error_count pendaftar gagal diproses.", 'error');
 		}
 		
-		$redirect_url = build_redirect_url($current_filter, $search_query, $filter_tanggal_dari, $filter_tanggal_sampai, $filter_minat, $per_page);
+		$redirect_url = build_redirect_url($current_filter, $search_query, $filter_tanggal_dari, $filter_tanggal_sampai, $per_page);
 		header('Location: ' . $redirect_url);
 		exit;
 	}
@@ -279,13 +302,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_riwayat' && isset($_GET['
 }
 
 // Helper function untuk build redirect URL dengan semua filter
-function build_redirect_url($status_filter, $search_query = '', $filter_tanggal_dari = '', $filter_tanggal_sampai = '', $filter_minat = '', $per_page = 25) {
+function build_redirect_url($status_filter, $search_query = '', $filter_tanggal_dari = '', $filter_tanggal_sampai = '', $per_page = 25) {
 	$params = [];
 	if ($status_filter !== 'all') $params[] = 'status=' . urlencode($status_filter);
 	if (!empty($search_query)) $params[] = 'search=' . urlencode($search_query);
 	if (!empty($filter_tanggal_dari)) $params[] = 'tanggal_dari=' . urlencode($filter_tanggal_dari);
 	if (!empty($filter_tanggal_sampai)) $params[] = 'tanggal_sampai=' . urlencode($filter_tanggal_sampai);
-	if (!empty($filter_minat)) $params[] = 'minat=' . urlencode($filter_minat);
 	if ($per_page != 25) $params[] = 'per_page=' . $per_page;
 	
 	return 'index.php' . (!empty($params) ? '?' . implode('&', $params) : '');
@@ -300,7 +322,6 @@ $status_filter = isset($_GET['status']) ? clean_input($_GET['status']) : 'all';
 $search_query = isset($_GET['search']) ? trim(clean_input($_GET['search'])) : '';
 $filter_tanggal_dari = isset($_GET['tanggal_dari']) ? clean_input($_GET['tanggal_dari']) : '';
 $filter_tanggal_sampai = isset($_GET['tanggal_sampai']) ? clean_input($_GET['tanggal_sampai']) : '';
-$filter_minat = isset($_GET['minat']) ? trim(clean_input($_GET['minat'])) : '';
 
 // ============================================
 // PAGINATION
@@ -355,7 +376,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 			pesan_kilat('Gagal mengupdate status. Error: ' . pg_last_error($koneksi), 'error');
 		}
 		
-		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_minat ?? '', $per_page ?? 25);
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $per_page ?? 25);
 		header('Location: ' . $redirect_url);
 		exit;
 	}
@@ -372,10 +393,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 		$nama = isset($_POST['nama']) ? clean_input($_POST['nama']) : '';
 		$nim = isset($_POST['nim']) ? clean_input($_POST['nim']) : '';
 		$email = isset($_POST['email']) ? clean_input($_POST['email']) : '';
-		$foto = isset($_POST['foto']) ? clean_input($_POST['foto']) : '';
-		$minat = isset($_POST['minat']) ? clean_input($_POST['minat']) : '';
 		$status = isset($_POST['status']) ? clean_input($_POST['status']) : 'pending';
 		$catatan_admin = isset($_POST['catatan_admin']) ? clean_input($_POST['catatan_admin']) : '';
+		
+		// Handle upload foto (opsional - replace jika ada)
+		$foto_path = '';
+		if (isset($_FILES['foto']) && is_uploaded_file($_FILES['foto']['tmp_name']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+			$allowed_ext = ['jpg','jpeg','png','webp'];
+			$max_size = 2 * 1024 * 1024; // 2MB
+			$original_name = $_FILES['foto']['name'];
+			$tmp_path = $_FILES['foto']['tmp_name'];
+			$size = (int)$_FILES['foto']['size'];
+			$ext = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
+			
+			if (in_array($ext, $allowed_ext) && $size <= $max_size) {
+				$uploadDir = __DIR__ . '/../../uploads/pendaftar/';
+				if (!is_dir($uploadDir)) {
+					@mkdir($uploadDir, 0775, true);
+				}
+				$safeBase = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower(pathinfo($original_name, PATHINFO_FILENAME)));
+				$newName = $safeBase . '_' . time() . '_' . mt_rand(1000,9999) . '.' . $ext;
+				$destPath = $uploadDir . $newName;
+				if (@move_uploaded_file($tmp_path, $destPath)) {
+					$foto_path = 'uploads/pendaftar/' . $newName;
+				}
+			} else {
+				pesan_kilat('Foto tidak valid (format harus JPG/PNG/WEBP, maks 2MB).', 'error');
+			}
+		} elseif (isset($_POST['foto_old']) && !empty($_POST['foto_old'])) {
+			// Jika tidak ada file baru, gunakan foto lama
+			$foto_path = clean_input($_POST['foto_old']);
+		}
 		
 		if ($nama === '' || $nim === '') {
 			pesan_kilat('Nama dan NIM wajib diisi.', 'error');
@@ -383,8 +431,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 			$nama_escaped = pg_escape_string($koneksi, $nama);
 			$nim_escaped = pg_escape_string($koneksi, $nim);
 			$email_escaped = pg_escape_string($koneksi, $email);
-			$foto_escaped = pg_escape_string($koneksi, $foto);
-			$minat_escaped = pg_escape_string($koneksi, $minat);
+			$foto_escaped = pg_escape_string($koneksi, $foto_path);
 			$status_escaped = pg_escape_string($koneksi, $status);
 			$catatan_admin_escaped = pg_escape_string($koneksi, $catatan_admin);
 			
@@ -393,7 +440,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 				nim = '$nim_escaped',
 				email = '$email_escaped',
 				foto = '$foto_escaped',
-				minat = '$minat_escaped',
 				status = '$status_escaped',
 				catatan_admin = '$catatan_admin_escaped',
 				updated_at = NOW()";
@@ -440,7 +486,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 			}
 		}
 		
-		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_minat ?? '', $per_page ?? 25);
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $per_page ?? 25);
 		header('Location: ' . $redirect_url);
 		exit;
 	}
@@ -475,7 +521,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 		} else {
 			pesan_kilat('Gagal menghapus pendaftar: ' . pg_last_error($koneksi), 'error');
 		}
-		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $filter_minat ?? '', $per_page ?? 25);
+		$redirect_url = build_redirect_url($current_filter, $search_query ?? '', $filter_tanggal_dari ?? '', $filter_tanggal_sampai ?? '', $per_page ?? 25);
 		header('Location: ' . $redirect_url);
 		exit;
 	}
@@ -512,11 +558,6 @@ if (!empty($filter_tanggal_sampai)) {
 	$where_conditions[] = "DATE(p.tanggal_daftar) <= '$tanggal_sampai_escaped'";
 }
 
-// Filter minat
-if (!empty($filter_minat)) {
-	$minat_escaped = pg_escape_string($koneksi, $filter_minat);
-	$where_conditions[] = "p.minat ILIKE '%$minat_escaped%'";
-}
 
 // Build query
 $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
@@ -621,16 +662,16 @@ include __DIR__ . '/../../template/admin_header.php';
 						<span class="filter-label">
 							<i class="lni lni-filter"></i>Filter Status:
 						</span>
-						<a href="?status=all<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'all' ? 'filter-button-active' : 'border-button'; ?>">
+						<a href="?status=all<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'all' ? 'filter-button-active' : 'border-button'; ?>">
 							<i class="lni lni-list"></i> Semua
 						</a>
-						<a href="?status=pending<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'pending' ? 'filter-button-pending' : 'border-button'; ?>">
+						<a href="?status=pending<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'pending' ? 'filter-button-pending' : 'border-button'; ?>">
 							<i class="lni lni-hourglass"></i> Pending
 						</a>
-						<a href="?status=accepted<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'accepted' ? 'filter-button-accepted' : 'border-button'; ?>">
+						<a href="?status=accepted<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'accepted' ? 'filter-button-accepted' : 'border-button'; ?>">
 							<i class="lni lni-checkmark-circle"></i> Diterima
 						</a>
-						<a href="?status=rejected<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?><?php echo !empty($filter_minat) ? '&minat=' . urlencode($filter_minat) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'rejected' ? 'filter-button-rejected' : 'border-button'; ?>">
+						<a href="?status=rejected<?php echo !empty($search_query) ? '&search=' . urlencode($search_query) : ''; ?><?php echo !empty($filter_tanggal_dari) ? '&tanggal_dari=' . urlencode($filter_tanggal_dari) : ''; ?><?php echo !empty($filter_tanggal_sampai) ? '&tanggal_sampai=' . urlencode($filter_tanggal_sampai) : ''; ?>" class="button button-sm radius-10 filter-button <?php echo $status_filter === 'rejected' ? 'filter-button-rejected' : 'border-button'; ?>">
 							<i class="lni lni-close"></i> Ditolak
 						</a>
 					</div>
@@ -670,14 +711,6 @@ include __DIR__ . '/../../template/admin_header.php';
 								<input type="date" name="tanggal_sampai" value="<?php echo htmlspecialchars($filter_tanggal_sampai); ?>" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
 							</div>
 							
-							<!-- Filter Minat -->
-							<div class="col-md-3 mb-3">
-								<label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50; font-size: 13px;">
-									<i class="lni lni-tag"></i> Minat
-								</label>
-								<input type="text" name="minat" value="<?php echo htmlspecialchars($filter_minat); ?>" placeholder="Kata kunci minat..." style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px;">
-							</div>
-							
 							<!-- Tombol -->
 							<div class="col-md-1 mb-3" style="display: flex; align-items: flex-end;">
 								<button type="submit" class="button radius-10 btn-edit" style="width: 100%; padding: 10px;">
@@ -686,7 +719,7 @@ include __DIR__ . '/../../template/admin_header.php';
 							</div>
 						</div>
 						
-						<?php if (!empty($search_query) || !empty($filter_tanggal_dari) || !empty($filter_tanggal_sampai) || !empty($filter_minat)): ?>
+						<?php if (!empty($search_query) || !empty($filter_tanggal_dari) || !empty($filter_tanggal_sampai)): ?>
 						<div class="row mt-2">
 							<div class="col-md-12">
 								<a href="?status=<?php echo htmlspecialchars($status_filter); ?>" class="button button-sm radius-10 border-button">
@@ -744,7 +777,6 @@ include __DIR__ . '/../../template/admin_header.php';
 								<th>Nama Lengkap</th>
 								<th>Email</th>
 								<th>NIM</th>
-								<th>Minat</th>
 								<th>Status</th>
 								<th>Tanggal Daftar</th>
 								<th class="text-center">Aksi</th>
@@ -763,8 +795,34 @@ include __DIR__ . '/../../template/admin_header.php';
 									<td><?php echo $no++; ?></td>
 									<td>
 										<div class="flex-center">
-											<?php if (!empty($p['foto'])): ?>
-												<img src="<?php echo htmlspecialchars($p['foto']); ?>" alt="<?php echo htmlspecialchars($p['nama']); ?>" class="avatar-circle">
+											<?php 
+											$foto_raw = $p['foto'] ?? '';
+											$foto_src = '';
+											if (!empty($foto_raw)) {
+												$is_abs = preg_match('/^https?:\/\//', $foto_raw) || (strlen($foto_raw) > 0 && $foto_raw[0] === '/');
+												if ($is_abs) {
+													$foto_src = $foto_raw;
+												} else {
+													// Path relatif dari module/pendaftar/ ke root
+													$base_path = defined('LABSE_BASE_PATH') ? LABSE_BASE_PATH : '';
+													if (!empty($base_path)) {
+														$foto_src = rtrim($base_path, '/') . '/' . ltrim($foto_raw, '/');
+													} else {
+														// Fallback: path relatif dari module/pendaftar/
+														$foto_src = '../../' . ltrim($foto_raw, '/');
+													}
+												}
+											}
+											?>
+											<?php if (!empty($foto_src)): ?>
+												<img src="<?php echo htmlspecialchars($foto_src); ?>" 
+												     alt="<?php echo htmlspecialchars($p['nama']); ?>" 
+												     class="avatar-circle"
+												     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+												<?php $initial = strtoupper(substr($p['nama'], 0, 1)); ?>
+												<div class="initial-circle" style="display: none;">
+													<?php echo $initial; ?>
+												</div>
 											<?php else: ?>
 												<?php $initial = strtoupper(substr($p['nama'], 0, 1)); ?>
 												<div class="initial-circle">
@@ -787,16 +845,6 @@ include __DIR__ . '/../../template/admin_header.php';
 										<span class="nim-badge">
 											<?php echo htmlspecialchars($p['nim']); ?>
 										</span>
-									</td>
-									<td>
-										<?php if (!empty($p['minat'])): ?>
-											<span class="text-color-primary text-size-13" title="<?php echo htmlspecialchars($p['minat']); ?>">
-												<?php echo htmlspecialchars(substr($p['minat'], 0, 50)); ?>
-												<?php echo strlen($p['minat']) > 50 ? '...' : ''; ?>
-											</span>
-										<?php else: ?>
-											<span class="text-muted-small">-</span>
-										<?php endif; ?>
 									</td>
 									<td>
 										<?php
@@ -919,7 +967,6 @@ include __DIR__ . '/../../template/admin_header.php';
 					if (!empty($search_query)) $query_params[] = 'search=' . urlencode($search_query);
 					if (!empty($filter_tanggal_dari)) $query_params[] = 'tanggal_dari=' . urlencode($filter_tanggal_dari);
 					if (!empty($filter_tanggal_sampai)) $query_params[] = 'tanggal_sampai=' . urlencode($filter_tanggal_sampai);
-					if (!empty($filter_minat)) $query_params[] = 'minat=' . urlencode($filter_minat);
 					if ($per_page != 25) $query_params[] = 'per_page=' . $per_page;
 					$query_string = !empty($query_params) ? '?' . implode('&', $query_params) : '';
 					$page_separator = !empty($query_string) ? '&' : '?';
@@ -1016,10 +1063,11 @@ include __DIR__ . '/../../template/admin_header.php';
 			<button class="detail-close" title="Tutup" onclick="closeUpdatePendaftarModal();">&times;</button>
 		</div>
 		<div class="detail-body">
-			<form id="formUpdatePendaftar" method="POST" onsubmit="return submitUpdatePendaftar(event);">
+			<form id="formUpdatePendaftar" method="POST" enctype="multipart/form-data" onsubmit="return submitUpdatePendaftar(event);">
 				<input type="hidden" name="action" value="update_pendaftar">
 				<input type="hidden" name="id" id="updatePendaftarId">
 				<input type="hidden" name="current_filter" value="<?php echo htmlspecialchars($status_filter); ?>">
+				<input type="hidden" name="foto_old" id="updatePendaftarFotoOld">
 				
 				<div style="display: grid; gap: 16px;">
 					<div>
@@ -1038,13 +1086,16 @@ include __DIR__ . '/../../template/admin_header.php';
 					</div>
 					
 					<div>
-						<label style="display: block; margin-bottom: 6px; color: #2c3e50; font-size: 13px; font-weight: 600;">Foto (URL)</label>
-						<input type="text" name="foto" id="updatePendaftarFoto" placeholder="https://example.com/foto.jpg" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+						<label style="display: block; margin-bottom: 6px; color: #2c3e50; font-size: 13px; font-weight: 600;">Foto</label>
+						<div id="fotoPreviewContainer" style="margin-bottom: 10px; display: none;">
+							<img id="fotoPreview" src="" alt="Preview" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 2px solid #e0e0e0; object-fit: cover;">
+							<small style="display: block; margin-top: 5px; color: #6c757d;">Gambar saat ini</small>
+						</div>
+						<input type="file" name="foto" id="updatePendaftarFoto" accept="image/jpeg,image/jpg,image/png,image/webp" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;" onchange="previewFotoUpdate(this);">
+						<small style="display: block; margin-top: 5px; color: #6c757d;">Format: JPG, PNG, WEBP (Maksimal 2MB). Kosongkan jika tidak ingin mengganti.</small>
 					</div>
 					
 					<div>
-						<label style="display: block; margin-bottom: 6px; color: #2c3e50; font-size: 13px; font-weight: 600;">Minat</label>
-						<textarea name="minat" id="updatePendaftarMinat" rows="3" style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; box-sizing: border-box; resize: vertical;"></textarea>
 					</div>
 					
 					<div>
@@ -1161,7 +1212,6 @@ foreach ($pendaftar as $pp) {
 		'nama' => $pp['nama'] ?? '',
 		'email' => $pp['email'] ?? '',
 		'nim' => $pp['nim'] ?? '',
-		'minat' => $pp['minat'] ?? '',
 		'foto' => $pp['foto'] ?? '',
 		'status' => $pp['status'] ?? 'pending',
 		'tanggal_daftar' => $tanggal_daftar_formatted,
@@ -1175,7 +1225,6 @@ foreach ($pendaftar as $pp) {
 		'nama' => $pp['nama'] ?? '',
 		'email' => $pp['email'] ?? '',
 		'nim' => $pp['nim'] ?? '',
-		'minat' => $pp['minat'] ?? '',
 		'foto' => $pp['foto'] ?? '',
 		'status' => $pp['status'] ?? 'pending',
 		'catatan_admin' => $pp['catatan_admin'] ?? ''
@@ -1185,6 +1234,7 @@ foreach ($pendaftar as $pp) {
 <script>
 window.pendaftarData = <?php echo json_encode($pendaftar_map); ?>;
 window.pendaftarDataFull = <?php echo json_encode($pendaftar_map_full); ?>;
+window.LABSE_BASE_PATH = <?php echo json_encode(defined('LABSE_BASE_PATH') ? LABSE_BASE_PATH : ''); ?>;
 </script>
 <script src="../../assets/js/classes/PendaftarModals.js"></script>
 <script>
@@ -1213,8 +1263,6 @@ if (typeof PendaftarModals !== 'undefined' && window.pendaftarData) {
 				<div class="detail-label">NIM</div>
 				<div class="detail-value" id="detailNim">-</div>
 
-				<div class="detail-label">Minat</div>
-				<div class="detail-value" id="detailMinat">-</div>
 
 				<div class="detail-label">Email</div>
 				<div class="detail-value"><a id="detailEmail" href="javascript:void(0)">-</a></div>
@@ -1643,14 +1691,34 @@ function showEditModal(id) {
     // Ambil data lengkap dari pendaftar_map
     const pendaftarFull = window.pendaftarDataFull && window.pendaftarDataFull[id] ? window.pendaftarDataFull[id] : null;
     if (pendaftarFull) {
-        document.getElementById('updatePendaftarFoto').value = pendaftarFull.foto || '';
-        document.getElementById('updatePendaftarMinat').value = pendaftarFull.minat || '';
+        // Handle foto preview
+        const fotoInput = document.getElementById('updatePendaftarFoto');
+        const fotoOldInput = document.getElementById('updatePendaftarFotoOld');
+        const fotoPreviewContainer = document.getElementById('fotoPreviewContainer');
+        const fotoPreview = document.getElementById('fotoPreview');
+        
+        if (pendaftarFull.foto) {
+            fotoOldInput.value = pendaftarFull.foto;
+            // Tampilkan preview foto lama
+            let fotoSrc = pendaftarFull.foto;
+            if (!fotoSrc.startsWith('http') && !fotoSrc.startsWith('/')) {
+                fotoSrc = '../../' + fotoSrc;
+            }
+            fotoPreview.src = fotoSrc;
+            fotoPreviewContainer.style.display = 'block';
+        } else {
+            fotoOldInput.value = '';
+            fotoPreviewContainer.style.display = 'none';
+        }
+        fotoInput.value = ''; // Reset file input
         document.getElementById('updatePendaftarStatus').value = pendaftarFull.status || 'pending';
         document.getElementById('updatePendaftarCatatan').value = pendaftarFull.catatan_admin || '';
     } else {
         // Fallback: ambil dari data yang ada
+        // Reset foto input
         document.getElementById('updatePendaftarFoto').value = '';
-        document.getElementById('updatePendaftarMinat').value = data.minat || '';
+        document.getElementById('updatePendaftarFotoOld').value = '';
+        document.getElementById('fotoPreviewContainer').style.display = 'none';
         document.getElementById('updatePendaftarStatus').value = data.status || 'pending';
         document.getElementById('updatePendaftarCatatan').value = '';
     }
@@ -1666,6 +1734,21 @@ function showEditModal(id) {
 function closeUpdatePendaftarModal() {
     const overlay = document.getElementById('updatePendaftarOverlay');
     if (overlay) overlay.style.display = 'none';
+}
+
+// Preview foto saat memilih file baru
+function previewFotoUpdate(input) {
+    const fotoPreviewContainer = document.getElementById('fotoPreviewContainer');
+    const fotoPreview = document.getElementById('fotoPreview');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            fotoPreview.src = e.target.result;
+            fotoPreviewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
 }
 
 // Submit Update Form

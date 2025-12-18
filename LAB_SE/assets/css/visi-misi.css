@@ -250,17 +250,30 @@ section.pt-150.pb-50 .section-title p {
 }
 
 #visi-misi-content .card-icon {
-	width: 50px !important;
-	height: 50px !important;
+	width: 60px !important;
+	height: 60px !important;
 	background: linear-gradient(135deg, #2F80ED 0%, #1E5FCC 100%) !important;
 	border-radius: 12px !important;
 	display: flex !important;
 	align-items: center !important;
 	justify-content: center !important;
 	color: #ffffff !important;
-	font-size: 1.5rem !important;
-	margin-right: 15px !important;
+	font-size: 24px !important;
+	margin-right: 20px !important;
 	box-shadow: 0 4px 15px rgba(47, 128, 237, 0.3) !important;
+	flex-shrink: 0 !important;
+}
+
+#visi-misi-content .card-icon i {
+	font-size: 24px !important;
+	color: #ffffff !important;
+	display: inline-block !important;
+	line-height: 1 !important;
+	font-family: 'LineIcons' !important;
+	font-style: normal !important;
+	font-weight: normal !important;
+	-webkit-font-smoothing: antialiased !important;
+	-moz-osx-font-smoothing: grayscale !important;
 }
 
 #visi-misi-content .mission-card .card-icon {

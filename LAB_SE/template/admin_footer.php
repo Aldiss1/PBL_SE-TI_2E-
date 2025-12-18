@@ -7,8 +7,17 @@
     </footer>
 
     <?php
+    // Pastikan base_path terdefinisi dan memiliki trailing slash
     if (!isset($base_path)) {
-        $base_path = '../../';
+        // Gunakan LABSE_BASE_PATH jika tersedia, atau fallback ke path relatif
+        if (defined('LABSE_BASE_PATH')) {
+            $base_path = rtrim(LABSE_BASE_PATH, '/') . '/';
+        } else {
+            $base_path = '../../';
+        }
+    } else {
+        // Pastikan base_path memiliki trailing slash
+        $base_path = rtrim($base_path, '/') . '/';
     }
     ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>

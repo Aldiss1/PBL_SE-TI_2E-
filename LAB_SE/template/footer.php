@@ -1,5 +1,6 @@
 <?php 
-$labseFooterBase = defined('LABSE_BASE_PATH') ? LABSE_BASE_PATH : '';
+// Pastikan base path memiliki trailing slash
+$labseFooterBase = defined('LABSE_BASE_PATH') ? rtrim(LABSE_BASE_PATH, '/') . '/' : '';
 
 // Fungsi untuk mengambil konten footer dari database
 function ambil_footer_konten($koneksi, $key) {
@@ -112,7 +113,7 @@ function format_footer_url($url, $base) {
             <div class="col-xl-3 col-lg-4 col-md-6">
               <div class="footer-widget wow fadeInUp" data-wow-delay=".2s">
                 <div class="logo">
-                  <a href="<?php echo $labseFooterBase; ?>/index.php"> <img src="<?php echo $labseFooterBase; ?>/assets/img/logo/logo.png" alt="Logo Lab SE"> </a>
+                  <a href="<?php echo $labseFooterBase; ?>index.php"> <img src="<?php echo $labseFooterBase; ?>assets/img/logo/logo.png" alt="Logo Lab SE"> </a>
                 </div>
                 <p class="desc"><?php echo htmlspecialchars($footer_deskripsi); ?></p>
                 <ul class="socials">
@@ -183,10 +184,10 @@ function format_footer_url($url, $base) {
 		
 
     <!-- ========================= JS here ========================= -->
-    <script src="<?php echo $labseFooterBase; ?>/assets/js/bootstrap.5.0.0.alpha-2-min.js"></script>
-    <script src="<?php echo $labseFooterBase; ?>/assets/js/count-up.min.js"></script>
-    <script src="<?php echo $labseFooterBase; ?>/assets/js/wow.min.js"></script>
-    <script src="<?php echo $labseFooterBase; ?>/assets/js/main.js"></script>
+    <script src="<?php echo $labseFooterBase; ?>assets/js/bootstrap.5.0.0.alpha-2-min.js"></script>
+    <script src="<?php echo $labseFooterBase; ?>assets/js/count-up.min.js"></script>
+    <script src="<?php echo $labseFooterBase; ?>assets/js/wow.min.js"></script>
+    <script src="<?php echo $labseFooterBase; ?>assets/js/main.js"></script>
     
     <!-- Force Responsive Script - Load First -->
     <script>

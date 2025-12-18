@@ -93,7 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $server_file = $upload_dir . $nama_file_baru;
             
             if (move_uploaded_file($file['tmp_name'], $server_file)) {
-                $featured_image = '../../assets/img/blog/' . $nama_file_baru;
+                // Simpan path relatif dari root website (bukan relatif dari module/blog/)
+                $featured_image = 'assets/img/blog/' . $nama_file_baru;
             }
         }
     } 
@@ -513,16 +514,16 @@ include __DIR__ . '/../../template/admin_header.php';
                                     <label for="content" class="form-label form-label-custom">
                                         <i class="lni lni-file"></i> Konten Blog <span class="text-danger">*</span>
                                     </label>
+                                    <div id="content-editor" style="min-height: 400px; margin-bottom: 10px; background: #fff;"></div>
                                     <textarea 
                                         class="form-control form-input-custom" 
                                         id="content" 
                                         name="content" 
                                         rows="15" 
                                         placeholder="Tulis konten artikel blog di sini..."
-                                        required
-                                        minlength="50"></textarea>
+                                        style="display: none;"></textarea>
                                     <div class="form-text">
-                                        <i class="lni lni-information"></i> Gunakan baris baru untuk paragraf baru (minimal 50 karakter)
+                                        <i class="lni lni-information"></i> Gunakan toolbar di atas untuk memformat teks (bold, italic, dll)
                                     </div>
                                     <div class="invalid-feedback" id="content_error"></div>
                                 </div>
@@ -706,10 +707,30 @@ include __DIR__ . '/../../template/admin_header.php';
                                     <label for="featured_image" class="form-label form-label-custom">
                                         <i class="lni lni-image"></i> Gambar Featured
                                     </label>
-                                    <?php if (!empty($blog['featured_image'])): ?>
+                                    <?php if (!empty($blog['featured_image'])): 
+                                        // Handle path gambar untuk preview di admin
+                                        $preview_image_raw = $blog['featured_image'];
+                                        $preview_image_src = '';
+                                        $is_abs_preview = preg_match('/^https?:\/\//', $preview_image_raw) || (strlen($preview_image_raw) > 0 && $preview_image_raw[0] === '/');
+                                        if ($is_abs_preview) {
+                                            $preview_image_src = $preview_image_raw;
+                                        } else {
+                                            // Jika path sudah dimulai dengan ../../, gunakan langsung
+                                            if (strpos($preview_image_raw, '../../') === 0) {
+                                                $preview_image_src = $preview_image_raw;
+                                            } else {
+                                                // Path relatif dari root, tambahkan ../../ untuk module/blog/
+                                                $preview_image_src = '../../' . ltrim($preview_image_raw, '/');
+                                            }
+                                        }
+                                    ?>
                                     <div class="mb-2">
                                         <small class="text-muted">Gambar saat ini:</small><br>
-                                        <img src="<?php echo htmlspecialchars($blog['featured_image']); ?>" alt="Current" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 2px solid #e0e0e0; margin-top: 8px;">
+                                        <img src="<?php echo htmlspecialchars($preview_image_src); ?>" 
+                                             alt="Current" 
+                                             style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 2px solid #e0e0e0; margin-top: 8px;"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                        <small class="text-danger" style="display: none;">Gambar tidak dapat dimuat</small>
                                     </div>
                                     <?php endif; ?>
                                     <input 
@@ -747,16 +768,16 @@ include __DIR__ . '/../../template/admin_header.php';
                                     <label for="content" class="form-label form-label-custom">
                                         <i class="lni lni-file"></i> Konten Blog <span class="text-danger">*</span>
                                     </label>
+                                    <div id="content-editor-edit" style="min-height: 400px; margin-bottom: 10px; background: #fff;"></div>
                                     <textarea 
                                         class="form-control form-input-custom" 
-                                        id="content" 
+                                        id="content-edit" 
                                         name="content" 
                                         rows="15" 
                                         placeholder="Tulis konten artikel blog di sini..."
-                                        required
-                                        minlength="50"><?php echo htmlspecialchars($blog['content']); ?></textarea>
+                                        style="display: none;"><?php echo htmlspecialchars($blog['content']); ?></textarea>
                                     <div class="form-text">
-                                        <i class="lni lni-information"></i> Gunakan baris baru untuk paragraf baru (minimal 50 karakter)
+                                        <i class="lni lni-information"></i> Gunakan toolbar di atas untuk memformat teks (bold, italic, dll)
                                     </div>
                                     <div class="invalid-feedback" id="content_error"></div>
                                 </div>
@@ -869,6 +890,34 @@ include __DIR__ . '/../../template/admin_header.php';
 
 <!-- Load UI/UX Components -->
 <link rel="stylesheet" href="../../assets/css/anggota-ui.css">
+
+<!-- Quill Rich Text Editor - Load First -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<style>
+.ql-container {
+    font-size: 16px;
+    min-height: 400px;
+}
+.ql-editor {
+    min-height: 400px;
+}
+/* Error message styling */
+#content_error {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #dc3545;
+}
+#content_error.show {
+    display: block !important;
+}
+.is-invalid ~ #content_error {
+    display: block !important;
+}
+</style>
+
 <script src="../../assets/js/classes/ToastNotification.js"></script>
 <script src="../../assets/js/classes/LoadingState.js"></script>
 <script src="../../assets/js/classes/AnggotaConfirmModal.js"></script>
@@ -1040,8 +1089,45 @@ document.addEventListener('DOMContentLoaded', function() {
         // Form submission
         if (form && btnSubmit) {
             form.addEventListener('submit', function(e) {
+                // Copy konten dari Quill ke textarea SEBELUM validasi
+                const contentEditorDiv = document.getElementById('content-editor');
+                const contentEditorEditDiv = document.getElementById('content-editor-edit');
+                let quillInstance = null;
+                
+                if (contentEditorDiv && contentEditorDiv.__quill) {
+                    quillInstance = contentEditorDiv.__quill;
+                } else if (contentEditorEditDiv && contentEditorEditDiv.__quill) {
+                    quillInstance = contentEditorEditDiv.__quill;
+                }
+                
+                // Coba ambil Quill instance dari textarea juga
+                if (!quillInstance && inputContent && inputContent.__quill) {
+                    quillInstance = inputContent.__quill;
+                }
+                
+                if (quillInstance && inputContent) {
+                    // Copy HTML content dari Quill ke textarea
+                    inputContent.value = quillInstance.root.innerHTML;
+                    console.log('Content copied from Quill to textarea, length:', inputContent.value.length);
+                }
+                
                 const titleValue = inputTitle ? inputTitle.value.trim() : '';
                 const contentValue = inputContent ? inputContent.value.trim() : '';
+                
+                // Validasi konten (gunakan text only untuk panjang)
+                let contentTextLength = 0;
+                if (quillInstance) {
+                    contentTextLength = quillInstance.getText().trim().length;
+                    console.log('Content text length from Quill:', contentTextLength);
+                } else if (contentValue) {
+                    // Fallback: strip HTML tags untuk menghitung panjang teks
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = contentValue;
+                    contentTextLength = tempDiv.textContent.trim().length;
+                    console.log('Content text length from textarea (stripped HTML):', contentTextLength);
+                }
+                
+                console.log('Form validation - Title:', titleValue.length, 'Content:', contentTextLength);
                 
                 if (titleValue.length < 5) {
                     e.preventDefault();
@@ -1060,22 +1146,84 @@ document.addEventListener('DOMContentLoaded', function() {
                     return false;
                 }
                 
-                if (contentValue.length < 50) {
+                if (contentTextLength < 50) {
                     e.preventDefault();
+                    e.stopPropagation();
+                    console.error('Validation failed: Content too short', contentTextLength);
+                    
                     if (inputContent) {
                         inputContent.classList.add('is-invalid');
                         const errorEl = document.getElementById('content_error');
                         if (errorEl) {
-                            errorEl.textContent = 'Konten blog minimal 50 karakter';
+                            errorEl.textContent = 'Konten blog minimal 50 karakter (tanpa HTML tags)';
+                            errorEl.style.cssText = 'display: block !important; color: #dc3545 !important; font-size: 0.875rem !important; margin-top: 0.25rem !important; width: 100% !important;';
                         }
-                        inputContent.focus();
+                        // Focus ke editor jika ada
+                        if (contentEditorDiv) {
+                            contentEditorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else if (contentEditorEditDiv) {
+                            contentEditorEditDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
                     }
+                    
+                    // Tampilkan alert sebagai fallback
+                    alert('Konten blog minimal 50 karakter!');
                     
                     if (window.toast) {
                         window.toast.error('Konten blog minimal 50 karakter', 'Validasi Gagal');
                     }
                     return false;
                 }
+                
+                // Pastikan textarea memiliki value sebelum submit
+                // Jika contentTextLength sudah >= 50, berarti konten valid
+                if (contentTextLength >= 50) {
+                    // Konten sudah valid, pastikan ter-copy ke textarea
+                    if (quillInstance && inputContent) {
+                        const quillContent = quillInstance.root.innerHTML;
+                        inputContent.value = quillContent;
+                        console.log('Content copied to textarea after validation passed, length:', inputContent.value.length);
+                        
+                        // Pastikan textarea tidak kosong setelah copy
+                        if (!inputContent.value || inputContent.value.trim() === '' || inputContent.value.trim() === '<p><br></p>') {
+                            console.error('ERROR: Textarea still empty after copy!');
+                            e.preventDefault();
+                            e.stopPropagation();
+                            alert('Error: Konten tidak ter-copy ke textarea. Silakan coba lagi.');
+                            return false;
+                        }
+                    } else if (!quillInstance && inputContent) {
+                        // Jika tidak ada Quill instance, cek textarea langsung
+                        const textareaValue = inputContent.value ? inputContent.value.trim() : '';
+                        if (!textareaValue || textareaValue === '<p><br></p>' || textareaValue === '<p></p>') {
+                            console.error('ERROR: No Quill instance and textarea is empty!');
+                            e.preventDefault();
+                            e.stopPropagation();
+                            inputContent.classList.add('is-invalid');
+                            const errorEl = document.getElementById('content_error');
+                            if (errorEl) {
+                                errorEl.textContent = 'Konten blog tidak boleh kosong';
+                                errorEl.classList.add('show');
+                                errorEl.style.cssText = 'display: block !important; color: #dc3545 !important; font-size: 0.875rem !important; margin-top: 0.25rem !important; width: 100% !important;';
+                            }
+                            alert('Konten blog tidak boleh kosong!');
+                            return false;
+                        }
+                    }
+                }
+                
+                // Clear error jika validasi berhasil
+                if (inputContent) {
+                    inputContent.classList.remove('is-invalid');
+                    const errorEl = document.getElementById('content_error');
+                    if (errorEl) {
+                        errorEl.classList.remove('show');
+                        errorEl.style.display = 'none';
+                    }
+                }
+                
+                console.log('Validation passed, submitting form...');
+                console.log('Final textarea value length:', inputContent ? inputContent.value.length : 0);
                 
                 // Show loading
                 if (window.loading) {
@@ -1130,6 +1278,195 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Initialize Quill Rich Text Editor
+    function initQuillEditor(editorId, textareaId, formId, existingContent) {
+        try {
+            const editorDiv = document.getElementById(editorId);
+            const textarea = document.getElementById(textareaId);
+            const form = document.getElementById(formId);
+            
+            if (!editorDiv) {
+                console.error('Editor div not found:', editorId);
+                return null;
+            }
+            
+            if (!textarea) {
+                console.error('Textarea not found:', textareaId);
+                return null;
+            }
+            
+            if (!form) {
+                console.error('Form not found:', formId);
+                return null;
+            }
+            
+            // Check if Quill is loaded
+            if (typeof Quill === 'undefined') {
+                console.error('Quill library is not loaded');
+                return null;
+            }
+            
+            // Check if Quill already initialized on this element
+            if (editorDiv.__quill) {
+                console.log('Quill already initialized on', editorId, '- returning existing instance');
+                return editorDiv.__quill;
+            }
+            
+            // Check if element already has Quill toolbar (prevent duplicate)
+            if (editorDiv.querySelector('.ql-toolbar')) {
+                console.log('Quill toolbar already exists on', editorId, '- removing and reinitializing');
+                // Remove existing Quill instance
+                editorDiv.innerHTML = '';
+            }
+            
+            // Create Quill editor
+            const quill = new Quill('#' + editorId, {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'align': [] }],
+                        ['link', 'image'],
+                        ['blockquote', 'code-block'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Tulis konten artikel blog di sini...',
+                bounds: document.body
+            });
+            
+            // Set existing content jika ada
+            if (existingContent && existingContent.trim() !== '') {
+                // Decode HTML entities jika ada
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = existingContent;
+                const decodedContent = tempDiv.textContent || tempDiv.innerText || '';
+                
+                if (existingContent.includes('<') && existingContent !== decodedContent) {
+                    // Jika sudah HTML, langsung set
+                    quill.root.innerHTML = existingContent;
+                } else {
+                    // Jika plain text, convert ke HTML
+                    quill.root.innerHTML = existingContent.replace(/\n/g, '<br>');
+                }
+            }
+            
+            // Simpan instance Quill ke element dan textarea untuk akses nanti
+            editorDiv.__quill = quill;
+            textarea.__quill = quill;
+            
+            // Update textarea saat form submit (sebelum validasi)
+            // Event listener ini akan dijalankan SEBELUM event listener validasi utama
+            form.addEventListener('submit', function(e) {
+                // Copy konten dari Quill ke textarea
+                const quillContent = quill.root.innerHTML;
+                textarea.value = quillContent;
+                console.log('Quill content copied to textarea:', quillContent.substring(0, 100));
+                // Jangan preventDefault di sini, biarkan event listener utama yang handle validasi
+            }, true); // Use capture phase untuk dijalankan lebih dulu
+            
+            return quill;
+        } catch (error) {
+            console.error('Error initializing Quill editor:', error);
+            return null;
+        }
+    }
+    
+    // Function to initialize editors after Quill is loaded
+    function initializeEditors() {
+        console.log('Initializing Quill editors...');
+        
+        // Initialize untuk form tambah
+        const contentEditorDiv = document.getElementById('content-editor');
+        const contentTextarea = document.getElementById('content');
+        const formTambah = document.getElementById('formTambahBlog');
+        
+        if (contentEditorDiv && contentTextarea && formTambah) {
+            // Cek apakah sudah diinisialisasi
+            if (!contentEditorDiv.__quill) {
+                console.log('Found form tambah, initializing editor...');
+                initQuillEditor('content-editor', 'content', 'formTambahBlog', '');
+            } else {
+                console.log('Form tambah editor already initialized');
+            }
+        }
+        
+        // Initialize untuk form edit
+        const contentEditorEditDiv = document.getElementById('content-editor-edit');
+        const contentTextareaEdit = document.getElementById('content-edit');
+        const formEdit = document.getElementById('formEditBlog');
+        
+        if (contentEditorEditDiv && contentTextareaEdit && formEdit) {
+            // Cek apakah sudah diinisialisasi
+            if (!contentEditorEditDiv.__quill) {
+                console.log('Found form edit, initializing editor...');
+                const existingContent = contentTextareaEdit.value || '';
+                console.log('Existing content length:', existingContent.length);
+                const quill = initQuillEditor('content-editor-edit', 'content-edit', 'formEditBlog', existingContent);
+                if (quill) {
+                    console.log('Quill editor initialized successfully for form edit');
+                } else {
+                    console.error('Failed to initialize Quill editor for form edit');
+                }
+            } else {
+                console.log('Form edit editor already initialized');
+            }
+        } else {
+            console.warn('Form edit elements not found. Editor div:', !!contentEditorEditDiv, 'Textarea:', !!contentTextareaEdit, 'Form:', !!formEdit);
+        }
+    }
+    
+    // Wait for Quill to be loaded and DOM to be ready
+    function waitAndInitialize() {
+        // Check if Quill is available
+        if (typeof Quill === 'undefined') {
+            console.log('Waiting for Quill library to load...');
+            let quillCheckCount = 0;
+            const quillCheckInterval = setInterval(function() {
+                quillCheckCount++;
+                if (typeof Quill !== 'undefined') {
+                    clearInterval(quillCheckInterval);
+                    console.log('Quill library loaded, initializing editors...');
+                    // Wait a bit more to ensure DOM is ready
+                    setTimeout(initializeEditors, 200);
+                } else if (quillCheckCount > 100) {
+                    // Timeout after 10 seconds
+                    clearInterval(quillCheckInterval);
+                    console.error('Quill library failed to load after 10 seconds');
+                    // Try to initialize anyway (maybe Quill will load later)
+                    setTimeout(initializeEditors, 500);
+                }
+            }, 100);
+        } else {
+            console.log('Quill library already loaded, initializing editors...');
+            // Wait a bit to ensure DOM is fully ready
+            setTimeout(initializeEditors, 200);
+        }
+    }
+    
+    // Start initialization when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', waitAndInitialize);
+    } else {
+        // DOM already ready
+        waitAndInitialize();
+    }
+    
+    // Also try on window load as backup
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            // Check if editors were initialized
+            const editorDiv = document.getElementById('content-editor-edit');
+            if (editorDiv && !editorDiv.querySelector('.ql-toolbar')) {
+                console.log('Editor not initialized, trying again...');
+                initializeEditors();
+            }
+        }, 500);
+    });
 });
 </script>
 

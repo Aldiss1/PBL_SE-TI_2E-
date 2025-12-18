@@ -35,29 +35,73 @@ if ($id > 0) {
 
 <link rel="stylesheet" href="../../assets/css/blog-detail.css" />
 
-<section class="pt-150 pb-100" style="margin-top: 80px;">
+<section class="pt-150 pb-100" style="margin-top: 80px; background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);">
     <div class="container">
       <div class="row justify-content-center">
-        <div class="col-lg-10" id="blog-detail-container">
+        <div class="col-lg-10 col-xl-9" id="blog-detail-container">
           <?php if ($blog): ?>
             <div class="section-title mb-40">
                 <h2 class="mb-25 wow fadeInUp" data-wow-delay=".2s"><?php echo htmlspecialchars($blog['title']); ?></h2>
-                <p class="wow fadeInUp" data-wow-delay=".4s" style="color: #585978;">Dipublikasikan pada: <?php echo $blog['published_at'] ? date('d F Y', strtotime($blog['published_at'])) : date('d F Y', strtotime($blog['created_at'])); ?></p>
+                <p class="wow fadeInUp" data-wow-delay=".4s">Dipublikasikan pada: <?php echo $blog['published_at'] ? date('d F Y', strtotime($blog['published_at'])) : date('d F Y', strtotime($blog['created_at'])); ?></p>
+            </div>
+
+            <!-- Meta Information -->
+            <div class="blog-meta-info wow fadeInUp" data-wow-delay=".3s">
+                <div class="meta-item">
+                    <i class="lni lni-calendar"></i>
+                    <span><?php echo $blog['published_at'] ? date('d F Y', strtotime($blog['published_at'])) : date('d F Y', strtotime($blog['created_at'])); ?></span>
+                </div>
+                <?php if (!empty($blog['views'])): ?>
+                <div class="meta-item">
+                    <i class="lni lni-eye"></i>
+                    <span><?php echo number_format($blog['views']); ?> views</span>
+                </div>
+                <?php endif; ?>
+                <?php if (!empty($blog['category'])): ?>
+                <div class="meta-item">
+                    <i class="lni lni-tag"></i>
+                    <span><?php echo htmlspecialchars(ucfirst($blog['category'])); ?></span>
+                </div>
+                <?php endif; ?>
             </div>
         
-            <?php if ($blog['featured_image']): ?>
+            <?php 
+            $featured_image_raw = $blog['featured_image'] ?? '';
+            $featured_image_src = '';
+            if (!empty($featured_image_raw)) {
+                $is_abs = preg_match('/^https?:\/\//', $featured_image_raw) || (strlen($featured_image_raw) > 0 && $featured_image_raw[0] === '/');
+                if ($is_abs) {
+                    $featured_image_src = $featured_image_raw;
+                } else {
+                    // Jika path sudah dimulai dengan ../../, gunakan langsung
+                    if (strpos($featured_image_raw, '../../') === 0) {
+                        $featured_image_src = $featured_image_raw;
+                    } else {
+                        // Path relatif dari root, tambahkan ../../ untuk pages/blog/
+                        $featured_image_src = '../../' . ltrim($featured_image_raw, '/');
+                    }
+                }
+            } else {
+                $featured_image_src = '../../assets/img/blog/blog-1-1.jpg';
+            }
+            ?>
             <div class="wow fadeInUp" data-wow-delay=".6s">
-                <img src="<?php echo htmlspecialchars($blog['featured_image']); ?>" alt="<?php echo htmlspecialchars($blog['title']); ?>" class="img-fluid mb-40" style="width: 100%; max-height: 450px; object-fit: cover; border-radius: 10px;">
+                <img src="<?php echo htmlspecialchars($featured_image_src); ?>" 
+                     alt="<?php echo htmlspecialchars($blog['title']); ?>" 
+                     class="img-fluid mb-40 blog-featured-image"
+                     onerror="this.src='../../assets/img/blog/blog-1-1.jpg';">
             </div>
-            <?php endif; ?>
         
-            <div class="article-content wow fadeInUp" data-wow-delay=".8s" style="line-height: 1.8; color: #2c3e50;">
+            <div class="article-content wow fadeInUp" data-wow-delay=".8s">
                 <?php 
-                // Render content dengan formatting
-                $content = $blog['content'];
-                // Convert line breaks to HTML
-                $content = nl2br(htmlspecialchars($content));
-                // Simple formatting untuk paragraf
+                // Render content dari Quill editor (sudah dalam format HTML)
+                $content = $blog['content'] ?? '';
+                
+                // Konten dari Quill sudah HTML, jadi langsung render tanpa escape
+                // Quill editor hanya menghasilkan tag HTML yang aman (p, strong, em, ul, ol, li, a, img, blockquote, code, pre, h1-h6)
+                // Untuk keamanan tambahan, kita bisa strip script tags jika ada
+                $content = preg_replace('/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/mi', '', $content);
+                
                 echo $content;
                 ?>
             </div>
@@ -66,12 +110,10 @@ if ($id > 0) {
                 $tags_array = json_decode($blog['tags'], true);
                 if (is_array($tags_array) && count($tags_array) > 0):
             ?>
-            <div class="blog-tags mt-40 wow fadeInUp" data-wow-delay=".9s">
-                <strong style="color: #2c3e50; margin-right: 10px;">Tags:</strong>
+            <div class="blog-tags wow fadeInUp" data-wow-delay=".9s">
+                <strong>Tags:</strong>
                 <?php foreach ($tags_array as $tag): ?>
-                <span style="display: inline-block; background: #f8f9fa; color: #2F80ED; padding: 5px 12px; border-radius: 20px; margin-right: 5px; margin-bottom: 5px; font-size: 12px;">
-                    <?php echo htmlspecialchars(trim($tag)); ?>
-                </span>
+                <span><?php echo htmlspecialchars(trim($tag)); ?></span>
                 <?php endforeach; ?>
             </div>
             <?php endif; endif; ?>

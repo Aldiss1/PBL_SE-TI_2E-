@@ -34,7 +34,12 @@ function tambahBlog($data) {
     $category = isset($data['category']) ? $data['category'] : '';
     $tags = isset($data['tags']) ? $data['tags'] : '';
     $featured_image = isset($data['featured_image']) ? $data['featured_image'] : '';
-    $is_published = isset($data['is_published']) ? ($data['is_published'] === true || $data['is_published'] === 'true' || $data['is_published'] === '1') : false;
+    // Konversi is_published dari berbagai format ke boolean
+    $is_published = false;
+    if (isset($data['is_published'])) {
+        $val = $data['is_published'];
+        $is_published = ($val === true || $val === 'true' || $val === '1' || $val === 1 || $val === 't');
+    }
     
     // Escape untuk PostgreSQL
     $title_escaped = pg_escape_string($koneksi, $title);
@@ -115,7 +120,12 @@ function updateBlog($id, $data) {
     $category = isset($data['category']) ? $data['category'] : '';
     $tags = isset($data['tags']) ? $data['tags'] : '';
     $featured_image = isset($data['featured_image']) ? $data['featured_image'] : '';
-    $is_published = isset($data['is_published']) ? ($data['is_published'] === true || $data['is_published'] === 'true' || $data['is_published'] === '1') : false;
+    // Konversi is_published dari berbagai format ke boolean
+    $is_published = false;
+    if (isset($data['is_published'])) {
+        $val = $data['is_published'];
+        $is_published = ($val === true || $val === 'true' || $val === '1' || $val === 1 || $val === 't');
+    }
     
     // Ambil data blog lama untuk cek slug dan published_at
     $query_old = "SELECT slug, is_published FROM blog WHERE id = $id";
@@ -123,6 +133,14 @@ function updateBlog($id, $data) {
     $blog_old = null;
     if ($result_old && pg_num_rows($result_old) > 0) {
         $blog_old = pg_fetch_assoc($result_old);
+        // Konversi is_published dari PostgreSQL boolean ke PHP boolean
+        // PostgreSQL bisa mengembalikan 't', 'f', true, false, '1', '0', 1, 0
+        if (isset($blog_old['is_published'])) {
+            $val = $blog_old['is_published'];
+            $blog_old['is_published'] = ($val === true || $val === 't' || $val === '1' || $val === 1 || strtolower($val) === 'true');
+        } else {
+            $blog_old['is_published'] = false;
+        }
     } else {
         return ['success' => false, 'message' => 'Blog tidak ditemukan!'];
     }
@@ -250,6 +268,15 @@ function getBlogById($id) {
     if ($result && pg_num_rows($result) > 0) {
         $blog = pg_fetch_assoc($result);
         
+        // Konversi is_published dari PostgreSQL boolean ke PHP boolean
+        // PostgreSQL bisa mengembalikan 't', 'f', true, false, '1', '0', 1, 0
+        if (isset($blog['is_published'])) {
+            $val = $blog['is_published'];
+            $blog['is_published'] = ($val === true || $val === 't' || $val === '1' || $val === 1 || strtolower($val) === 'true');
+        } else {
+            $blog['is_published'] = false;
+        }
+        
         // Parse tags from PostgreSQL array
         if (!empty($blog['tags'])) {
             // PostgreSQL array bisa berupa string "{tag1,tag2}" atau sudah array PHP
@@ -293,6 +320,14 @@ function getAllBlogs() {
     $result = pg_query($koneksi, $query);
     if ($result && pg_num_rows($result) > 0) {
         while ($row = pg_fetch_assoc($result)) {
+            // Konversi is_published dari PostgreSQL boolean ke PHP boolean
+            // PostgreSQL bisa mengembalikan 't', 'f', true, false, '1', '0', 1, 0
+            if (isset($row['is_published'])) {
+                $val = $row['is_published'];
+                $row['is_published'] = ($val === true || $val === 't' || $val === '1' || $val === 1 || strtolower($val) === 'true');
+            } else {
+                $row['is_published'] = false;
+            }
             $blogs[] = $row;
         }
     }

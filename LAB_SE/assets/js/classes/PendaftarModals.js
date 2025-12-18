@@ -48,7 +48,6 @@ class PendaftarModals {
         // Populate
         const detailNama = document.getElementById('detailNama');
         const detailNim = document.getElementById('detailNim');
-        const detailMinat = document.getElementById('detailMinat');
         const detailEmail = document.getElementById('detailEmail');
         const detailTanggalDaftar = document.getElementById('detailTanggalDaftar');
         const detailTanggalReview = document.getElementById('detailTanggalReview');
@@ -58,7 +57,6 @@ class PendaftarModals {
 
         if (detailNama) detailNama.textContent = data.nama || '-';
         if (detailNim) detailNim.textContent = data.nim || '-';
-        if (detailMinat) detailMinat.textContent = data.minat ? data.minat : '-';
         
         if (detailEmail) {
             detailEmail.textContent = data.email || '-';
@@ -72,8 +70,21 @@ class PendaftarModals {
         // Foto
         if (detailFoto) {
             if (data.foto) {
-                const fotoPath = data.foto.startsWith('http') ? data.foto : '../../' + data.foto;
-                detailFoto.innerHTML = '<img src="'+ fotoPath +'" alt="Foto '+ (data.nama || "") +'" class="detail-image">';
+                let fotoPath = data.foto;
+                // Cek apakah path sudah absolut (http/https atau mulai dengan /)
+                const isAbs = /^https?:\/\//.test(fotoPath) || fotoPath.charAt(0) === '/';
+                if (!isAbs) {
+                    // Path relatif, tambahkan base path
+                    // Dari assets/js/classes/ ke root, jadi ../../../ atau gunakan base path jika tersedia
+                    const basePath = window.LABSE_BASE_PATH || '';
+                    if (basePath) {
+                        fotoPath = basePath.replace(/\/$/, '') + '/' + fotoPath.replace(/^\//, '');
+                    } else {
+                        // Fallback: path relatif dari assets/js/classes/ ke root
+                        fotoPath = '../../../' + fotoPath.replace(/^\//, '');
+                    }
+                }
+                detailFoto.innerHTML = '<img src="'+ fotoPath +'" alt="Foto '+ (data.nama || "") +'" class="detail-image" onerror="this.parentElement.textContent=\'-\';">';
             } else {
                 detailFoto.textContent = '-';
             }
